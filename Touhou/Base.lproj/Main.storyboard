@@ -709,40 +709,41 @@
                         <rect key="frame" x="0.0" y="0.0" width="640" height="480"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <containerView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bnA-fa-wZj" customClass="SKView">
+                            <containerView translatesAutoresizingMaskIntoConstraints="NO" id="bnA-fa-wZj" customClass="SKView">
                                 <rect key="frame" x="32" y="16" width="384" height="448"/>
-                                <autoresizingMask key="autoresizingMask"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="bnA-fa-wZj" secondAttribute="height" multiplier="6:7" id="zQs-Oo-EUa"/>
+                                </constraints>
                             </containerView>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oIh-m6-h5l">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oIh-m6-h5l">
                                 <rect key="frame" x="422" y="448" width="71" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="High Score" id="UTY-3L-ifw">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0Cm-uz-6Ai">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0Cm-uz-6Ai">
                                 <rect key="frame" x="422" y="424" width="40" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Score" id="sO0-58-xg8">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6Hx-Al-Xsd">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6Hx-Al-Xsd">
                                 <rect key="frame" x="422" y="400" width="36" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Lives" id="GPW-Gt-Ya3">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PaZ-Su-MGZ">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PaZ-Su-MGZ">
                                 <rect key="frame" x="422" y="371" width="46" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="RDF-aZ-z1Q"/>
+                                </constraints>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Bombs" id="Zuk-pU-Zhi">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -750,6 +751,19 @@
                                 </textFieldCell>
                             </textField>
                         </subviews>
+                        <constraints>
+                            <constraint firstItem="0Cm-uz-6Ai" firstAttribute="leading" secondItem="bnA-fa-wZj" secondAttribute="trailing" constant="8" symbolic="YES" id="8Sc-e4-52V"/>
+                            <constraint firstItem="bnA-fa-wZj" firstAttribute="top" secondItem="oIh-m6-h5l" secondAttribute="top" id="BIU-2p-sXX"/>
+                            <constraint firstItem="bnA-fa-wZj" firstAttribute="centerY" secondItem="m2S-Jp-Qdl" secondAttribute="centerY" id="E08-hV-i2u"/>
+                            <constraint firstItem="bnA-fa-wZj" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="32" id="I4g-Yv-J8z"/>
+                            <constraint firstItem="0Cm-uz-6Ai" firstAttribute="top" secondItem="oIh-m6-h5l" secondAttribute="bottom" constant="8" symbolic="YES" id="Lex-0a-JtC"/>
+                            <constraint firstItem="6Hx-Al-Xsd" firstAttribute="leading" secondItem="bnA-fa-wZj" secondAttribute="trailing" constant="8" symbolic="YES" id="Mn3-OQ-E7E"/>
+                            <constraint firstItem="PaZ-Su-MGZ" firstAttribute="leading" secondItem="bnA-fa-wZj" secondAttribute="trailing" constant="8" symbolic="YES" id="PpL-HE-Nyr"/>
+                            <constraint firstItem="PaZ-Su-MGZ" firstAttribute="top" secondItem="6Hx-Al-Xsd" secondAttribute="bottom" constant="8" symbolic="YES" id="UPJ-Dy-PDv"/>
+                            <constraint firstItem="bnA-fa-wZj" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="16" id="a70-JZ-rqF"/>
+                            <constraint firstItem="oIh-m6-h5l" firstAttribute="leading" secondItem="bnA-fa-wZj" secondAttribute="trailing" constant="8" symbolic="YES" id="r0X-SN-iEj"/>
+                            <constraint firstItem="6Hx-Al-Xsd" firstAttribute="top" secondItem="0Cm-uz-6Ai" secondAttribute="bottom" constant="8" symbolic="YES" id="vW2-fp-di7"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="BombsLabel" destination="PaZ-Su-MGZ" id="KUa-P7-UF6"/>

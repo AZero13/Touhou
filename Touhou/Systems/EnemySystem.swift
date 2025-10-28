@@ -43,14 +43,53 @@ class EnemySystem: GameSystem {
     // MARK: - Private Methods
     
     private func loadStageScript() {
-        // Stage 1 script - enemies spawn at specific times with different patterns and parameters
+        // Stage 1 script - enemies spawn at specific times with different patterns and visual variety
         stageScript = [
-            EnemySpawnEvent(time: 1.0, type: "fairy", position: CGPoint(x: 100, y: 400), pattern: .singleShot, parameters: BulletConfig(speed: 120)),
-            EnemySpawnEvent(time: 2.5, type: "fairy", position: CGPoint(x: 200, y: 400), pattern: .tripleShot, parameters: BulletConfig(speed: 100, spread: 60)),
-            EnemySpawnEvent(time: 4.0, type: "fairy", position: CGPoint(x: 300, y: 400), pattern: .aimedShot, parameters: BulletConfig(speed: 140)),
-            EnemySpawnEvent(time: 6.0, type: "fairy", position: CGPoint(x: 150, y: 400), pattern: .circleShot, parameters: BulletConfig(speed: 80, bulletCount: 12)),
-            EnemySpawnEvent(time: 7.5, type: "fairy", position: CGPoint(x: 250, y: 400), pattern: .spiralShot, parameters: BulletConfig(speed: 90, bulletCount: 8, spiralSpeed: 15)),
-            EnemySpawnEvent(time: 10.0, type: "fairy", position: CGPoint(x: 192, y: 400), pattern: .aimedShot, parameters: BulletConfig(speed: 160)), // Center
+            // Basic red circles
+            EnemySpawnEvent(time: 1.0, type: "fairy", position: CGPoint(x: 100, y: 400), 
+                           pattern: .singleShot, parameters: PatternConfig(
+                               physics: PhysicsConfig(speed: 120),
+                               visual: VisualConfig(shape: .circle, color: .red)
+                           )),
+            
+            // Blue diamonds in triple shot
+            EnemySpawnEvent(time: 2.5, type: "fairy", position: CGPoint(x: 200, y: 400), 
+                           pattern: .tripleShot, parameters: PatternConfig(
+                               physics: PhysicsConfig(speed: 100),
+                               visual: VisualConfig(shape: .diamond, color: .blue),
+                               spread: 60
+                           )),
+            
+            // Green aimed shots
+            EnemySpawnEvent(time: 4.0, type: "fairy", position: CGPoint(x: 300, y: 400), 
+                           pattern: .aimedShot, parameters: PatternConfig(
+                               physics: PhysicsConfig(speed: 140),
+                               visual: VisualConfig(shape: .circle, color: .green)
+                           )),
+            
+            // Purple stars in circle pattern
+            EnemySpawnEvent(time: 6.0, type: "fairy", position: CGPoint(x: 150, y: 400), 
+                           pattern: .circleShot, parameters: PatternConfig(
+                               physics: PhysicsConfig(speed: 80),
+                               visual: VisualConfig(shape: .star, color: .purple),
+                               bulletCount: 12
+                           )),
+            
+            // Orange squares in spiral
+            EnemySpawnEvent(time: 7.5, type: "fairy", position: CGPoint(x: 250, y: 400), 
+                           pattern: .spiralShot, parameters: PatternConfig(
+                               physics: PhysicsConfig(speed: 90),
+                               visual: VisualConfig(shape: .square, color: .orange),
+                               bulletCount: 8,
+                               spiralSpeed: 15
+                           )),
+            
+            // Large yellow circles
+            EnemySpawnEvent(time: 10.0, type: "fairy", position: CGPoint(x: 192, y: 400), 
+                           pattern: .aimedShot, parameters: PatternConfig(
+                               physics: PhysicsConfig(speed: 160),
+                               visual: VisualConfig(size: .large, shape: .circle, color: .yellow)
+                           )),
         ]
     }
     
@@ -61,12 +100,12 @@ class EnemySystem: GameSystem {
         }
         
         for spawnEvent in enemiesToSpawn {
-            spawnEnemy(type: spawnEvent.type, position: spawnEvent.position, pattern: spawnEvent.pattern, parameters: spawnEvent.parameters)
+            spawnEnemy(type: spawnEvent.type, position: spawnEvent.position, pattern: spawnEvent.pattern, patternConfig: spawnEvent.parameters)
             spawnEvent.hasSpawned = true
         }
     }
     
-    private func spawnEnemy(type: String, position: CGPoint, pattern: EnemyPattern, parameters: BulletConfig) {
+    private func spawnEnemy(type: String, position: CGPoint, pattern: EnemyPattern, patternConfig: PatternConfig) {
         let entity = entityManager.createEntity()
         
         // Add components based on enemy type
@@ -77,7 +116,7 @@ class EnemySystem: GameSystem {
                 scoreValue: 100,
                 dropItem: .power, // Fairies always drop power items
                 attackPattern: pattern,
-                bulletConfig: parameters,
+                patternConfig: patternConfig,
                 shotInterval: 2.0
             ))
             entity.addComponent(TransformComponent(
@@ -136,7 +175,14 @@ class EnemySystem: GameSystem {
                     bulletEntity.addComponent(BulletComponent(
                         ownedByPlayer: false,
                         bulletType: command.bulletType,
-                        damage: command.damage
+                        damage: command.physics.damage,
+                        homingStrength: command.behavior.homingStrength,
+                        maxTurnRate: command.behavior.maxTurnRate,
+                        size: command.visual.size,
+                        shape: command.visual.shape,
+                        color: command.visual.color,
+                        hasTrail: command.visual.hasTrail,
+                        trailLength: command.visual.trailLength
                     ))
                     bulletEntity.addComponent(TransformComponent(
                         position: command.position,
@@ -154,10 +200,10 @@ class EnemySpawnEvent {
     let type: String
     let position: CGPoint
     let pattern: EnemyPattern
-    let parameters: BulletConfig
+    let parameters: PatternConfig
     var hasSpawned: Bool = false
     
-    init(time: TimeInterval, type: String, position: CGPoint, pattern: EnemyPattern, parameters: BulletConfig) {
+    init(time: TimeInterval, type: String, position: CGPoint, pattern: EnemyPattern, parameters: PatternConfig) {
         self.time = time
         self.type = type
         self.position = position

@@ -10,19 +10,26 @@ import GameplayKit
 
 class GameScene: SKScene {
     
+    private var renderSystem: RenderSystem!
+    
     override func didMove(to view: SKView) {
         // Set background color
         backgroundColor = SKColor.black
         
-        // Add a simple label to test
-        let label = SKLabelNode(text: "Touhou Game")
-        label.fontSize = 24
-        label.fontColor = SKColor.white
-        label.position = CGPoint(x: frame.midX, y: frame.midY)
-        addChild(label)
+        // Initialize render system
+        renderSystem = RenderSystem()
+        
+        // Start the game
+        GameFacade.shared.startGame()
     }
     
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+        // Update game logic
+        GameFacade.shared.update(currentTime)
+        
+        // Update rendering
+        if let renderSystem = renderSystem {
+            renderSystem.sync(entityManager: GameFacade.shared.getEntityManager(), scene: self)
+        }
     }
 }

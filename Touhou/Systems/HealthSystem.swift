@@ -19,15 +19,15 @@ class HealthSystem: GameSystem {
     }
     
     func update(deltaTime: TimeInterval) {
-        // Update invulnerability timers for enemies
-        let entitiesWithHealth = entityManager.getEntities(with: HealthComponent.self)
+        // Update invulnerability timers for all damageable entities
+        let damageableEntities = entityManager.getEntities(with: HealthComponent.self)
         
-        for entity in entitiesWithHealth {
-            guard let health = entity.component(ofType: HealthComponent.self) else { continue }
+        for entity in damageableEntities {
+            guard let healthComponent = entity.component(ofType: HealthComponent.self) else { continue }
             
             // Decrease invulnerability timer
-            if health.invulnerabilityTimer > 0 {
-                health.invulnerabilityTimer -= deltaTime
+            if healthComponent.invulnerabilityTimer > 0 {
+                healthComponent.invulnerabilityTimer -= deltaTime
             }
         }
     }
@@ -39,7 +39,40 @@ class HealthSystem: GameSystem {
         }
     }
     
-    // MARK: - Private Methods
+    // MARK: - Generic Damage System
+    
+    /// Apply damage to any damageable entity
+    func applyDamage(to entity: GKEntity, damage: Int) {
+        guard let damageable = entity.component(ofType: HealthComponent.self) else { return }
+        
+        print("💥 Applying \(damage) damage to entity. Health: \(damageable.health)")
+        
+        // Apply damage using protocol
+        damageable.health -= damage
+        
+        // Check if entity dies using protocol
+        if !damageable.isAlive {
+            print("💀 Entity died!")
+            handleEntityDeath(entity)
+        }
+    }
+    
+    /// Handle death for any entity that can die
+    private func handleEntityDeath(_ entity: GKEntity) {
+        // Check if it's an enemy (has EnemyComponent)
+        if let enemy = entity.component(ofType: EnemyComponent.self) {
+            // Fire enemy death event
+            eventBus.fire(EnemyDiedEvent(
+                entity: entity,
+                scoreValue: enemy.scoreValue,
+                dropItem: enemy.dropItem
+            ))
+            
+            // Mark enemy for destruction
+            entityManager.markForDestruction(entity)
+        }
+        // Could add other entity types here (bosses, etc.)
+    }
     
     private func handleCollisionEvent(_ event: CollisionOccurredEvent) {
         switch event.collisionType {
@@ -58,28 +91,8 @@ class HealthSystem: GameSystem {
     }
     
     private func handleEnemyHit(_ enemyEntity: GKEntity) {
-        guard let health = enemyEntity.component(ofType: HealthComponent.self),
-              let enemy = enemyEntity.component(ofType: EnemyComponent.self) else { return }
-        
-        print("💥 Enemy took damage! Health: \(health.current)")
-        
-        // Apply damage
-        health.current -= 1
-        
-        // Check if enemy dies
-        if health.current <= 0 {
-            print("💀 Enemy died!")
-            
-            // Fire enemy death event
-            eventBus.fire(EnemyDiedEvent(
-                entity: enemyEntity,
-                scoreValue: enemy.scoreValue,
-                dropTable: enemy.dropTable
-            ))
-            
-            // Mark enemy for destruction
-            entityManager.markForDestruction(enemyEntity)
-        }
+        // Use the generic damage system
+        applyDamage(to: enemyEntity, damage: 1)
     }
     
     private func handlePlayerHit(_ playerEntity: GKEntity) {

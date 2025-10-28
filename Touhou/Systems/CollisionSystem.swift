@@ -100,21 +100,21 @@ class CollisionSystem: GameSystem {
     }
     
     private func handleCollision(entityA: GKEntity, entityB: GKEntity) {
-        // Determine collision type
-        let bulletEntity: GKEntity?
+        // Find the damaging entity (bullet) and target using protocol
+        let damagingEntity: GKEntity?
         let targetEntity: GKEntity?
         
         if entityA.component(ofType: BulletComponent.self) != nil {
-            bulletEntity = entityA
+            damagingEntity = entityA
             targetEntity = entityB
         } else if entityB.component(ofType: BulletComponent.self) != nil {
-            bulletEntity = entityB
+            damagingEntity = entityB
             targetEntity = entityA
         } else {
-            return // No bullet involved
+            return // No damaging entity involved
         }
         
-        guard let bullet = bulletEntity?.component(ofType: BulletComponent.self),
+        guard let bullet = damagingEntity?.component(ofType: BulletComponent.self),
               let target = targetEntity else { return }
         
         // Player bullet hits enemy
@@ -122,11 +122,11 @@ class CollisionSystem: GameSystem {
             print("🔥 Firing collision event: player_bullet_hit_enemy")
             
             // Mark bullet for destruction
-            entityManager.markForDestruction(bulletEntity!)
+            entityManager.markForDestruction(damagingEntity!)
             
             // Fire collision event
             eventBus.fire(CollisionOccurredEvent(
-                entityA: bulletEntity!,
+                entityA: damagingEntity!,
                 entityB: targetEntity!,
                 collisionType: "player_bullet_hit_enemy"
             ))
@@ -134,12 +134,14 @@ class CollisionSystem: GameSystem {
         
         // Enemy bullet hits player
         if !bullet.ownedByPlayer && target.component(ofType: PlayerComponent.self) != nil {
+            print("🔥 Firing collision event: enemy_bullet_hit_player")
+            
             // Mark bullet for destruction
-            entityManager.markForDestruction(bulletEntity!)
+            entityManager.markForDestruction(damagingEntity!)
             
             // Fire collision event
             eventBus.fire(CollisionOccurredEvent(
-                entityA: bulletEntity!,
+                entityA: damagingEntity!,
                 entityB: targetEntity!,
                 collisionType: "enemy_bullet_hit_player"
             ))

@@ -43,14 +43,14 @@ class EnemySystem: GameSystem {
     // MARK: - Private Methods
     
     private func loadStageScript() {
-        // Stage 1 script - enemies spawn at specific times with different patterns
+        // Stage 1 script - enemies spawn at specific times with different patterns and parameters
         stageScript = [
-            EnemySpawnEvent(time: 1.0, type: "fairy", position: CGPoint(x: 100, y: 400), pattern: .singleShot),
-            EnemySpawnEvent(time: 2.5, type: "fairy", position: CGPoint(x: 200, y: 400), pattern: .tripleShot),
-            EnemySpawnEvent(time: 4.0, type: "fairy", position: CGPoint(x: 300, y: 400), pattern: .aimedShot),
-            EnemySpawnEvent(time: 6.0, type: "fairy", position: CGPoint(x: 150, y: 400), pattern: .circleShot),
-            EnemySpawnEvent(time: 7.5, type: "fairy", position: CGPoint(x: 250, y: 400), pattern: .spiralShot),
-            EnemySpawnEvent(time: 10.0, type: "fairy", position: CGPoint(x: 192, y: 400), pattern: .aimedShot), // Center
+            EnemySpawnEvent(time: 1.0, type: "fairy", position: CGPoint(x: 100, y: 400), pattern: .singleShot, parameters: BulletConfig(speed: 120)),
+            EnemySpawnEvent(time: 2.5, type: "fairy", position: CGPoint(x: 200, y: 400), pattern: .tripleShot, parameters: BulletConfig(speed: 100, spread: 60)),
+            EnemySpawnEvent(time: 4.0, type: "fairy", position: CGPoint(x: 300, y: 400), pattern: .aimedShot, parameters: BulletConfig(speed: 140)),
+            EnemySpawnEvent(time: 6.0, type: "fairy", position: CGPoint(x: 150, y: 400), pattern: .circleShot, parameters: BulletConfig(speed: 80, bulletCount: 12)),
+            EnemySpawnEvent(time: 7.5, type: "fairy", position: CGPoint(x: 250, y: 400), pattern: .spiralShot, parameters: BulletConfig(speed: 90, bulletCount: 8, spiralSpeed: 15)),
+            EnemySpawnEvent(time: 10.0, type: "fairy", position: CGPoint(x: 192, y: 400), pattern: .aimedShot, parameters: BulletConfig(speed: 160)), // Center
         ]
     }
     
@@ -61,12 +61,12 @@ class EnemySystem: GameSystem {
         }
         
         for spawnEvent in enemiesToSpawn {
-            spawnEnemy(type: spawnEvent.type, position: spawnEvent.position, pattern: spawnEvent.pattern)
+            spawnEnemy(type: spawnEvent.type, position: spawnEvent.position, pattern: spawnEvent.pattern, parameters: spawnEvent.parameters)
             spawnEvent.hasSpawned = true
         }
     }
     
-    private func spawnEnemy(type: String, position: CGPoint, pattern: EnemyPattern) {
+    private func spawnEnemy(type: String, position: CGPoint, pattern: EnemyPattern, parameters: BulletConfig) {
         let entity = entityManager.createEntity()
         
         // Add components based on enemy type
@@ -75,8 +75,9 @@ class EnemySystem: GameSystem {
             entity.addComponent(EnemyComponent(
                 enemyType: "fairy",
                 scoreValue: 100,
-                dropTable: [.power: 0.3, .point: 0.7],
+                dropItem: .power, // Fairies always drop power items
                 attackPattern: pattern,
+                bulletConfig: parameters,
                 shotInterval: 2.0
             ))
             entity.addComponent(TransformComponent(
@@ -109,22 +110,22 @@ class EnemySystem: GameSystem {
     
     private func updateEnemyShooting(deltaTime: TimeInterval) {
         let currentTime = CACurrentMediaTime()
-        let enemies = entityManager.getEntities(with: EnemyComponent.self)
+        let shootableEntities = entityManager.getEntities(with: EnemyComponent.self)
         
-        for enemy in enemies {
-            guard let enemyComp = enemy.component(ofType: EnemyComponent.self),
+        for enemy in shootableEntities {
+            guard let shootable = enemy.component(ofType: EnemyComponent.self),
                   let transform = enemy.component(ofType: TransformComponent.self) else { continue }
             
-            // Check if it's time for this enemy to shoot
-            if currentTime - enemyComp.lastShotTime >= enemyComp.shotInterval {
-                enemyComp.lastShotTime = currentTime
+            // Check if it's time for this enemy to shoot using protocol
+            if shootable.canShoot(at: currentTime) {
+                shootable.lastShotTime = currentTime
                 
                 // Get player position for aimed shots
                 let players = entityManager.getEntities(with: PlayerComponent.self)
                 let playerPosition = players.first?.component(ofType: TransformComponent.self)?.position
                 
-                // Get bullet commands from pattern
-                let commands = enemyComp.attackPattern.getBulletCommands(
+                // Get bullet commands using protocol
+                let commands = shootable.getBulletCommands(
                     from: transform.position,
                     targetPosition: playerPosition
                 )
@@ -153,12 +154,14 @@ class EnemySpawnEvent {
     let type: String
     let position: CGPoint
     let pattern: EnemyPattern
+    let parameters: BulletConfig
     var hasSpawned: Bool = false
     
-    init(time: TimeInterval, type: String, position: CGPoint, pattern: EnemyPattern) {
+    init(time: TimeInterval, type: String, position: CGPoint, pattern: EnemyPattern, parameters: BulletConfig) {
         self.time = time
         self.type = type
         self.position = position
         self.pattern = pattern
+        self.parameters = parameters
     }
 }

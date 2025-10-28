@@ -6,9 +6,15 @@
 //
 
 import Foundation
+import CoreGraphics
 import GameplayKit
 
-class BulletComponent: GKComponent {
+/// Protocol for entities that can deal damage
+protocol Damaging {
+    var damage: Int { get }
+}
+
+class BulletComponent: GKComponent, Damaging {
     var ownedByPlayer: Bool
     var bulletType: String // "needle", "rice", "orb"
     var damage: Int

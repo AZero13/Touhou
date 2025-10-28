@@ -19,13 +19,13 @@ struct EnemyDiedEvent: GameEvent {
     let timestamp: TimeInterval
     let entity: GKEntity
     let scoreValue: Int
-    let dropTable: [ItemType: Float]
+    let dropItem: ItemType?
     
-    init(entity: GKEntity, scoreValue: Int, dropTable: [ItemType: Float] = [:]) {
+    init(entity: GKEntity, scoreValue: Int, dropItem: ItemType? = nil) {
         self.timestamp = CACurrentMediaTime()
         self.entity = entity
         self.scoreValue = scoreValue
-        self.dropTable = dropTable
+        self.dropItem = dropItem
     }
 }
 

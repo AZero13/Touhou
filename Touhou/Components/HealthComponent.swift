@@ -8,7 +8,15 @@
 import Foundation
 import GameplayKit
 
-class HealthComponent: GKComponent {
+/// Protocol for entities that can take damage
+protocol Damageable {
+    var health: Int { get set }
+    var maxHealth: Int { get }
+    var isAlive: Bool { get }
+    var invulnerabilityTimer: TimeInterval { get set }
+}
+
+class HealthComponent: GKComponent, Damageable {
     var current: Int
     var max: Int
     var invulnerabilityTimer: TimeInterval = 0
@@ -30,5 +38,16 @@ class HealthComponent: GKComponent {
     
     var isInvulnerable: Bool {
         return invulnerabilityTimer > 0
+    }
+    
+    // MARK: - Damageable Protocol
+    
+    var health: Int {
+        get { current }
+        set { current = newValue }
+    }
+    
+    var maxHealth: Int {
+        return max
     }
 }

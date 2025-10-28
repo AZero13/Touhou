@@ -6,9 +6,15 @@
 //
 
 import Cocoa
+import SpriteKit
 
 class ViewController: NSViewController {
 
+    @IBOutlet weak var GameplayView: SKView!
+    @IBOutlet weak var HighScoreLabel: NSTextField!
+    @IBOutlet weak var ScoreLabel: NSTextField!
+    @IBOutlet weak var LivesLabel: NSTextField!
+    @IBOutlet weak var BombsLabel: NSTextField!
     override func viewDidLoad() {
         super.viewDidLoad()
 

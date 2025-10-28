@@ -753,16 +753,20 @@
                         </subviews>
                         <constraints>
                             <constraint firstItem="0Cm-uz-6Ai" firstAttribute="leading" secondItem="bnA-fa-wZj" secondAttribute="trailing" constant="8" symbolic="YES" id="8Sc-e4-52V"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="0Cm-uz-6Ai" secondAttribute="trailing" constant="20" symbolic="YES" id="A4n-Yu-hjr"/>
                             <constraint firstItem="bnA-fa-wZj" firstAttribute="top" secondItem="oIh-m6-h5l" secondAttribute="top" id="BIU-2p-sXX"/>
                             <constraint firstItem="bnA-fa-wZj" firstAttribute="centerY" secondItem="m2S-Jp-Qdl" secondAttribute="centerY" id="E08-hV-i2u"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="oIh-m6-h5l" secondAttribute="trailing" constant="20" symbolic="YES" id="ERi-br-yFs"/>
                             <constraint firstItem="bnA-fa-wZj" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="32" id="I4g-Yv-J8z"/>
                             <constraint firstItem="0Cm-uz-6Ai" firstAttribute="top" secondItem="oIh-m6-h5l" secondAttribute="bottom" constant="8" symbolic="YES" id="Lex-0a-JtC"/>
                             <constraint firstItem="6Hx-Al-Xsd" firstAttribute="leading" secondItem="bnA-fa-wZj" secondAttribute="trailing" constant="8" symbolic="YES" id="Mn3-OQ-E7E"/>
                             <constraint firstItem="PaZ-Su-MGZ" firstAttribute="leading" secondItem="bnA-fa-wZj" secondAttribute="trailing" constant="8" symbolic="YES" id="PpL-HE-Nyr"/>
                             <constraint firstItem="PaZ-Su-MGZ" firstAttribute="top" secondItem="6Hx-Al-Xsd" secondAttribute="bottom" constant="8" symbolic="YES" id="UPJ-Dy-PDv"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="PaZ-Su-MGZ" secondAttribute="trailing" constant="20" symbolic="YES" id="VJ1-56-5yv"/>
                             <constraint firstItem="bnA-fa-wZj" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="16" id="a70-JZ-rqF"/>
                             <constraint firstItem="oIh-m6-h5l" firstAttribute="leading" secondItem="bnA-fa-wZj" secondAttribute="trailing" constant="8" symbolic="YES" id="r0X-SN-iEj"/>
                             <constraint firstItem="6Hx-Al-Xsd" firstAttribute="top" secondItem="0Cm-uz-6Ai" secondAttribute="bottom" constant="8" symbolic="YES" id="vW2-fp-di7"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="6Hx-Al-Xsd" secondAttribute="trailing" constant="20" symbolic="YES" id="xuv-vN-HXf"/>
                         </constraints>
                     </view>
                     <connections>

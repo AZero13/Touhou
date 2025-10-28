@@ -33,7 +33,19 @@ class BulletSpriteFactory: SpriteFactory {
         }
         
         let circle = SKShapeNode(circleOfRadius: 3)
-        circle.fillColor = bulletComponent.ownedByPlayer ? .cyan : .red
+        
+        // Different colors for different bullet types
+        switch bulletComponent.bulletType {
+        case "homing_amulet":
+            circle.fillColor = .cyan
+        case "amulet":
+            circle.fillColor = .cyan
+        case "enemy_bullet":
+            circle.fillColor = .red
+        default:
+            circle.fillColor = bulletComponent.ownedByPlayer ? .cyan : .red
+        }
+        
         circle.strokeColor = .clear
         circle.zPosition = 50
         return circle

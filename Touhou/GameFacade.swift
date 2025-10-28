@@ -34,8 +34,11 @@ class GameFacade {
     private func setupSystems() {
         // Add systems in update order
         addSystem(PlayerSystem())
+        addSystem(EnemySystem())
         addSystem(BulletSystem())
         addSystem(BulletHomingSystem()) // Handle homing after movement
+        addSystem(CollisionSystem()) // Detect collisions
+        addSystem(HealthSystem()) // Process damage/death
         addSystem(CleanupSystem()) // Must be last
     }
     
@@ -50,6 +53,7 @@ class GameFacade {
     func startGame() {
         isRunning = true
         lastUpdateTime = CACurrentMediaTime()
+        print("🎮 Game started!")
     }
     
     func stopGame() {

@@ -52,9 +52,13 @@ class PlayerSystem: GameSystem {
         let entity = entityManager.createEntity()
         
         // Add components
-        entity.addComponent(PlayerComponent())
+        let playerComponent = PlayerComponent()
+        print("🎮 Player created with lives: \(playerComponent.lives)")
+        
+        entity.addComponent(playerComponent)
         entity.addComponent(TransformComponent(position: CGPoint(x: 192, y: 50))) // Center bottom
         entity.addComponent(HitboxComponent(playerHitbox: 2.5, grazeZone: 30))
+        // No HealthComponent - player just has lives, not HP
         
         playerEntity = entity
     }

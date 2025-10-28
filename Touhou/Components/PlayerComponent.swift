@@ -15,7 +15,7 @@ class PlayerComponent: GKComponent {
     var isFocused: Bool
     var score: Int
     
-    init(power: Int = 0, lives: Int = 2, bombs: Int = 3, isFocused: Bool = false, score: Int = 0) {
+    init(power: Int = 0, lives: Int = 3, bombs: Int = 3, isFocused: Bool = false, score: Int = 0) {
         self.power = power
         self.lives = lives
         self.bombs = bombs

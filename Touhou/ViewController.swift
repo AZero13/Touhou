@@ -18,8 +18,18 @@ class ViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+        GameplayView.showsFPS = true
+        GameplayView.showsNodeCount = true
+        GameplayView.ignoresSiblingOrder = true
+        
+        // Create and present a scene
+        let scene = GameScene()
+        scene.scaleMode = .aspectFill
+        scene.size = GameplayView.bounds.size
+        
+        GameplayView.presentScene(scene)
     }
+    
 
     override var representedObject: Any? {
         didSet {

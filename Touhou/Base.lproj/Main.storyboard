@@ -712,9 +712,6 @@
                             <containerView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bnA-fa-wZj" customClass="SKView">
                                 <rect key="frame" x="32" y="16" width="384" height="448"/>
                                 <autoresizingMask key="autoresizingMask"/>
-                                <connections>
-                                    <segue destination="qhb-VP-Irj" kind="embed" id="QFJ-YY-oiX"/>
-                                </connections>
                             </containerView>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oIh-m6-h5l">
                                 <rect key="frame" x="422" y="448" width="71" height="16"/>
@@ -765,19 +762,6 @@
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="75" y="655"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="cNu-SF-AQ1">
-            <objects>
-                <viewController id="qhb-VP-Irj" sceneMemberID="viewController">
-                    <view key="view" id="y2t-oT-km8">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </view>
-                </viewController>
-                <customObject id="RBt-0C-Ppj" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-435" y="602"/>
         </scene>
     </scenes>
 </document>

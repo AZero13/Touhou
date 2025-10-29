@@ -26,6 +26,24 @@ final class EnemyFactory {
         entity.addComponent(HealthComponent(current: 1, max: 1))
         return entity
     }
+    
+    static func createBoss(name: String, position: CGPoint, entityManager: EntityManager) -> GKEntity {
+        let entity = entityManager.createEntity()
+        entity.addComponent(BossComponent(name: name, health: 300))
+        // Also treat boss as an enemy for collision/targeting and scoring
+        entity.addComponent(EnemyComponent(
+            enemyType: .custom("boss_\(name)"),
+            scoreValue: 5000,
+            dropItem: .life,
+            attackPattern: .tripleShot,
+            patternConfig: PatternConfig(physics: PhysicsConfig(speed: 120), visual: VisualConfig(shape: .star, color: .purple), bulletCount: 8, spread: 80, spiralSpeed: 12),
+            shotInterval: 1.2
+        ))
+        entity.addComponent(TransformComponent(position: position, velocity: CGVector(dx: 0, dy: 0)))
+        entity.addComponent(HitboxComponent(enemyHitbox: 16))
+        entity.addComponent(HealthComponent(current: 20, max: 20))
+        return entity
+    }
 }
 
 

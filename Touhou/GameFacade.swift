@@ -38,6 +38,7 @@ class GameFacade {
     
     // MARK: - Game State
     private var lastUpdateTime: TimeInterval = 0
+    private var currentStage: Int = 1
     
     // MARK: - Setup
     private func setupStateMachine() {
@@ -137,5 +138,11 @@ class GameFacade {
     
     func getTaskScheduler() -> TaskScheduler {
         return taskScheduler
+    }
+    
+    func getCurrentStage() -> Int { currentStage }
+    
+    func advanceStage() {
+        currentStage = min(currentStage + 1, 6)
     }
 }

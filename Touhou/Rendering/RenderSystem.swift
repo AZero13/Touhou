@@ -76,6 +76,44 @@ class RenderSystem {
                 entityToNode.removeValue(forKey: entity)
             }
         }
+        
+        // Boss health bar overlay (top of screen)
+        if let boss = entities.first(where: { $0.component(ofType: BossComponent.self) != nil }),
+           let bossComp = boss.component(ofType: BossComponent.self) {
+            let barWidth = scene.size.width * 0.8
+            let barHeight: CGFloat = 12
+            let origin = CGPoint(x: (scene.size.width - barWidth) / 2, y: scene.size.height - 30)
+            let bgName = "bossHealthBarBG"
+            let fillName = "bossHealthBarFill"
+            var bg = scene.childNode(withName: bgName) as? SKShapeNode
+            if bg == nil {
+                let rect = CGRect(x: origin.x, y: origin.y, width: barWidth, height: barHeight)
+                bg = SKShapeNode(rect: rect, cornerRadius: 4)
+                bg?.name = bgName
+                bg?.strokeColor = .white
+                bg?.fillColor = .clear
+                bg?.zPosition = 2000
+                scene.addChild(bg!)
+            }
+            var fill = scene.childNode(withName: fillName) as? SKShapeNode
+            let pct = max(0, min(1, CGFloat(bossComp.health) / CGFloat(bossComp.maxHealth)))
+            if fill == nil {
+                let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
+                fill = SKShapeNode(rect: rect, cornerRadius: 4)
+                fill?.name = fillName
+                fill?.strokeColor = .clear
+                fill?.fillColor = .systemPink
+                fill?.zPosition = 2001
+                scene.addChild(fill!)
+            } else {
+                let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
+                fill?.path = CGPath(roundedRect: rect, cornerWidth: 4, cornerHeight: 4, transform: nil)
+            }
+        } else {
+            // Remove bar if no boss
+            scene.childNode(withName: "bossHealthBarBG")?.removeFromParent()
+            scene.childNode(withName: "bossHealthBarFill")?.removeFromParent()
+        }
     }
     
     private func createNode(for entity: GKEntity) -> SKNode? {

@@ -15,6 +15,7 @@ final class EnemySystem: GameSystem {
     private var stageTimer: TimeInterval = 0
     private var stageScript: [EnemySpawnEvent] = []
     private var stageCompleteDispatched: Bool = false
+    private var bossSpawned: Bool = false
     
     private var lastShotTime: TimeInterval = 0
     
@@ -22,8 +23,8 @@ final class EnemySystem: GameSystem {
         self.entityManager = entityManager
         self.eventBus = eventBus
         
-        // Load stage script
-        loadStageScript()
+        // Load stage script for initial stage explicitly to avoid re-entrancy
+        loadStageScript(stageId: 1)
     }
     
     func update(deltaTime: TimeInterval) {
@@ -36,23 +37,49 @@ final class EnemySystem: GameSystem {
         updateEnemyMovement(deltaTime: deltaTime)
         updateEnemyShooting(deltaTime: deltaTime)
         
-        // If all scripted enemies have spawned and been cleared, move to score scene
-        if !stageCompleteDispatched,
-           stageScript.allSatisfy({ $0.hasSpawned }),
-           entityManager.getEntities(with: EnemyComponent.self).isEmpty {
+        // If all scripted enemies have spawned and none remain, spawn boss once
+        if stageScript.allSatisfy({ $0.hasSpawned }) && !bossSpawned {
+            let boss = EnemyFactory.createBoss(name: "Stage Boss", position: CGPoint(x: 192, y: 360), entityManager: entityManager)
+            bossSpawned = true
+            // Schedule boss shooting task
+            if let shootable = boss.component(ofType: EnemyComponent.self) {
+                let scheduler = GameFacade.shared.getTaskScheduler()
+                let steps: [TaskScheduler.Step] = [
+                    .run { entityManager, commandQueue in
+                        guard let t = boss.component(ofType: TransformComponent.self) else { return }
+                        let players = entityManager.getEntities(with: PlayerComponent.self)
+                        let playerPosition = players.first?.component(ofType: TransformComponent.self)?.position
+                        let commands = shootable.getBulletCommands(from: t.position, targetPosition: playerPosition)
+                        for c in commands { commandQueue.enqueue(.spawnBullet(c, ownedByPlayer: false)) }
+                    }
+                ]
+                _ = scheduler.schedule(owner: boss, steps: steps, repeatEvery: shootable.shotInterval)
+            }
+        }
+        
+        // After boss defeated (no enemies remain), move to score scene once
+        if bossSpawned && !stageCompleteDispatched && entityManager.getEntities(with: EnemyComponent.self).isEmpty {
             stageCompleteDispatched = true
-            eventBus.fire(StageTransitionEvent(nextStageId: 2))
+            let nextId = min(GameFacade.shared.getCurrentStage() + 1, 6)
+            eventBus.fire(StageTransitionEvent(nextStageId: nextId))
         }
     }
     
     func handleEvent(_ event: GameEvent) {
-        // Handle events as needed
+        if let s = event as? StageStartedEvent {
+            stageTimer = 0
+            stageCompleteDispatched = false
+            bossSpawned = false
+            loadStageScript(stageId: s.stageId)
+        }
     }
     
     // MARK: - Private Methods
     
-    private func loadStageScript() {
+    private func loadStageScript(stageId: Int) {
         // Stage 1 script - enemies spawn at specific times with different patterns and visual variety
+        switch stageId {
+        case 1:
         stageScript = [
             // Basic red circles
             EnemySpawnEvent(time: 1.0, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 100, y: 400), 
@@ -100,6 +127,14 @@ final class EnemySystem: GameSystem {
                                visual: VisualConfig(size: .large, shape: .circle, color: .yellow)
                            )),
         ]
+        default:
+        let speed = CGFloat(120 + (stageId - 1) * 20)
+        stageScript = [
+            EnemySpawnEvent(time: 1.0, type: .fairy, position: CGPoint(x: 80, y: 400), pattern: .aimedShot, parameters: PatternConfig(physics: PhysicsConfig(speed: speed))),
+            EnemySpawnEvent(time: 2.0, type: .fairy, position: CGPoint(x: 192, y: 400), pattern: .tripleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: speed - 10))),
+            EnemySpawnEvent(time: 3.0, type: .fairy, position: CGPoint(x: 300, y: 400), pattern: .circleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: speed - 20), bulletCount: 10))
+        ]
+        }
     }
     
     private func spawnEnemiesFromScript() {

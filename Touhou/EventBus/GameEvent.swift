@@ -192,6 +192,16 @@ struct StageTransitionEvent: GameEvent {
     }
 }
 
+struct StageStartedEvent: GameEvent {
+    let timestamp: TimeInterval
+    let stageId: Int
+    
+    init(stageId: Int) {
+        self.timestamp = CACurrentMediaTime()
+        self.stageId = stageId
+    }
+}
+
 struct BossIntroStartedEvent: GameEvent {
     let timestamp: TimeInterval
     let bossEntity: GKEntity

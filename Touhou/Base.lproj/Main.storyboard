@@ -731,16 +731,16 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6Hx-Al-Xsd">
-                                <rect key="frame" x="422" y="400" width="36" height="16"/>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6Hx-Al-Xsd">
+                                <rect key="frame" x="422" y="386" width="36" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Lives" id="GPW-Gt-Ya3">
                                     <font key="font" usesAppearanceFont="YES"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PaZ-Su-MGZ">
-                                <rect key="frame" x="422" y="371" width="46" height="21"/>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PaZ-Su-MGZ">
+                                <rect key="frame" x="422" y="357" width="46" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="RDF-aZ-z1Q"/>
                                 </constraints>
@@ -750,6 +750,10 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="Joy-GU-JX0">
+                                <rect key="frame" x="436" y="346" width="184" height="5"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                            </box>
                         </subviews>
                         <constraints>
                             <constraint firstItem="0Cm-uz-6Ai" firstAttribute="leading" secondItem="bnA-fa-wZj" secondAttribute="trailing" constant="8" symbolic="YES" id="8Sc-e4-52V"/>

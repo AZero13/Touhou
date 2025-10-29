@@ -43,8 +43,11 @@ class CollisionSystem: GameSystem {
                   !bulletComp.ownedByPlayer else { continue }
             
             for player in players {
-                if checkCollision(entityA: bullet, entityB: player) {
+                    if checkCollision(entityA: bullet, entityB: player) {
                     handleCollision(entityA: bullet, entityB: player)
+                    } else if checkGraze(bullet: bullet, player: player) {
+                        // Graze detected (no collision). Award graze via event
+                        eventBus.fire(GrazeEvent(bulletEntity: bullet, grazeValue: 1))
                 }
             }
         }
@@ -58,6 +61,8 @@ class CollisionSystem: GameSystem {
                 }
             }
         }
+
+        
     }
     
     func handleEvent(_ event: GameEvent) {
@@ -155,5 +160,25 @@ class CollisionSystem: GameSystem {
             entityB: player,
             collisionType: "enemy_touch_player"
         ))
+    }
+
+    private func checkGraze(bullet: GKEntity, player: GKEntity) -> Bool {
+        guard let bulletTransform = bullet.component(ofType: TransformComponent.self),
+              let playerTransform = player.component(ofType: TransformComponent.self) else {
+            return false
+        }
+        
+        // Player graze radius: prefer HitboxComponent.grazeZone, fallback to default
+        let defaultGraze: CGFloat = 30.0
+        let playerGraze = player.component(ofType: HitboxComponent.self)?.grazeZone ?? defaultGraze
+        let bulletRadius: CGFloat = getCollisionRadius(for: bullet)
+        let playerRadius: CGFloat = getCollisionRadius(for: player)
+        
+        let dx = bulletTransform.position.x - playerTransform.position.x
+        let dy = bulletTransform.position.y - playerTransform.position.y
+        let distance = sqrt(dx * dx + dy * dy)
+        
+        // Consider graze when within graze ring but outside collision
+        return distance < (playerGraze + bulletRadius) && distance >= (playerRadius + bulletRadius)
     }
 }

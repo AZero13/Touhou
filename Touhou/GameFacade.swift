@@ -39,6 +39,7 @@ class GameFacade {
         addSystem(BulletHomingSystem()) // Handle homing after movement
         addSystem(CollisionSystem()) // Detect collisions
         addSystem(HealthSystem()) // Process damage/death
+        addSystem(ItemSystem()) // Items: drops and collection
         addSystem(ScoreSystem()) // Update score/high score for UI
         addSystem(CleanupSystem()) // Must be last
     }

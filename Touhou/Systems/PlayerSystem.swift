@@ -141,16 +141,21 @@ class PlayerSystem: GameSystem {
     }
     
     private func handleBomb(input: InputState) {
-        guard let playerEntity = playerEntity,
-              let player = playerEntity.component(ofType: PlayerComponent.self) else { return }
+        guard let entity = playerEntity,
+              let player = entity.component(ofType: PlayerComponent.self) else { return }
+        guard input.isBombJustPressed else { return }
+        guard player.bombs > 0 else { return }
         
-        if input.isBombPressed && player.bombs > 0 {
-            player.bombs -= 1
-            
-            // Fire bomb event
-            eventBus.fire(BombActivatedEvent(playerEntity: playerEntity))
-            
-            // TODO: Add bomb visual effects and bullet clearing
+        player.bombs -= 1
+        eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
+        eventBus.fire(BombActivatedEvent(playerEntity: entity))
+        
+        // Clear enemy bullets immediately
+        let bullets = entityManager.getEntities(with: BulletComponent.self)
+        for b in bullets {
+            if let comp = b.component(ofType: BulletComponent.self), !comp.ownedByPlayer {
+                entityManager.markForDestruction(b)
+            }
         }
     }
 }

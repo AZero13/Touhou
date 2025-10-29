@@ -30,12 +30,9 @@ class ViewController: NSViewController, EventListener {
         GameplayView.showsNodeCount = true
         GameplayView.ignoresSiblingOrder = true
         
-        // Create and present a scene
-        let scene = GameScene()
-        scene.scaleMode = .aspectFill
-        scene.size = GameplayView.bounds.size
-        
-        GameplayView.presentScene(scene)
+        // Configure scene coordinator and present initial gameplay scene
+        SceneCoordinator.shared.configure(with: GameplayView)
+        SceneCoordinator.shared.presentGameplayScene()
         
         // Register for game events to keep UI in sync
         GameFacade.shared.getEventBus().register(listener: self)

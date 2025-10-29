@@ -14,6 +14,7 @@ final class EnemySystem: GameSystem {
     private var eventBus: EventBus!
     private var stageTimer: TimeInterval = 0
     private var stageScript: [EnemySpawnEvent] = []
+    private var stageCompleteDispatched: Bool = false
     
     private var lastShotTime: TimeInterval = 0
     
@@ -34,6 +35,14 @@ final class EnemySystem: GameSystem {
         // Update enemy movement and shooting
         updateEnemyMovement(deltaTime: deltaTime)
         updateEnemyShooting(deltaTime: deltaTime)
+        
+        // If all scripted enemies have spawned and been cleared, move to score scene
+        if !stageCompleteDispatched,
+           stageScript.allSatisfy({ $0.hasSpawned }),
+           entityManager.getEntities(with: EnemyComponent.self).isEmpty {
+            stageCompleteDispatched = true
+            eventBus.fire(StageTransitionEvent(nextStageId: 2))
+        }
     }
     
     func handleEvent(_ event: GameEvent) {
@@ -108,7 +117,20 @@ final class EnemySystem: GameSystem {
     private func spawnEnemy(type: EnemyComponent.EnemyType, position: CGPoint, pattern: EnemyPattern, patternConfig: PatternConfig) {
         switch type {
         case .fairy:
-            _ = EnemyFactory.createFairy(position: position, pattern: pattern, patternConfig: patternConfig, entityManager: entityManager)
+            let enemy = EnemyFactory.createFairy(position: position, pattern: pattern, patternConfig: patternConfig, entityManager: entityManager)
+            if let shootable = enemy.component(ofType: EnemyComponent.self) {
+                let scheduler = GameFacade.shared.getTaskScheduler()
+                let steps: [TaskScheduler.Step] = [
+                    .run { entityManager, commandQueue in
+                        guard let t = enemy.component(ofType: TransformComponent.self) else { return }
+                        let players = entityManager.getEntities(with: PlayerComponent.self)
+                        let playerPosition = players.first?.component(ofType: TransformComponent.self)?.position
+                        let commands = shootable.getBulletCommands(from: t.position, targetPosition: playerPosition)
+                        for c in commands { commandQueue.enqueue(.spawnBullet(c, ownedByPlayer: false)) }
+                    }
+                ]
+                _ = scheduler.schedule(owner: enemy, steps: steps, repeatEvery: shootable.shotInterval)
+            }
         default:
             break
         }
@@ -131,34 +153,7 @@ final class EnemySystem: GameSystem {
     }
     
     private func updateEnemyShooting(deltaTime: TimeInterval) {
-        let currentTime = CACurrentMediaTime()
-        let shootableEntities = entityManager.getEntities(with: EnemyComponent.self)
-        
-        for enemy in shootableEntities {
-            guard let shootable = enemy.component(ofType: EnemyComponent.self),
-                  let transform = enemy.component(ofType: TransformComponent.self) else { continue }
-            
-            // Check if it's time for this enemy to shoot using protocol
-            if shootable.canShoot(at: currentTime) {
-                shootable.lastShotTime = currentTime
-                
-                // Get player position for aimed shots
-                let players = entityManager.getEntities(with: PlayerComponent.self)
-                let playerPosition = players.first?.component(ofType: TransformComponent.self)?.position
-                
-                // Get bullet commands using protocol
-                let commands = shootable.getBulletCommands(
-                    from: transform.position,
-                    targetPosition: playerPosition
-                )
-                
-                // Enqueue bullet spawns via CommandQueue
-                let queue = GameFacade.shared.getCommandQueue()
-                for command in commands {
-                    queue.enqueue(.spawnBullet(command, ownedByPlayer: false))
-                }
-            }
-        }
+        // Shooting is driven by TaskScheduler via scheduled tasks on spawn.
     }
 }
 

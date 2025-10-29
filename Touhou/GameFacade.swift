@@ -28,6 +28,7 @@ class GameFacade {
     private let entityManager = EntityManager()
     private let eventBus = EventBus()
     private let commandQueue = CommandQueue()
+    private let taskScheduler = TaskScheduler()
     
     // MARK: - Game Systems
     private var systems: [GameSystem] = []
@@ -92,6 +93,9 @@ class GameFacade {
                 system.update(deltaTime: deltaTime)
             }
             
+            // Run scheduled tasks (patterns, phases)
+            taskScheduler.update(deltaTime: deltaTime, entityManager: entityManager, commandQueue: commandQueue)
+            
             // Apply buffered world mutations
             commandQueue.process(entityManager: entityManager, eventBus: eventBus)
         }
@@ -129,5 +133,9 @@ class GameFacade {
     
     func getCommandQueue() -> CommandQueue {
         return commandQueue
+    }
+    
+    func getTaskScheduler() -> TaskScheduler {
+        return taskScheduler
     }
 }

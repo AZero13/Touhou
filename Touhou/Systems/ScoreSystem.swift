@@ -47,14 +47,36 @@ class ScoreSystem: GameSystem {
                let playerComp = player.component(ofType: PlayerComponent.self) {
                 switch p.itemType {
                 case .point:
+                    // Point items: add calculated value to score
                     playerComp.score += p.value
                     eventBus.fire(ScoreChangedEvent(newTotal: playerComp.score))
+                    
                 case .power:
-                    playerComp.power = min(playerComp.power + p.value, 128)
-                    eventBus.fire(PowerLevelChangedEvent(newTotal: playerComp.power))
+                    // Power items: handle based on current power level
+                    if playerComp.power >= 128 {
+                        // At full power: add score from table, increment counter
+                        playerComp.powerItemCountForScore += 1
+                        if playerComp.powerItemCountForScore >= 31 {
+                            playerComp.powerItemCountForScore = 30 // Clamp to max index
+                        }
+                        playerComp.score += p.value // Value already calculated from table
+                        eventBus.fire(ScoreChangedEvent(newTotal: playerComp.score))
+                    } else {
+                        // Not at full power: increment power, reset counter
+                        playerComp.powerItemCountForScore = 0
+                        playerComp.power = min(playerComp.power + p.value, 128)
+                        eventBus.fire(PowerLevelChangedEvent(newTotal: playerComp.power))
+                        // Also add 10 points for power items (from th06 reference)
+                        playerComp.score += 10
+                        eventBus.fire(ScoreChangedEvent(newTotal: playerComp.score))
+                    }
+                    
                 case .bomb:
-                    playerComp.bombs += 1
-                    eventBus.fire(BombsChangedEvent(newTotal: playerComp.bombs))
+                    if playerComp.bombs < 8 {
+                        playerComp.bombs += 1
+                        eventBus.fire(BombsChangedEvent(newTotal: playerComp.bombs))
+                    }
+                    
                 case .life:
                     playerComp.lives += 1
                     eventBus.fire(LivesChangedEvent(newTotal: playerComp.lives))

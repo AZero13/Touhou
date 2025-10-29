@@ -14,6 +14,7 @@ class PlayerComponent: GKComponent {
     var bombs: Int
     var isFocused: Bool
     var score: Int
+    var powerItemCountForScore: Int // For tracking power items collected when at full power
     
     init(power: Int = 0, lives: Int = 3, bombs: Int = 3, isFocused: Bool = false, score: Int = 0) {
         self.power = power
@@ -21,6 +22,7 @@ class PlayerComponent: GKComponent {
         self.bombs = bombs
         self.isFocused = isFocused
         self.score = score
+        self.powerItemCountForScore = 0 // Always starts at 0
         super.init()
     }
     

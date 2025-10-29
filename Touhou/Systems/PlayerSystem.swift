@@ -80,9 +80,10 @@ class PlayerSystem: GameSystem {
         transform.position.x += movement.dx
         transform.position.y += movement.dy
         
-        // Clamp to play area bounds (0,0 to 384,448)
-        transform.position.x = max(0, min(384, transform.position.x))
-        transform.position.y = max(0, min(448, transform.position.y))
+        // Clamp to logical play area bounds
+        let area = GameFacade.playArea
+        transform.position.x = max(area.minX, min(area.maxX, transform.position.x))
+        transform.position.y = max(area.minY, min(area.maxY, transform.position.y))
         
         // Update focus state
         player.isFocused = input.isFocusPressed

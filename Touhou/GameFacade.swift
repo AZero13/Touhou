@@ -7,6 +7,7 @@
 
 import Foundation
 import GameplayKit
+import CoreGraphics
 
 /// GameFacade - Singleton coordinator that owns all systems and runs the game loop
 /// Contains NO game logic - only coordination
@@ -14,6 +15,9 @@ class GameFacade {
     
     // MARK: - Singleton
     static let shared = GameFacade()
+    
+    // MARK: - Global Game Configuration
+    static let playArea: CGRect = CGRect(x: 0, y: 0, width: 384, height: 448)
     
     private init() {
         setupSystems()

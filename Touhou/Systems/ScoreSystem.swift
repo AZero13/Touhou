@@ -59,15 +59,14 @@ class ScoreSystem: GameSystem {
                         if playerComp.powerItemCountForScore >= 31 {
                             playerComp.powerItemCountForScore = 30 // Clamp to max index
                         }
-                        playerComp.score += p.value // Value already calculated from table
+                        playerComp.score += p.value // Value is score from table
                         eventBus.fire(ScoreChangedEvent(newTotal: playerComp.score))
                     } else {
-                        // Not at full power: increment power, reset counter
+                        // Not at full power: increment power by 1, add score value
                         playerComp.powerItemCountForScore = 0
-                        playerComp.power = min(playerComp.power + p.value, 128)
+                        playerComp.power = min(playerComp.power + 1, 128) // Always +1 power
                         eventBus.fire(PowerLevelChangedEvent(newTotal: playerComp.power))
-                        // Also add 10 points for power items (from th06 reference)
-                        playerComp.score += 10
+                        playerComp.score += p.value // Value is 10 (score added)
                         eventBus.fire(ScoreChangedEvent(newTotal: playerComp.score))
                     }
                     

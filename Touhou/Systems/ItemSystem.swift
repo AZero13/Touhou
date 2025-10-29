@@ -101,19 +101,19 @@ class ItemSystem: GameSystem {
             }
             
         case .power:
-            // Power items: if at full power, use score table; otherwise just return increment amount
+            // Power items: if at full power, use score table; otherwise return score value (10)
             if playerPower >= 128 {
                 // At full power: return score value from table
                 let index = min(powerItemCount, powerItemScoreTable.count - 1)
                 return powerItemScoreTable[index]
             } else {
-                // Not at full power: just return 1 (for power increment)
-                return 1
+                // Not at full power: return score value (10), power increment handled separately
+                return 10
             }
             
         case .bomb, .life:
-            // Bombs and lives: just return 1 (for increment)
-            return 1
+            // Bombs and lives: no score value
+            return 0
         }
     }
 }

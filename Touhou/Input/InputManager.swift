@@ -17,6 +17,7 @@ struct InputState {
     var isBombJustPressed: Bool
     var isFocusPressed: Bool
     var isPausePressed: Bool
+    var isPauseJustPressed: Bool
     
     init() {
         self.movement = CGVector.zero
@@ -25,6 +26,7 @@ struct InputState {
         self.isBombJustPressed = false
         self.isFocusPressed = false
         self.isPausePressed = false
+        self.isPauseJustPressed = false
     }
 }
 
@@ -35,6 +37,7 @@ class InputManager {
     private var currentInput = InputState()
     private var keyboardState: Set<UInt16> = []
     private var prevBombPressed: Bool = false
+    private var prevPausePressed: Bool = false
     
     private init() {
         setupKeyboardMonitoring()
@@ -95,9 +98,12 @@ class InputManager {
         // Process controller input (if available)
         processControllerInput(&input)
         
-        // Edge detection for bomb
+        // Edge detection for bomb and pause
         input.isBombJustPressed = input.isBombPressed && !prevBombPressed
         prevBombPressed = input.isBombPressed
+        
+        input.isPauseJustPressed = input.isPausePressed && !prevPausePressed
+        prevPausePressed = input.isPausePressed
         
         currentInput = input
     }

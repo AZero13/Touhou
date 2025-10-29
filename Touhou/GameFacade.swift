@@ -20,6 +20,7 @@ class GameFacade {
     static let playArea: CGRect = CGRect(x: 0, y: 0, width: 384, height: 448)
     
     private init() {
+        setupStateMachine()
         setupSystems()
     }
     
@@ -30,11 +31,21 @@ class GameFacade {
     // MARK: - Game Systems
     private var systems: [GameSystem] = []
     
+    // MARK: - Game State Machine
+    private var stateMachine: GKStateMachine!
+    
     // MARK: - Game State
-    private var isRunning = false
     private var lastUpdateTime: TimeInterval = 0
     
     // MARK: - Setup
+    private func setupStateMachine() {
+        let notStartedState = GameNotStartedState(gameFacade: self)
+        let playingState = GamePlayingState(gameFacade: self)
+        let pausedState = GamePausedState(gameFacade: self)
+        stateMachine = GKStateMachine(states: [notStartedState, playingState, pausedState])
+        stateMachine.enter(GameNotStartedState.self)
+    }
+    
     private func setupSystems() {
         // Add systems in update order
         addSystem(PlayerSystem())
@@ -57,28 +68,50 @@ class GameFacade {
     
     // MARK: - Game Loop
     func startGame() {
-        isRunning = true
         lastUpdateTime = CACurrentMediaTime()
+        stateMachine.enter(GamePlayingState.self)
         print("🎮 Game started!")
     }
     
-    func stopGame() {
-        isRunning = false
-    }
-    
     func update(_ currentTime: TimeInterval) {
-        guard isRunning else { return }
         
         let deltaTime = currentTime - lastUpdateTime
         lastUpdateTime = currentTime
         
-        // Update all systems in order
-        for system in systems {
-            system.update(deltaTime: deltaTime)
+        // Update input manager first
+        InputManager.shared.update()
+        
+        // Update state machine (handles pause/unpause and menu navigation)
+        stateMachine.update(deltaTime: deltaTime)
+        
+        // Only update game systems if we're in playing state
+        if stateMachine.currentState is GamePlayingState {
+            // Update all systems in order
+            for system in systems {
+                system.update(deltaTime: deltaTime)
+            }
         }
         
         // Process events
         eventBus.processEvents()
+    }
+    
+    // MARK: - Game Control
+    func restartGame() {
+        // Clear all entities (player will be respawned by PlayerSystem)
+        let allEntities = entityManager.getAllEntities()
+        for entity in allEntities {
+            entityManager.markForDestruction(entity)
+        }
+        
+        // Clean up immediately (processEvents happens once per frame in update loop)
+        entityManager.destroyMarkedEntities()
+        
+        // Reset game state
+        lastUpdateTime = CACurrentMediaTime()
+        
+        // PlayerSystem will respawn player on next update
+        print("🔄 Game restarted")
     }
     
     // MARK: - System Access

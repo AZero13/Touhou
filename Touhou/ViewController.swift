@@ -69,8 +69,8 @@ class ViewController: NSViewController, EventListener {
                 // Show last graze value increment; a future system can emit aggregate if desired
                 self.GrazeLabel.stringValue = "GRAZE: +\(e.grazeValue)"
             case let e as PowerUpCollectedEvent:
-                // Optional: reflect last value pickup
-                if e.itemType == .point {
+                // Show score value for items that give score (point and power items)
+                if e.value > 0 {
                     self.ValueLabel.stringValue = "VALUE: \(e.value)"
                 }
             default:

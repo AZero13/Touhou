@@ -9,35 +9,12 @@ import Foundation
 import AppKit
 import GameController
 
-/// Unified input state for both keyboard and controller
-struct InputState {
-    var movement: CGVector  // -1 to 1 for each axis
-    var isShootPressed: Bool
-    var isBombPressed: Bool
-    var isBombJustPressed: Bool
-    var isFocusPressed: Bool
-    var isPausePressed: Bool
-    var isPauseJustPressed: Bool
-    
-    init() {
-        self.movement = CGVector.zero
-        self.isShootPressed = false
-        self.isBombPressed = false
-        self.isBombJustPressed = false
-        self.isFocusPressed = false
-        self.isPausePressed = false
-        self.isPauseJustPressed = false
-    }
-}
-
 /// InputManager - handles both keyboard and gamepad input
 class InputManager {
     static let shared = InputManager()
     
     private var currentInput = InputState()
     private var keyboardState: Set<UInt16> = []
-    private var prevBombPressed: Bool = false
-    private var prevPausePressed: Bool = false
     
     private init() {
         setupKeyboardMonitoring()
@@ -98,12 +75,15 @@ class InputManager {
         // Process controller input (if available)
         processControllerInput(&input)
         
-        // Edge detection for bomb and pause
-        input.isBombJustPressed = input.isBombPressed && !prevBombPressed
-        prevBombPressed = input.isBombPressed
-        
-        input.isPauseJustPressed = input.isPausePressed && !prevPausePressed
-        prevPausePressed = input.isPausePressed
+        // Update button states with edge detection (use previous frame's state)
+        input.shoot = ButtonState.update(currentPressed: input.shoot.isPressed, previousState: currentInput.shoot)
+        input.bomb = ButtonState.update(currentPressed: input.bomb.isPressed, previousState: currentInput.bomb)
+        input.pause = ButtonState.update(currentPressed: input.pause.isPressed, previousState: currentInput.pause)
+        input.enter = ButtonState.update(currentPressed: input.enter.isPressed, previousState: currentInput.enter)
+        input.up = ButtonState.update(currentPressed: input.up.isPressed, previousState: currentInput.up)
+        input.down = ButtonState.update(currentPressed: input.down.isPressed, previousState: currentInput.down)
+        // Focus doesn't need edge detection, it's a hold button
+        input.focus = ButtonState(isPressed: input.focus.isPressed, justPressed: false)
         
         currentInput = input
     }
@@ -119,11 +99,16 @@ class InputManager {
         
         input.movement = movement
         
+        // Menu navigation (discrete key presses)
+        input.up = ButtonState(isPressed: keyboardState.contains(126))  // Up arrow
+        input.down = ButtonState(isPressed: keyboardState.contains(125))  // Down arrow
+        
         // Action keys
-        input.isShootPressed = keyboardState.contains(6)  // Z key
-        input.isBombPressed = keyboardState.contains(7)    // X key
-        input.isFocusPressed = keyboardState.contains(56) // Shift key
-        input.isPausePressed = keyboardState.contains(53) // Esc key
+        input.shoot = ButtonState(isPressed: keyboardState.contains(6))  // Z key
+        input.bomb = ButtonState(isPressed: keyboardState.contains(7))    // X key
+        input.focus = ButtonState(isPressed: keyboardState.contains(56)) // Shift key
+        input.pause = ButtonState(isPressed: keyboardState.contains(53)) // Esc key
+        input.enter = ButtonState(isPressed: keyboardState.contains(36)) // Enter key
     }
     
     private func processControllerInput(_ input: inout InputState) {
@@ -133,17 +118,23 @@ class InputManager {
         if let dpad = controller.extendedGamepad?.dpad {
             input.movement.dx = CGFloat(dpad.xAxis.value)
             input.movement.dy = CGFloat(dpad.yAxis.value)
+            // Menu navigation (discrete)
+            input.up = ButtonState(isPressed: dpad.up.isPressed)
+            input.down = ButtonState(isPressed: dpad.down.isPressed)
         } else if let leftStick = controller.extendedGamepad?.leftThumbstick {
             input.movement.dx = CGFloat(leftStick.xAxis.value)
             input.movement.dy = CGFloat(leftStick.yAxis.value)
+            // For menu: treat stick up/down as discrete presses if beyond threshold
+            input.up = ButtonState(isPressed: leftStick.yAxis.value > 0.5)
+            input.down = ButtonState(isPressed: leftStick.yAxis.value < -0.5)
         }
         
         // Face buttons
         if let gamepad = controller.extendedGamepad {
-            input.isShootPressed = gamepad.buttonA.isPressed
-            input.isBombPressed = gamepad.buttonB.isPressed
-            input.isFocusPressed = gamepad.leftTrigger.isPressed || gamepad.rightTrigger.isPressed
-            input.isPausePressed = gamepad.buttonMenu.isPressed
+            input.shoot = ButtonState(isPressed: gamepad.buttonA.isPressed)
+            input.bomb = ButtonState(isPressed: gamepad.buttonB.isPressed)
+            input.focus = ButtonState(isPressed: gamepad.leftTrigger.isPressed || gamepad.rightTrigger.isPressed)
+            input.pause = ButtonState(isPressed: gamepad.buttonMenu.isPressed)
         }
     }
     

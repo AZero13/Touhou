@@ -24,7 +24,17 @@ class PlayerSystem: GameSystem {
     }
     
     func update(deltaTime: TimeInterval) {
-        guard playerEntity != nil else { return }
+        // Check if player entity still exists in the EntityManager
+        // If not, respawn it (e.g., if it was accidentally destroyed)
+        if let player = playerEntity, !entityManager.getAllEntities().contains(player) {
+            print("⚠️ Player entity no longer in EntityManager, respawning...")
+            playerEntity = nil
+        }
+        
+        // Spawn player if missing
+        if playerEntity == nil {
+            spawnPlayer()
+        }
         
         // Get current input
         let input = InputManager.shared.getCurrentInput()
@@ -86,14 +96,14 @@ class PlayerSystem: GameSystem {
         transform.position.y = max(area.minY, min(area.maxY, transform.position.y))
         
         // Update focus state
-        player.isFocused = input.isFocusPressed
+        player.isFocused = input.focus.isPressed
     }
     
     private func handleShooting(input: InputState, currentTime: TimeInterval) {
         guard let playerEntity = playerEntity,
               let transform = playerEntity.component(ofType: TransformComponent.self) else { return }
         
-        if input.isShootPressed && currentTime - lastShotTime > 0.1 { // 10 shots per second
+        if input.shoot.isPressed && currentTime - lastShotTime > 0.1 { // 10 shots per second
             lastShotTime = currentTime
             
             // Reimu A shoots 3 bullets: 1 straight + 2 homing at angles
@@ -144,7 +154,7 @@ class PlayerSystem: GameSystem {
     private func handleBomb(input: InputState) {
         guard let entity = playerEntity,
               let player = entity.component(ofType: PlayerComponent.self) else { return }
-        guard input.isBombJustPressed else { return }
+        guard input.bomb.justPressed else { return }
         guard player.bombs > 0 else { return }
         
         player.bombs -= 1

@@ -261,6 +261,24 @@ struct GameResumedEvent: GameEvent {
     }
 }
 
+struct PauseMenuUpdateEvent: GameEvent {
+    let timestamp: TimeInterval
+    let selectedOption: PauseMenuOption
+    
+    init(selectedOption: PauseMenuOption) {
+        self.timestamp = CACurrentMediaTime()
+        self.selectedOption = selectedOption
+    }
+}
+
+struct PauseMenuHiddenEvent: GameEvent {
+    let timestamp: TimeInterval
+    
+    init() {
+        self.timestamp = CACurrentMediaTime()
+    }
+}
+
 struct GameOverEvent: GameEvent {
     let timestamp: TimeInterval
     let finalScore: Int

@@ -25,7 +25,7 @@ class GamePlayingState: GKState {
         let input = InputManager.shared.getCurrentInput()
         
         // Check for pause input (Escape key edge detection)
-        if input.isPauseJustPressed {
+        if input.pause.justPressed {
             stateMachine?.enter(GamePausedState.self)
         }
     }

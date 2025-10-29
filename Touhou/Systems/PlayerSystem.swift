@@ -24,23 +24,10 @@ class PlayerSystem: GameSystem {
     }
     
     func update(deltaTime: TimeInterval) {
-        // Check if player entity still exists in the EntityManager
-        // If not, respawn it (e.g., if it was accidentally destroyed)
-        if let player = playerEntity, !entityManager.getAllEntities().contains(player) {
-            print("⚠️ Player entity no longer in EntityManager, respawning...")
-            playerEntity = nil
-        }
-        
-        // Spawn player if missing
-        if playerEntity == nil {
-            spawnPlayer()
-        }
+        guard playerEntity != nil else { return }
         
         // Get current input
         let input = InputManager.shared.getCurrentInput()
-        
-        // Update input manager
-        InputManager.shared.update()
         
         // Handle movement
         handleMovement(input: input, deltaTime: deltaTime)
@@ -53,7 +40,19 @@ class PlayerSystem: GameSystem {
     }
     
     func handleEvent(_ event: GameEvent) {
-        // Handle events as needed
+        // Ensure player lifecycle across state transitions
+        switch event {
+        case is GameResumedEvent:
+            // After unpausing, guarantee the player entity exists
+            if playerEntity == nil {
+                spawnPlayer()
+            } else if let player = playerEntity,
+                      !entityManager.getAllEntities().contains(player) {
+                spawnPlayer()
+            }
+        default:
+            break
+        }
     }
     
     // MARK: - Private Methods

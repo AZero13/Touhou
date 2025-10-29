@@ -136,12 +136,10 @@ struct GrazeEvent: GameEvent {
 struct ScoreChangedEvent: GameEvent {
     let timestamp: TimeInterval
     let newTotal: Int
-    let oldTotal: Int
     
-    init(newTotal: Int, oldTotal: Int) {
+    init(newTotal: Int) {
         self.timestamp = CACurrentMediaTime()
         self.newTotal = newTotal
-        self.oldTotal = oldTotal
     }
 }
 

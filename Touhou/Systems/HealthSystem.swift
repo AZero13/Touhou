@@ -96,7 +96,7 @@ class HealthSystem: GameSystem {
     }
     
     private func handlePlayerHit(_ playerEntity: GKEntity) {
-        guard let player = playerEntity.component(ofType: PlayerComponent.self) else { return }
+                guard let player = playerEntity.component(ofType: PlayerComponent.self) else { return }
         
         print("💥 Player hit! Lives before: \(player.lives)")
         
@@ -104,6 +104,9 @@ class HealthSystem: GameSystem {
         player.lives -= 1
         
         print("💥 Player hit! Lives after: \(player.lives)")
+
+                // Notify UI about lives change
+                eventBus.fire(LivesChangedEvent(newTotal: player.lives))
         
         // Check if player dies
         if player.lives <= 0 {

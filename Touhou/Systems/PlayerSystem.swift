@@ -111,7 +111,7 @@ class PlayerSystem: GameSystem {
             let centerCmd = BulletSpawnCommand(
                 position: CGPoint(x: transform.position.x, y: transform.position.y + 20),
                 velocity: CGVector(dx: 0, dy: 200),
-                bulletType: "amulet",
+                bulletType: .amulet,
                 physics: PhysicsConfig(speed: 200, damage: 1),
                 visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
                 behavior: BehaviorConfig(homingStrength: nil, maxTurnRate: nil, delay: 0)
@@ -121,7 +121,7 @@ class PlayerSystem: GameSystem {
             let leftCmd = BulletSpawnCommand(
                 position: CGPoint(x: transform.position.x - 10, y: transform.position.y + 20),
                 velocity: CGVector(dx: -50, dy: 180),
-                bulletType: "homing_amulet",
+                bulletType: .homingAmulet,
                 physics: PhysicsConfig(speed: 180, damage: 1),
                 visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
                 behavior: BehaviorConfig(homingStrength: 0.15, maxTurnRate: 1.2, delay: 0)
@@ -131,7 +131,7 @@ class PlayerSystem: GameSystem {
             let rightCmd = BulletSpawnCommand(
                 position: CGPoint(x: transform.position.x + 10, y: transform.position.y + 20),
                 velocity: CGVector(dx: 50, dy: 180),
-                bulletType: "homing_amulet",
+                bulletType: .homingAmulet,
                 physics: PhysicsConfig(speed: 180, damage: 1),
                 visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
                 behavior: BehaviorConfig(homingStrength: 0.15, maxTurnRate: 1.2, delay: 0)
@@ -146,15 +146,15 @@ class PlayerSystem: GameSystem {
         guard input.bomb.justPressed else { return }
         guard player.bombs > 0 else { return }
         
-        player.bombs -= 1
-        eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
+        // Decrement bombs via queue and emit activation event
+        GameFacade.shared.getCommandQueue().enqueue(.adjustBombs(delta: -1))
         eventBus.fire(BombActivatedEvent(playerEntity: entity))
         
         // Clear enemy bullets immediately
         let bullets = entityManager.getEntities(with: BulletComponent.self)
         for b in bullets {
             if let comp = b.component(ofType: BulletComponent.self), !comp.ownedByPlayer {
-                entityManager.markForDestruction(b)
+                GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(b))
             }
         }
     }

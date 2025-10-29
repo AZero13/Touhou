@@ -21,7 +21,7 @@ class BulletSpawnCommandTests: XCTestCase {
         let command = BulletSpawnCommand(
             position: position,
             velocity: velocity,
-            bulletType: "test_bullet",
+            bulletType: .custom("test_bullet"),
             physics: physics,
             visual: visual,
             behavior: behavior
@@ -30,7 +30,7 @@ class BulletSpawnCommandTests: XCTestCase {
         // Then
         XCTAssertEqual(command.position, position)
         XCTAssertEqual(command.velocity, velocity)
-        XCTAssertEqual(command.bulletType, "test_bullet")
+        XCTAssertEqual(command.bulletType, .custom("test_bullet"))
         XCTAssertEqual(command.physics.speed, 200)
         XCTAssertEqual(command.physics.damage, 3)
         XCTAssertEqual(command.visual.size, .medium)
@@ -50,13 +50,13 @@ class BulletSpawnCommandTests: XCTestCase {
         let command = BulletSpawnCommand(
             position: position,
             velocity: velocity,
-            bulletType: "default"
+            bulletType: .enemyBullet
         )
         
         // Then
         XCTAssertEqual(command.position, position)
         XCTAssertEqual(command.velocity, velocity)
-        XCTAssertEqual(command.bulletType, "default")
+        XCTAssertEqual(command.bulletType, .enemyBullet)
         XCTAssertEqual(command.physics.speed, 150)
         XCTAssertEqual(command.physics.damage, 1)
         XCTAssertEqual(command.visual.size, .small)

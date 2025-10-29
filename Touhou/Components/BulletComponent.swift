@@ -67,7 +67,14 @@ protocol Damaging {
 
 class BulletComponent: GKComponent, Damaging {
     var ownedByPlayer: Bool
-    var bulletType: String // "needle", "rice", "orb", "laser", "curved"
+    enum BulletType: Equatable {
+        case needle
+        case amulet
+        case homingAmulet
+        case enemyBullet
+        case custom(String)
+    }
+    var bulletType: BulletType
     var damage: Int
     var homingStrength: CGFloat? // 0.0 to 1.0 for homing bullets (Reimu's shots)
     var maxTurnRate: CGFloat? // radians per second for smooth homing
@@ -79,7 +86,7 @@ class BulletComponent: GKComponent, Damaging {
     var hasTrail: Bool
     var trailLength: Int // Number of trail segments
     
-    init(ownedByPlayer: Bool, bulletType: String = "needle", damage: Int = 1, 
+    init(ownedByPlayer: Bool, bulletType: BulletType = .needle, damage: Int = 1, 
          homingStrength: CGFloat? = nil, maxTurnRate: CGFloat? = nil,
          size: BulletSize = .small, shape: BulletShape = .circle, 
          color: BulletColor = .red, hasTrail: Bool = false, trailLength: Int = 3) {

@@ -55,14 +55,14 @@ struct BehaviorConfig {
 struct BulletSpawnCommand {
     let position: CGPoint
     let velocity: CGVector
-    let bulletType: String
+    let bulletType: BulletComponent.BulletType
     
     // Configuration objects
     let physics: PhysicsConfig
     let visual: VisualConfig
     let behavior: BehaviorConfig
     
-    init(position: CGPoint, velocity: CGVector, bulletType: String = "enemy_bullet",
+    init(position: CGPoint, velocity: CGVector, bulletType: BulletComponent.BulletType = .enemyBullet,
          physics: PhysicsConfig = PhysicsConfig(),
          visual: VisualConfig = VisualConfig(),
          behavior: BehaviorConfig = BehaviorConfig()) {

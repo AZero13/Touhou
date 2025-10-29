@@ -10,12 +10,12 @@ import CoreGraphics
 import GameplayKit
 
 /// Enemy attack patterns with configurable config
-enum EnemyPattern: String, CaseIterable {
-    case singleShot = "single_shot"
-    case tripleShot = "triple_shot"
-    case circleShot = "circle_shot"
-    case aimedShot = "aimed_shot"
-    case spiralShot = "spiral_shot"
+enum EnemyPattern: CaseIterable {
+    case singleShot
+    case tripleShot
+    case circleShot
+    case aimedShot
+    case spiralShot
     
     /// Get the pattern's bullet spawn commands with config
     func getBulletCommands(from position: CGPoint, targetPosition: CGPoint? = nil, config: PatternConfig = PatternConfig()) -> [BulletSpawnCommand] {
@@ -25,7 +25,7 @@ enum EnemyPattern: String, CaseIterable {
                 BulletSpawnCommand(
                     position: position,
                     velocity: CGVector(dx: 0, dy: -config.physics.speed),
-                    bulletType: "enemy_bullet",
+                    bulletType: .enemyBullet,
                     physics: config.physics,
                     visual: config.visual,
                     behavior: config.behavior
@@ -38,7 +38,7 @@ enum EnemyPattern: String, CaseIterable {
                 BulletSpawnCommand(
                     position: position,
                     velocity: CGVector(dx: 0, dy: -config.physics.speed),
-                    bulletType: "enemy_bullet",
+                    bulletType: .enemyBullet,
                     physics: config.physics,
                     visual: config.visual,
                     behavior: config.behavior
@@ -46,7 +46,7 @@ enum EnemyPattern: String, CaseIterable {
                 BulletSpawnCommand(
                     position: position,
                     velocity: CGVector(dx: -spread, dy: -config.physics.speed * 0.8),
-                    bulletType: "enemy_bullet",
+                    bulletType: .enemyBullet,
                     physics: config.physics,
                     visual: config.visual,
                     behavior: config.behavior
@@ -54,7 +54,7 @@ enum EnemyPattern: String, CaseIterable {
                 BulletSpawnCommand(
                     position: position,
                     velocity: CGVector(dx: spread, dy: -config.physics.speed * 0.8),
-                    bulletType: "enemy_bullet",
+                    bulletType: .enemyBullet,
                     physics: config.physics,
                     visual: config.visual,
                     behavior: config.behavior
@@ -73,7 +73,7 @@ enum EnemyPattern: String, CaseIterable {
                 commands.append(BulletSpawnCommand(
                     position: position,
                     velocity: velocity,
-                    bulletType: "enemy_bullet",
+                    bulletType: .enemyBullet,
                     physics: config.physics,
                     visual: config.visual,
                     behavior: config.behavior
@@ -102,7 +102,7 @@ enum EnemyPattern: String, CaseIterable {
                     BulletSpawnCommand(
                         position: position,
                         velocity: velocity,
-                        bulletType: "enemy_bullet",
+                        bulletType: .enemyBullet,
                         physics: config.physics,
                         visual: config.visual,
                         behavior: config.behavior
@@ -124,7 +124,7 @@ enum EnemyPattern: String, CaseIterable {
                 commands.append(BulletSpawnCommand(
                     position: position,
                     velocity: velocity,
-                    bulletType: "enemy_bullet",
+                    bulletType: .enemyBullet,
                     physics: config.physics,
                     visual: config.visual,
                     behavior: config.behavior

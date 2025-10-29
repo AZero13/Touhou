@@ -93,7 +93,7 @@ class GameFacade {
             }
             
             // Apply buffered world mutations
-            commandQueue.process(entityManager: entityManager)
+            commandQueue.process(entityManager: entityManager, eventBus: eventBus)
         }
         
         // Process events

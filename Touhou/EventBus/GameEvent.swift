@@ -238,18 +238,6 @@ struct PlayMusicTrackEvent: GameEvent {
     }
 }
 
-struct UpdateUIElementEvent: GameEvent {
-    let timestamp: TimeInterval
-    let elementName: String
-    let value: Any
-    
-    init(elementName: String, value: Any) {
-        self.timestamp = CACurrentMediaTime()
-        self.elementName = elementName
-        self.value = value
-    }
-}
-
 // MARK: - Game State Events
 
 struct GamePausedEvent: GameEvent {

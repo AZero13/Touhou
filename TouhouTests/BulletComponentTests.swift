@@ -15,7 +15,7 @@ class BulletComponentTests: XCTestCase {
         // Given
         let bullet = BulletComponent(
             ownedByPlayer: true,
-            bulletType: "test_bullet",
+            bulletType: .custom("test_bullet"),
             damage: 5,
             homingStrength: 0.5,
             maxTurnRate: 1.0,
@@ -28,7 +28,7 @@ class BulletComponentTests: XCTestCase {
         
         // Then
         XCTAssertTrue(bullet.ownedByPlayer)
-        XCTAssertEqual(bullet.bulletType, "test_bullet")
+        XCTAssertEqual(bullet.bulletType, .custom("test_bullet"))
         XCTAssertEqual(bullet.damage, 5)
         XCTAssertEqual(bullet.homingStrength, 0.5)
         XCTAssertEqual(bullet.maxTurnRate, 1.0)
@@ -45,7 +45,7 @@ class BulletComponentTests: XCTestCase {
         
         // Then
         XCTAssertFalse(bullet.ownedByPlayer)
-        XCTAssertEqual(bullet.bulletType, "needle")
+        XCTAssertEqual(bullet.bulletType, .needle)
         XCTAssertEqual(bullet.damage, 1)
         XCTAssertNil(bullet.homingStrength)
         XCTAssertNil(bullet.maxTurnRate)

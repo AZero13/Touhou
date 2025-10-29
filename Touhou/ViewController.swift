@@ -15,6 +15,9 @@ class ViewController: NSViewController {
     @IBOutlet weak var ScoreLabel: NSTextField!
     @IBOutlet weak var LivesLabel: NSTextField!
     @IBOutlet weak var BombsLabel: NSTextField!
+    @IBOutlet weak var PowerLabel: NSTextField!
+    @IBOutlet weak var ValueLabel: NSTextField!
+    @IBOutlet weak var GrazeLabel: NSTextField!
     override func viewDidLoad() {
         super.viewDidLoad()
 

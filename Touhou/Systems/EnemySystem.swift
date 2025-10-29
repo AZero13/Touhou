@@ -142,7 +142,7 @@ class EnemySystem: GameSystem {
             
             // Mark enemies that go off bottom of screen for destruction
             if transform.position.y < -50 {
-                entityManager.markForDestruction(enemy)
+                GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(enemy))
             }
         }
     }
@@ -169,25 +169,10 @@ class EnemySystem: GameSystem {
                     targetPosition: playerPosition
                 )
                 
-                // Spawn bullets
+                // Enqueue bullet spawns via CommandQueue
+                let queue = GameFacade.shared.getCommandQueue()
                 for command in commands {
-                    let bulletEntity = entityManager.createEntity()
-                    bulletEntity.addComponent(BulletComponent(
-                        ownedByPlayer: false,
-                        bulletType: command.bulletType,
-                        damage: command.physics.damage,
-                        homingStrength: command.behavior.homingStrength,
-                        maxTurnRate: command.behavior.maxTurnRate,
-                        size: command.visual.size,
-                        shape: command.visual.shape,
-                        color: command.visual.color,
-                        hasTrail: command.visual.hasTrail,
-                        trailLength: command.visual.trailLength
-                    ))
-                    bulletEntity.addComponent(TransformComponent(
-                        position: command.position,
-                        velocity: command.velocity
-                    ))
+                    queue.enqueue(.spawnBullet(command, ownedByPlayer: false))
                 }
             }
         }

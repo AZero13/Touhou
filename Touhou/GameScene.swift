@@ -23,12 +23,12 @@ class GameScene: SKScene, EventListener {
         
         // Initialize render system
         renderSystem = RenderSystem()
+
+        // Create pause menu (initially hidden)
+        createPauseMenu()
         
         // Register for game events
         GameFacade.shared.getEventBus().register(listener: self)
-        
-        // Create pause menu (initially hidden)
-        createPauseMenu()
         
         // Start the game
         GameFacade.shared.startGame()

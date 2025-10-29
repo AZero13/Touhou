@@ -27,6 +27,7 @@ class GameFacade {
     // MARK: - Core Systems
     private let entityManager = EntityManager()
     private let eventBus = EventBus()
+    private let commandQueue = CommandQueue()
     
     // MARK: - Game Systems
     private var systems: [GameSystem] = []
@@ -90,6 +91,9 @@ class GameFacade {
             for system in systems {
                 system.update(deltaTime: deltaTime)
             }
+            
+            // Apply buffered world mutations
+            commandQueue.process(entityManager: entityManager)
         }
         
         // Process events
@@ -121,5 +125,9 @@ class GameFacade {
     
     func getEventBus() -> EventBus {
         return eventBus
+    }
+    
+    func getCommandQueue() -> CommandQueue {
+        return commandQueue
     }
 }

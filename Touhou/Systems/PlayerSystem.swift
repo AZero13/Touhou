@@ -105,48 +105,38 @@ class PlayerSystem: GameSystem {
         if input.shoot.isPressed && currentTime - lastShotTime > 0.1 { // 10 shots per second
             lastShotTime = currentTime
             
-            // Reimu A shoots 3 bullets: 1 straight + 2 homing at angles
+            // Reimu A shoots 3 bullets: 1 straight + 2 homing at angles via CommandQueue
+            let queue = GameFacade.shared.getCommandQueue()
             
-            // 1. Center bullet (straight up, non-homing)
-            let centerBullet = entityManager.createEntity()
-            centerBullet.addComponent(BulletComponent(
-                ownedByPlayer: true,
-                bulletType: "amulet",
-                damage: 1
-                // No homing properties = straight shot
-            ))
-            centerBullet.addComponent(TransformComponent(
+            let centerCmd = BulletSpawnCommand(
                 position: CGPoint(x: transform.position.x, y: transform.position.y + 20),
-                velocity: CGVector(dx: 0, dy: 200) // Straight up (units per second)
-            ))
+                velocity: CGVector(dx: 0, dy: 200),
+                bulletType: "amulet",
+                physics: PhysicsConfig(speed: 200, damage: 1),
+                visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
+                behavior: BehaviorConfig(homingStrength: nil, maxTurnRate: nil, delay: 0)
+            )
+            queue.enqueue(.spawnBullet(centerCmd, ownedByPlayer: true))
             
-            // 2. Left homing bullet
-            let leftBullet = entityManager.createEntity()
-            leftBullet.addComponent(BulletComponent(
-                ownedByPlayer: true,
-                bulletType: "homing_amulet",
-                damage: 1,
-                homingStrength: 0.15, // Based on touhou06 reference
-                maxTurnRate: 1.2 // radians per second
-            ))
-            leftBullet.addComponent(TransformComponent(
+            let leftCmd = BulletSpawnCommand(
                 position: CGPoint(x: transform.position.x - 10, y: transform.position.y + 20),
-                velocity: CGVector(dx: -50, dy: 180) // Angle left (units per second)
-            ))
-            
-            // 3. Right homing bullet
-            let rightBullet = entityManager.createEntity()
-            rightBullet.addComponent(BulletComponent(
-                ownedByPlayer: true,
+                velocity: CGVector(dx: -50, dy: 180),
                 bulletType: "homing_amulet",
-                damage: 1,
-                homingStrength: 0.15, // Based on touhou06 reference
-                maxTurnRate: 1.2 // radians per second
-            ))
-            rightBullet.addComponent(TransformComponent(
+                physics: PhysicsConfig(speed: 180, damage: 1),
+                visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
+                behavior: BehaviorConfig(homingStrength: 0.15, maxTurnRate: 1.2, delay: 0)
+            )
+            queue.enqueue(.spawnBullet(leftCmd, ownedByPlayer: true))
+            
+            let rightCmd = BulletSpawnCommand(
                 position: CGPoint(x: transform.position.x + 10, y: transform.position.y + 20),
-                velocity: CGVector(dx: 50, dy: 180) // Angle right (units per second)
-            ))
+                velocity: CGVector(dx: 50, dy: 180),
+                bulletType: "homing_amulet",
+                physics: PhysicsConfig(speed: 180, damage: 1),
+                visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
+                behavior: BehaviorConfig(homingStrength: 0.15, maxTurnRate: 1.2, delay: 0)
+            )
+            queue.enqueue(.spawnBullet(rightCmd, ownedByPlayer: true))
         }
     }
     

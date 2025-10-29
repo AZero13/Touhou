@@ -124,7 +124,7 @@ class CollisionSystem: GameSystem {
         
         // Player bullet hits enemy
         if bullet.ownedByPlayer && target.component(ofType: EnemyComponent.self) != nil {
-            print("🔥 Firing collision event: player_bullet_hit_enemy")
+            print("🔥 Firing collision event: playerBulletHitEnemy")
             
             // Mark bullet for destruction
             entityManager.markForDestruction(damagingEntity!)
@@ -133,13 +133,13 @@ class CollisionSystem: GameSystem {
             eventBus.fire(CollisionOccurredEvent(
                 entityA: damagingEntity!,
                 entityB: targetEntity!,
-                collisionType: "player_bullet_hit_enemy"
+                collisionType: .playerBulletHitEnemy
             ))
         }
         
         // Enemy bullet hits player
         if !bullet.ownedByPlayer && target.component(ofType: PlayerComponent.self) != nil {
-            print("🔥 Firing collision event: enemy_bullet_hit_player")
+            print("🔥 Firing collision event: enemyBulletHitPlayer")
             
             // Mark bullet for destruction
             entityManager.markForDestruction(damagingEntity!)
@@ -148,7 +148,7 @@ class CollisionSystem: GameSystem {
             eventBus.fire(CollisionOccurredEvent(
                 entityA: damagingEntity!,
                 entityB: targetEntity!,
-                collisionType: "enemy_bullet_hit_player"
+                collisionType: .enemyBulletHitPlayer
             ))
         }
     }
@@ -158,7 +158,7 @@ class CollisionSystem: GameSystem {
         eventBus.fire(CollisionOccurredEvent(
             entityA: enemy,
             entityB: player,
-            collisionType: "enemy_touch_player"
+            collisionType: .enemyTouchPlayer
         ))
     }
 

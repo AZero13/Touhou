@@ -13,6 +13,13 @@ protocol GameEvent {
     var timestamp: TimeInterval { get }
 }
 
+/// Collision categories for strongly-typed collision events
+enum CollisionKind {
+    case playerBulletHitEnemy
+    case enemyBulletHitPlayer
+    case enemyTouchPlayer
+}
+
 // MARK: - Gameplay & Logic Events
 
 struct EnemyDiedEvent: GameEvent {
@@ -53,9 +60,9 @@ struct CollisionOccurredEvent: GameEvent {
     let timestamp: TimeInterval
     let entityA: GKEntity
     let entityB: GKEntity
-    let collisionType: String
+    let collisionType: CollisionKind
     
-    init(entityA: GKEntity, entityB: GKEntity, collisionType: String) {
+    init(entityA: GKEntity, entityB: GKEntity, collisionType: CollisionKind) {
         self.timestamp = CACurrentMediaTime()
         self.entityA = entityA
         self.entityB = entityB

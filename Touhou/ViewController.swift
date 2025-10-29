@@ -19,6 +19,10 @@ class ViewController: NSViewController, EventListener {
     @IBOutlet weak var PowerLabel: NSTextField!
     @IBOutlet weak var ValueLabel: NSTextField!
     @IBOutlet weak var GrazeLabel: NSTextField!
+    
+    // MARK: - UI flash timers
+    private var scoreFlashTimer: Timer?
+    private var highScoreFlashTimer: Timer?
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -44,7 +48,6 @@ class ViewController: NSViewController, EventListener {
         }
     }
 
-
     // MARK: - EventListener
     func handleEvent(_ event: GameEvent) {
         DispatchQueue.main.async { [weak self] in
@@ -52,8 +55,10 @@ class ViewController: NSViewController, EventListener {
             switch event {
             case let e as ScoreChangedEvent:
                 self.ScoreLabel.stringValue = "SCORE: \(e.newTotal)"
+                self.flash(label: self.ScoreLabel)
             case let e as HighScoreChangedEvent:
                 self.HighScoreLabel.stringValue = "HIGH SCORE: \(e.newHighScore)"
+                self.flash(label: self.HighScoreLabel)
             case let e as LivesChangedEvent:
                 self.LivesLabel.stringValue = "LIVES: \(e.newTotal)"
             case let e as BombsChangedEvent:
@@ -70,6 +75,25 @@ class ViewController: NSViewController, EventListener {
                 }
             default:
                 break
+            }
+        }
+    }
+
+    // MARK: - Private helpers
+    private func flash(label: NSTextField) {
+        // Turn pink immediately
+        label.textColor = .systemPink
+        
+        // Debounce back-to-default after 1s of inactivity per label
+        if label === ScoreLabel {
+            scoreFlashTimer?.invalidate()
+            scoreFlashTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
+                self?.ScoreLabel.textColor = .labelColor
+            }
+        } else if label === HighScoreLabel {
+            highScoreFlashTimer?.invalidate()
+            highScoreFlashTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
+                self?.HighScoreLabel.textColor = .labelColor
             }
         }
     }

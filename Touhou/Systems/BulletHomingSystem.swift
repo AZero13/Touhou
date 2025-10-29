@@ -9,7 +9,7 @@ import Foundation
 import GameplayKit
 
 /// BulletHomingSystem - handles homing bullet behavior
-class BulletHomingSystem: GameSystem {
+final class BulletHomingSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     

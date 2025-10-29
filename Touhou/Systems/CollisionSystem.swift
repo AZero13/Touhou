@@ -9,7 +9,7 @@ import Foundation
 import GameplayKit
 
 /// CollisionSystem - handles collision detection between entities
-class CollisionSystem: GameSystem {
+final class CollisionSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     

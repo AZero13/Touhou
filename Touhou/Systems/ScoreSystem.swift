@@ -9,7 +9,7 @@ import Foundation
 import GameplayKit
 
 /// ScoreSystem - updates player score and high score from events
-class ScoreSystem: GameSystem {
+final class ScoreSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     private var highScore: Int = 0

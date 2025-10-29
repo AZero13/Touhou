@@ -9,7 +9,7 @@ import Foundation
 import GameplayKit
 
 /// EnemySystem - handles enemy spawning and movement
-class EnemySystem: GameSystem {
+final class EnemySystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     private var stageTimer: TimeInterval = 0
@@ -46,14 +46,14 @@ class EnemySystem: GameSystem {
         // Stage 1 script - enemies spawn at specific times with different patterns and visual variety
         stageScript = [
             // Basic red circles
-            EnemySpawnEvent(time: 1.0, type: "fairy", position: CGPoint(x: 100, y: 400), 
+            EnemySpawnEvent(time: 1.0, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 100, y: 400), 
                            pattern: .singleShot, parameters: PatternConfig(
                                physics: PhysicsConfig(speed: 120),
                                visual: VisualConfig(shape: .circle, color: .red)
                            )),
             
             // Blue diamonds in triple shot
-            EnemySpawnEvent(time: 2.5, type: "fairy", position: CGPoint(x: 200, y: 400), 
+            EnemySpawnEvent(time: 2.5, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 200, y: 400), 
                            pattern: .tripleShot, parameters: PatternConfig(
                                physics: PhysicsConfig(speed: 100),
                                visual: VisualConfig(shape: .diamond, color: .blue),
@@ -61,14 +61,14 @@ class EnemySystem: GameSystem {
                            )),
             
             // Green aimed shots
-            EnemySpawnEvent(time: 4.0, type: "fairy", position: CGPoint(x: 300, y: 400), 
+            EnemySpawnEvent(time: 4.0, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 300, y: 400), 
                            pattern: .aimedShot, parameters: PatternConfig(
                                physics: PhysicsConfig(speed: 140),
                                visual: VisualConfig(shape: .circle, color: .green)
                            )),
             
             // Purple stars in circle pattern
-            EnemySpawnEvent(time: 6.0, type: "fairy", position: CGPoint(x: 150, y: 400), 
+            EnemySpawnEvent(time: 6.0, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 150, y: 400), 
                            pattern: .circleShot, parameters: PatternConfig(
                                physics: PhysicsConfig(speed: 80),
                                visual: VisualConfig(shape: .star, color: .purple),
@@ -76,7 +76,7 @@ class EnemySystem: GameSystem {
                            )),
             
             // Orange squares in spiral
-            EnemySpawnEvent(time: 7.5, type: "fairy", position: CGPoint(x: 250, y: 400), 
+            EnemySpawnEvent(time: 7.5, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 250, y: 400), 
                            pattern: .spiralShot, parameters: PatternConfig(
                                physics: PhysicsConfig(speed: 90),
                                visual: VisualConfig(shape: .square, color: .orange),
@@ -85,7 +85,7 @@ class EnemySystem: GameSystem {
                            )),
             
             // Large yellow circles
-            EnemySpawnEvent(time: 10.0, type: "fairy", position: CGPoint(x: 192, y: 400), 
+            EnemySpawnEvent(time: 10.0, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 192, y: 400), 
                            pattern: .aimedShot, parameters: PatternConfig(
                                physics: PhysicsConfig(speed: 160),
                                visual: VisualConfig(size: .large, shape: .circle, color: .yellow)
@@ -105,27 +105,10 @@ class EnemySystem: GameSystem {
         }
     }
     
-    private func spawnEnemy(type: String, position: CGPoint, pattern: EnemyPattern, patternConfig: PatternConfig) {
-        let entity = entityManager.createEntity()
-        
-        // Add components based on enemy type
+    private func spawnEnemy(type: EnemyComponent.EnemyType, position: CGPoint, pattern: EnemyPattern, patternConfig: PatternConfig) {
         switch type {
-        case "fairy":
-            entity.addComponent(EnemyComponent(
-                enemyType: "fairy",
-                scoreValue: 100,
-                dropItem: .power, // Fairies always drop power items
-                attackPattern: pattern,
-                patternConfig: patternConfig,
-                shotInterval: 2.0
-            ))
-            entity.addComponent(TransformComponent(
-                position: position,
-                velocity: CGVector(dx: 0, dy: -50) // Move down slowly
-            ))
-            entity.addComponent(HitboxComponent(enemyHitbox: 12))
-            entity.addComponent(HealthComponent(current: 1, max: 1))
-            
+        case .fairy:
+            _ = EnemyFactory.createFairy(position: position, pattern: pattern, patternConfig: patternConfig, entityManager: entityManager)
         default:
             break
         }
@@ -182,13 +165,13 @@ class EnemySystem: GameSystem {
 /// Enemy spawn event for stage scripting
 class EnemySpawnEvent {
     let time: TimeInterval
-    let type: String
+    let type: EnemyComponent.EnemyType
     let position: CGPoint
     let pattern: EnemyPattern
     let parameters: PatternConfig
     var hasSpawned: Bool = false
     
-    init(time: TimeInterval, type: String, position: CGPoint, pattern: EnemyPattern, parameters: PatternConfig) {
+    init(time: TimeInterval, type: EnemyComponent.EnemyType, position: CGPoint, pattern: EnemyPattern, parameters: PatternConfig) {
         self.time = time
         self.type = type
         self.position = position

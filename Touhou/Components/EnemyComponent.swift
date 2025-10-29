@@ -30,7 +30,11 @@ protocol Scoreable {
 }
 
 class EnemyComponent: GKComponent, Shootable, Droppable, Scoreable {
-    var enemyType: String
+    enum EnemyType: Equatable {
+        case fairy
+        case custom(String)
+    }
+    var enemyType: EnemyType
     var scoreValue: Int
     var dropItem: ItemType? // What item this enemy drops (nil = no drop)
     var attackPattern: EnemyPattern
@@ -38,7 +42,7 @@ class EnemyComponent: GKComponent, Shootable, Droppable, Scoreable {
     var lastShotTime: TimeInterval
     var shotInterval: TimeInterval
     
-    init(enemyType: String, scoreValue: Int, dropItem: ItemType? = nil, 
+    init(enemyType: EnemyType, scoreValue: Int, dropItem: ItemType? = nil, 
          attackPattern: EnemyPattern = .singleShot, patternConfig: PatternConfig = PatternConfig(), 
          shotInterval: TimeInterval = 2.0) {
         self.enemyType = enemyType

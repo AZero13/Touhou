@@ -9,7 +9,7 @@ import Foundation
 import GameplayKit
 
 /// HealthSystem - handles health and death logic
-class HealthSystem: GameSystem {
+final class HealthSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     

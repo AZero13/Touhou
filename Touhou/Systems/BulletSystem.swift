@@ -9,7 +9,7 @@ import Foundation
 import GameplayKit
 
 /// BulletSystem - handles bullet movement and lifecycle
-class BulletSystem: GameSystem {
+final class BulletSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     
@@ -32,7 +32,7 @@ class BulletSystem: GameSystem {
             // Mark bullets that are out of bounds for destruction
             if transform.position.x < 0 || transform.position.x > 384 ||
                transform.position.y < 0 || transform.position.y > 448 {
-                entityManager.markForDestruction(entity)
+                GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(entity))
             }
         }
     }
@@ -45,7 +45,7 @@ class BulletSystem: GameSystem {
             for entity in bulletEntities {
                 if let bullet = entity.component(ofType: BulletComponent.self),
                    !bullet.ownedByPlayer {
-                    entityManager.markForDestruction(entity)
+                    GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(entity))
                 }
             }
         }

@@ -22,7 +22,7 @@ private let pointItemBottomScore = 60000    // Base score when collected below y
 private let pointItemPositionMultiplier = 100 // Multiplier for position-based scoring
 private let pointItemThresholdY: CGFloat = 128 // Y position threshold (logical coordinates)
 
-class ItemSystem: GameSystem {
+final class ItemSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     

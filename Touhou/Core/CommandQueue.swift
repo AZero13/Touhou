@@ -60,27 +60,11 @@ final class CommandQueue {
     
     // MARK: - Helpers
     private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) {
-        let entity = entityManager.createEntity()
-        let bullet = BulletComponent(
-            ownedByPlayer: ownedByPlayer,
-            bulletType: cmd.bulletType,
-            damage: cmd.physics.damage,
-            homingStrength: cmd.behavior.homingStrength,
-            maxTurnRate: cmd.behavior.maxTurnRate,
-            size: cmd.visual.size,
-            shape: cmd.visual.shape,
-            color: cmd.visual.color,
-            hasTrail: cmd.visual.hasTrail,
-            trailLength: cmd.visual.trailLength
-        )
-        entity.addComponent(bullet)
-        entity.addComponent(TransformComponent(position: cmd.position, velocity: cmd.velocity))
+        _ = BulletFactory.createEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
     }
 
     private func spawnItem(type: ItemType, position: CGPoint, velocity: CGVector, entityManager: EntityManager) {
-        let entity = entityManager.createEntity()
-        entity.addComponent(ItemComponent(itemType: type, value: 0))
-        entity.addComponent(TransformComponent(position: position, velocity: velocity))
+        _ = ItemFactory.createEntity(type: type, position: position, velocity: velocity, entityManager: entityManager)
     }
 
     private func applyDamage(entity: GKEntity, amount: Int, entityManager: EntityManager, eventBus: EventBus) {

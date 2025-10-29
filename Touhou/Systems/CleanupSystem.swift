@@ -9,7 +9,7 @@ import Foundation
 import GameplayKit
 
 /// CleanupSystem - handles entity destruction (runs last)
-class CleanupSystem: GameSystem {
+final class CleanupSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     

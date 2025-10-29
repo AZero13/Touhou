@@ -9,7 +9,7 @@ import Foundation
 import GameplayKit
 
 /// PlayerSystem - handles all player logic (input, movement, shooting, lifecycle)
-class PlayerSystem: GameSystem {
+final class PlayerSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     private var playerEntity: GKEntity?

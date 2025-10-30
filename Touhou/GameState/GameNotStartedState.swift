@@ -18,7 +18,7 @@ class GameNotStartedState: GKState {
     }
     
     override func didEnter(from previousState: GKState?) {
-        print("⚪ Game not started")
+        print("Game not started")
     }
     
     override func update(deltaTime seconds: TimeInterval) {

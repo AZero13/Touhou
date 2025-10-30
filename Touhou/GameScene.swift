@@ -46,19 +46,17 @@ class GameScene: SKScene, EventListener {
     
     // MARK: - EventListener
     
+    @MainActor
     func handleEvent(_ event: GameEvent) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            switch event {
-            case is GamePausedEvent:
-                self.showPauseMenu()
-            case is PauseMenuHiddenEvent:
-                self.hidePauseMenu()
-            case let e as PauseMenuUpdateEvent:
-                self.updatePauseMenuSelection(selectedOption: e.selectedOption)
-            default:
-                break
-            }
+        switch event {
+        case is GamePausedEvent:
+            self.showPauseMenu()
+        case is PauseMenuHiddenEvent:
+            self.hidePauseMenu()
+        case let e as PauseMenuUpdateEvent:
+            self.updatePauseMenuSelection(selectedOption: e.selectedOption)
+        default:
+            break
         }
     }
     

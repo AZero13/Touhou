@@ -20,9 +20,9 @@ class ViewController: NSViewController, EventListener {
     @IBOutlet weak var ValueLabel: NSTextField!
     @IBOutlet weak var GrazeLabel: NSTextField!
     
-    // MARK: - UI flash timers
-    private var scoreFlashTimer: Timer?
-    private var highScoreFlashTimer: Timer?
+    // MARK: - UI flash tasks
+    private var scoreFlashTask: Task<Void, Never>?
+    private var highScoreFlashTask: Task<Void, Never>?
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -46,51 +46,46 @@ class ViewController: NSViewController, EventListener {
     }
 
     // MARK: - EventListener
+    @MainActor
     func handleEvent(_ event: GameEvent) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            switch event {
-            case let e as ScoreChangedEvent:
-                self.ScoreLabel.stringValue = "SCORE: \(e.newTotal)"
-                self.flash(label: self.ScoreLabel)
-            case let e as HighScoreChangedEvent:
-                self.HighScoreLabel.stringValue = "HIGH SCORE: \(e.newHighScore)"
-                self.flash(label: self.HighScoreLabel)
-            case let e as LivesChangedEvent:
-                self.LivesLabel.stringValue = "LIVES: \(e.newTotal)"
-            case let e as BombsChangedEvent:
-                self.BombsLabel.stringValue = "BOMBS: \(e.newTotal)"
-            case let e as PowerLevelChangedEvent:
-                self.PowerLabel.stringValue = "POWER: \(e.newTotal)"
-            case let e as GrazeEvent:
-                // Show last graze value increment; a future system can emit aggregate if desired
-                self.GrazeLabel.stringValue = "GRAZE: +\(e.grazeValue)"
-            case let e as PowerUpCollectedEvent:
-                // Show score value for items that give score (point and power items)
-                if e.value > 0 {
-                    self.ValueLabel.stringValue = "VALUE: \(e.value)"
-                }
-            default:
-                break
+        switch event {
+        case let e as ScoreChangedEvent:
+            self.ScoreLabel.stringValue = "SCORE: \(e.newTotal)"
+            self.flash(label: self.ScoreLabel)
+        case let e as HighScoreChangedEvent:
+            self.HighScoreLabel.stringValue = "HIGH SCORE: \(e.newHighScore)"
+            self.flash(label: self.HighScoreLabel)
+        case let e as LivesChangedEvent:
+            self.LivesLabel.stringValue = "LIVES: \(e.newTotal)"
+        case let e as BombsChangedEvent:
+            self.BombsLabel.stringValue = "BOMBS: \(e.newTotal)"
+        case let e as PowerLevelChangedEvent:
+            self.PowerLabel.stringValue = "POWER: \(e.newTotal)"
+        case let e as GrazeEvent:
+            self.GrazeLabel.stringValue = "GRAZE: +\(e.grazeValue)"
+        case let e as PowerUpCollectedEvent:
+            if e.value > 0 {
+                self.ValueLabel.stringValue = "VALUE: \(e.value)"
             }
+        default:
+            break
         }
     }
 
     // MARK: - Private helpers
     private func flash(label: NSTextField) {
-        // Turn pink immediately
         label.textColor = .systemPink
-        
-        // Debounce back-to-default after 1s of inactivity per label
         if label === ScoreLabel {
-            scoreFlashTimer?.invalidate()
-            scoreFlashTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
-                self?.ScoreLabel.textColor = .labelColor
+            scoreFlashTask?.cancel()
+            scoreFlashTask = Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                self.ScoreLabel.textColor = .labelColor
             }
         } else if label === HighScoreLabel {
-            highScoreFlashTimer?.invalidate()
-            highScoreFlashTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
-                self?.HighScoreLabel.textColor = .labelColor
+            highScoreFlashTask?.cancel()
+            highScoreFlashTask = Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                self.HighScoreLabel.textColor = .labelColor
             }
         }
     }

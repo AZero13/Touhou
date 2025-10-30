@@ -10,6 +10,7 @@ import SpriteKit
 import GameplayKit
 
 /// Coordinates SpriteKit scene presentation and transitions
+@MainActor
 final class SceneCoordinator: EventListener {
     static let shared = SceneCoordinator()
     private init() {

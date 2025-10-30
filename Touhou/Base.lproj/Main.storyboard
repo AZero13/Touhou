@@ -715,7 +715,7 @@
                                     <constraint firstAttribute="width" secondItem="bnA-fa-wZj" secondAttribute="height" multiplier="6:7" id="zQs-Oo-EUa"/>
                                 </constraints>
                             </containerView>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oIh-m6-h5l">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oIh-m6-h5l">
                                 <rect key="frame" x="422" y="448" width="71" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="High Score" id="UTY-3L-ifw">
                                     <font key="font" usesAppearanceFont="YES"/>
@@ -723,7 +723,7 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0Cm-uz-6Ai">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0Cm-uz-6Ai">
                                 <rect key="frame" x="422" y="424" width="40" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Score" id="sO0-58-xg8">
                                     <font key="font" usesAppearanceFont="YES"/>
@@ -731,7 +731,7 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6Hx-Al-Xsd">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6Hx-Al-Xsd">
                                 <rect key="frame" x="422" y="386" width="36" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Lives" id="GPW-Gt-Ya3">
                                     <font key="font" usesAppearanceFont="YES"/>
@@ -739,7 +739,7 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PaZ-Su-MGZ">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PaZ-Su-MGZ">
                                 <rect key="frame" x="422" y="357" width="46" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="RDF-aZ-z1Q"/>
@@ -753,7 +753,7 @@
                             <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="Joy-GU-JX0">
                                 <rect key="frame" x="436" y="346" width="184" height="5"/>
                             </box>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="qA3-iN-Lhu">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="qA3-iN-Lhu">
                                 <rect key="frame" x="422" y="324" width="42" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Power" id="UrS-NF-joX">
                                     <font key="font" metaFont="system"/>
@@ -761,7 +761,7 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wpG-mq-J9R">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wpG-mq-J9R">
                                 <rect key="frame" x="422" y="300" width="38" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Value" id="eoH-qe-30O">
                                     <font key="font" metaFont="system"/>
@@ -769,7 +769,7 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6bI-fl-mXG">
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6bI-fl-mXG">
                                 <rect key="frame" x="422" y="276" width="40" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Graze" id="99m-mp-CDy">
                                     <font key="font" metaFont="system"/>
@@ -821,7 +821,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="655"/>
+            <point key="canvasLocation" x="75" y="769"/>
         </scene>
     </scenes>
 </document>

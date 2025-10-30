@@ -18,7 +18,7 @@ class GamePlayingState: GKState {
     }
     
     override func didEnter(from previousState: GKState?) {
-        print("▶️ Entered Playing state")
+        print("Entered Playing state")
     }
     
     override func update(deltaTime seconds: TimeInterval) {

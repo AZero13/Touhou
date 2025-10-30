@@ -37,7 +37,7 @@ class EntityManager {
         for entity in entitiesToDestroy {
             // Debug: Check if we're destroying a player entity
             if entity.component(ofType: PlayerComponent.self) != nil {
-                print("⚠️ WARNING: Player entity is being destroyed!")
+                print("WARNING: Player entity is being destroyed!")
             }
             if let index = entities.firstIndex(of: entity) {
                 entities.remove(at: index)

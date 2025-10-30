@@ -73,7 +73,7 @@ class GameFacade {
     func startGame() {
         lastUpdateTime = CACurrentMediaTime()
         stateMachine.enter(GamePlayingState.self)
-        print("🎮 Game started!")
+        print("Game started")
     }
     
     func update(_ currentTime: TimeInterval) {
@@ -116,11 +116,10 @@ class GameFacade {
         // Clean up immediately (processEvents happens once per frame in update loop)
         entityManager.destroyMarkedEntities()
         
-        // Reset game state
         lastUpdateTime = CACurrentMediaTime()
         
         // PlayerSystem will respawn player on next update
-        print("🔄 Game restarted")
+        print("Game restarted")
     }
     
     // MARK: - System Access

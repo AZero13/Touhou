@@ -78,8 +78,7 @@ class RenderSystem {
         }
         
         // Boss health bar overlay (top of screen)
-        if let boss = entities.first(where: { $0.component(ofType: BossComponent.self) != nil }),
-           let bossComp = boss.component(ofType: BossComponent.self) {
+        if let boss = entities.first(where: { $0.component(ofType: BossComponent.self) != nil }) {
             let barWidth = scene.size.width * 0.8
             let barHeight: CGFloat = 12
             let origin = CGPoint(x: (scene.size.width - barWidth) / 2, y: scene.size.height - 30)
@@ -96,7 +95,16 @@ class RenderSystem {
                 scene.addChild(bg!)
             }
             var fill = scene.childNode(withName: fillName) as? SKShapeNode
-            let pct = max(0, min(1, CGFloat(bossComp.health) / CGFloat(bossComp.maxHealth)))
+            // Prefer HealthComponent if present, fallback to BossComponent
+            let pct: CGFloat = {
+                if let hc = boss.component(ofType: HealthComponent.self) {
+                    return max(0, min(1, CGFloat(hc.health) / CGFloat(hc.maxHealth)))
+                }
+                if let bc = boss.component(ofType: BossComponent.self) {
+                    return max(0, min(1, CGFloat(bc.health) / CGFloat(bc.maxHealth)))
+                }
+                return 0
+            }()
             if fill == nil {
                 let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
                 fill = SKShapeNode(rect: rect, cornerRadius: 4)

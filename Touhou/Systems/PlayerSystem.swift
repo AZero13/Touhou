@@ -24,6 +24,13 @@ final class PlayerSystem: GameSystem {
     }
     
     func update(deltaTime: TimeInterval) {
+        // Ensure player exists after stage transitions or restarts
+        if playerEntity == nil {
+            spawnPlayer()
+        } else if let player = playerEntity,
+                  !entityManager.getAllEntities().contains(player) {
+            spawnPlayer()
+        }
         guard playerEntity != nil else { return }
         
         // Get current input
@@ -50,6 +57,14 @@ final class PlayerSystem: GameSystem {
                       !entityManager.getAllEntities().contains(player) {
                 spawnPlayer()
             }
+        case is StageStartedEvent:
+            // New stage: ensure player is present
+            if playerEntity == nil {
+                spawnPlayer()
+            } else if let player = playerEntity,
+                      !entityManager.getAllEntities().contains(player) {
+                spawnPlayer()
+            }
         default:
             break
         }
@@ -62,7 +77,7 @@ final class PlayerSystem: GameSystem {
         
         // Add components
         let playerComponent = PlayerComponent()
-        print("🎮 Player created with lives: \(playerComponent.lives)")
+        print("Player created with lives: \(playerComponent.lives)")
         
         entity.addComponent(playerComponent)
         entity.addComponent(TransformComponent(position: CGPoint(x: 192, y: 50))) // Center bottom

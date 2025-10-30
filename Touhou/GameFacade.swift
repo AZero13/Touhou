@@ -18,6 +18,7 @@ class GameFacade {
     
     // MARK: - Global Game Configuration
     static let playArea: CGRect = CGRect(x: 0, y: 0, width: 384, height: 448)
+    static let maxStage: Int = 6
     
     private init() {
         setupStateMachine()
@@ -77,7 +78,7 @@ class GameFacade {
     }
     
     func update(_ currentTime: TimeInterval) {
-        
+
         let deltaTime = currentTime - lastUpdateTime
         lastUpdateTime = currentTime
         

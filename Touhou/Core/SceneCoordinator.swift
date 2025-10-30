@@ -33,10 +33,27 @@ final class SceneCoordinator: EventListener {
         else { view.presentScene(scene) }
     }
     
+    func presentWinScene(totalScore: Int, transition: SKTransition? = nil) {
+        guard let view = skView else { return }
+        let scene = WinScene(totalScore: totalScore) { [weak self] in
+            GameFacade.shared.restartGame()
+            GameFacade.shared.getEventBus().fire(StageStartedEvent(stageId: 1))
+            let fade = SKTransition.fade(withDuration: 1.0)
+            self?.presentGameplayScene(transition: fade)
+        }
+        scene.scaleMode = .aspectFill
+        scene.size = view.bounds.size
+        if let t = transition { view.presentScene(scene, transition: t) }
+        else { view.presentScene(scene) }
+    }
+    
     func presentScoreScene(totalScore: Int, nextStageId: Int, transition: SKTransition? = nil) {
         guard let view = skView else { return }
+        if nextStageId > 6 {
+            presentWinScene(totalScore: totalScore, transition: transition)
+            return
+        }
         let scene = ScoreScene(totalScore: totalScore, nextStageId: nextStageId) { [weak self] in
-            // Advance stage, restart world, and notify systems
             GameFacade.shared.advanceStage()
             let newStage = GameFacade.shared.getCurrentStage()
             GameFacade.shared.restartGame()
@@ -54,7 +71,6 @@ final class SceneCoordinator: EventListener {
     func handleEvent(_ event: GameEvent) {
         // When a stage transitions, show intermediate score scene
         if let e = event as? StageTransitionEvent {
-            // Compute current total score without exposing models to scene
             let score = GameFacade.shared.getEntityManager()
                 .getEntities(with: PlayerComponent.self)
                 .first?

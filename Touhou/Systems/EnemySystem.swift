@@ -60,7 +60,7 @@ final class EnemySystem: GameSystem {
         // After boss defeated (no enemies remain), move to score scene once
         if bossSpawned && !stageCompleteDispatched && entityManager.getEntities(with: EnemyComponent.self).isEmpty {
             stageCompleteDispatched = true
-            let nextId = min(GameFacade.shared.getCurrentStage() + 1, 6)
+            let nextId = GameFacade.shared.getCurrentStage() >= GameFacade.maxStage ? (GameFacade.maxStage + 1) : (GameFacade.shared.getCurrentStage() + 1)
             eventBus.fire(StageTransitionEvent(nextStageId: nextId))
         }
     }

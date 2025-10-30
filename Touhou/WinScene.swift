@@ -1,5 +1,5 @@
 //
-//  ScoreScene.swift
+//  WinScene.swift
 //  Touhou
 //
 //  Created by Rose on 10/29/25.
@@ -7,15 +7,12 @@
 
 import SpriteKit
 
-/// Simple score scene shown between stages
-final class ScoreScene: SKScene {
+final class WinScene: SKScene {
     private let totalScore: Int
-    private let nextStageId: Int
     private let onContinue: () -> Void
     
-    init(totalScore: Int, nextStageId: Int, onContinue: @escaping () -> Void) {
+    init(totalScore: Int, onContinue: @escaping () -> Void) {
         self.totalScore = totalScore
-        self.nextStageId = nextStageId
         self.onContinue = onContinue
         super.init(size: .zero)
     }
@@ -27,29 +24,28 @@ final class ScoreScene: SKScene {
     override func didMove(to view: SKView) {
         backgroundColor = .black
         buildUI()
-        // Auto-continue after short delay; also allow click/space to skip
         run(SKAction.sequence([
-            SKAction.wait(forDuration: 2.0),
+            SKAction.wait(forDuration: 2.5),
             SKAction.run { [weak self] in self?.onContinue() }
         ]))
     }
     
     private func buildUI() {
-        let title = SKLabelNode(text: "STAGE CLEAR")
+        let title = SKLabelNode(text: "YOU WIN!")
         title.fontName = "Menlo-Bold"
-        title.fontSize = 34
-        title.fontColor = .white
+        title.fontSize = 38
+        title.fontColor = .systemGreen
         title.position = CGPoint(x: size.width / 2, y: size.height / 2 + 40)
         addChild(title)
         
-        let score = SKLabelNode(text: "SCORE: \(totalScore)")
+        let score = SKLabelNode(text: "FINAL SCORE: \(totalScore)")
         score.fontName = "Menlo"
         score.fontSize = 26
         score.fontColor = .white
         score.position = CGPoint(x: size.width / 2, y: size.height / 2)
         addChild(score)
         
-        let hint = SKLabelNode(text: "NEXT: STAGE \(nextStageId)  (press any key)")
+        let hint = SKLabelNode(text: "Press any key to play again")
         hint.fontName = "Menlo"
         hint.fontSize = 16
         hint.fontColor = .gray

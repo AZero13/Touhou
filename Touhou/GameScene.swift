@@ -55,6 +55,8 @@ class GameScene: SKScene, EventListener {
             self.hidePauseMenu()
         case let e as PauseMenuUpdateEvent:
             self.updatePauseMenuSelection(selectedOption: e.selectedOption)
+        case let e as GrazeEvent:
+            self.playGrazeEffect(for: e.bulletEntity)
         default:
             break
         }
@@ -129,5 +131,34 @@ class GameScene: SKScene, EventListener {
             restartLabel?.fontColor = .white
             restartLabel?.fontName = "Menlo-Bold"
         }
+    }
+
+    // MARK: - Effects
+    private func playGrazeEffect(for bulletEntity: GKEntity) {
+        if let transform = GameFacade.shared.getEntityManager()
+            .getAllEntities()
+            .first(where: { $0 == bulletEntity })?
+            .component(ofType: TransformComponent.self) {
+            self.showGrazeEffect(atLogical: transform.position)
+        }
+    }
+
+    private func showGrazeEffect(atLogical position: CGPoint) {
+        let scaleX = size.width / 384
+        let scaleY = size.height / 448
+        let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
+        let radius: CGFloat = 8 * max(scaleX, scaleY)
+        let node = SKShapeNode(circleOfRadius: radius)
+        node.position = scenePosition
+        node.strokeColor = .white
+        node.lineWidth = 1.0
+        node.alpha = 1.0
+        node.zPosition = 200
+        addChild(node)
+        let expand = SKAction.scale(to: 2.5, duration: 0.2)
+        let fade = SKAction.fadeOut(withDuration: 0.2)
+        let group = SKAction.group([expand, fade])
+        node.run(.sequence([group, .removeFromParent()]))
+        run(SKAction.playSoundFileNamed("graze.caf", waitForCompletion: false))
     }
 }

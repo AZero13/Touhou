@@ -48,7 +48,7 @@ final class SceneCoordinator: EventListener {
     
     func presentScoreScene(totalScore: Int, nextStageId: Int, transition: SKTransition? = nil) {
         guard let view = skView else { return }
-        if nextStageId > 6 {
+        if nextStageId > GameFacade.maxStage {
             presentWinScene(totalScore: totalScore, transition: transition)
             return
         }

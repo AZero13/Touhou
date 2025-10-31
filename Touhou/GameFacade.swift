@@ -185,7 +185,7 @@ class GameFacade {
     func getCurrentStage() -> Int { currentStage }
     
     func advanceStage() {
-        if currentStage == 6 {
+        if currentStage >= GameFacade.maxStage {
             return
         }
         currentStage += 1

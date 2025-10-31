@@ -13,10 +13,16 @@ final class ScoreSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     private var highScore: Int = 0
+    private let highScoreStore: HighScoreStore
+    
+    init(highScoreStore: HighScoreStore = UserDefaultsHighScoreStore()) {
+        self.highScoreStore = highScoreStore
+    }
     
     func initialize(entityManager: EntityManager, eventBus: EventBus) {
         self.entityManager = entityManager
         self.eventBus = eventBus
+        self.highScore = highScoreStore.loadHighScore()
     }
     
     func update(deltaTime: TimeInterval) {
@@ -54,6 +60,7 @@ final class ScoreSystem: GameSystem {
             if s.newTotal > highScore {
                 highScore = s.newTotal
                 eventBus.fire(HighScoreChangedEvent(newHighScore: highScore))
+                highScoreStore.saveHighScore(highScore)
             }
         }
     }

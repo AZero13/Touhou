@@ -178,6 +178,10 @@ class GameFacade {
         return taskScheduler
     }
     
+    func registerListener(_ listener: EventListener) {
+        eventBus.register(listener: listener)
+    }
+    
     func getCurrentStage() -> Int { currentStage }
     
     func advanceStage() {

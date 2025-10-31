@@ -28,7 +28,7 @@ class GameScene: SKScene, EventListener {
         createPauseMenu()
         
         // Register for game events
-        GameFacade.shared.getEventBus().register(listener: self)
+        GameFacade.shared.registerListener(self)
         
         // Start the game
         GameFacade.shared.startGame()

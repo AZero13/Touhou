@@ -41,6 +41,10 @@ final class TaskScheduler {
         handle.isCancelled = true
     }
     
+    func reset() {
+        tasks.removeAll()
+    }
+    
     func update(deltaTime: TimeInterval, entityManager: EntityManager, commandQueue: CommandQueue) {
         guard !tasks.isEmpty else { return }
         var next: [TaskState] = []

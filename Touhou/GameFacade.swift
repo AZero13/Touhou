@@ -123,6 +123,44 @@ class GameFacade {
         print("Game restarted")
     }
     
+    // MARK: - Stage Lifecycle
+    func startStage(stageId: Int) {
+        // Reset world state for a clean start
+        clearTransientWorld()
+        commandQueue.clear()
+        taskScheduler.reset()
+        currentStage = stageId
+        eventBus.fire(StageStartedEvent(stageId: stageId))
+        lastUpdateTime = CACurrentMediaTime()
+        stateMachine.enter(GamePlayingState.self)
+        print("Stage \(stageId) started")
+    }
+    
+    func endStage() {
+        // Stop gameplay updates and clear transient entities so nothing lingers
+        stateMachine.enter(GameNotStartedState.self)
+        eventBus.fire(StageEndedEvent(stageId: currentStage))
+        clearTransientWorld()
+        commandQueue.clear()
+        taskScheduler.reset()
+        print("Stage \(currentStage) ended")
+    }
+    
+    private func clearTransientWorld() {
+        // Remove bullets, enemies, items, and spawners; keep persistent/player
+        let entities = entityManager.getAllEntities()
+        for entity in entities {
+            let hasBullet = entity.component(ofType: BulletComponent.self) != nil
+            let hasEnemy = entity.component(ofType: EnemyComponent.self) != nil
+            let hasItem = entity.component(ofType: ItemComponent.self) != nil
+            let hasSpawner = entity.component(ofType: BulletSpawnerComponent.self) != nil
+            if hasBullet || hasEnemy || hasItem || hasSpawner {
+                entityManager.markForDestruction(entity)
+            }
+        }
+        entityManager.destroyMarkedEntities()
+    }
+    
     // MARK: - System Access
     func getEntityManager() -> EntityManager {
         return entityManager

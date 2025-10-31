@@ -35,7 +35,7 @@ class ViewController: NSViewController, EventListener {
         SceneCoordinator.shared.presentGameplayScene()
         
         // Register for game events to keep UI in sync
-        GameFacade.shared.getEventBus().register(listener: self)
+        GameFacade.shared.registerListener(self)
     }
     
 

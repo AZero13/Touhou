@@ -12,17 +12,19 @@ import GameplayKit
 final class ScoreSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
-    private var highScore: Int = 0
-    private let highScoreStore: HighScoreStore
-    
-    init(highScoreStore: HighScoreStore = UserDefaultsHighScoreStore()) {
-        self.highScoreStore = highScoreStore
-    }
+    private var highScore: Int = 0 // session high score
+    private let highScoreStore: HighScoreStore = UserDefaultsHighScoreStore()
     
     func initialize(entityManager: EntityManager, eventBus: EventBus) {
         self.entityManager = entityManager
         self.eventBus = eventBus
-        self.highScore = highScoreStore.loadHighScore()
+        // Initialize session high score from current player score (likely 0)
+        if let player = entityManager.getEntities(with: PlayerComponent.self).first,
+           let playerComp = player.component(ofType: PlayerComponent.self) {
+            self.highScore = playerComp.score
+        } else {
+            self.highScore = 0
+        }
     }
     
     func update(deltaTime: TimeInterval) {
@@ -60,9 +62,32 @@ final class ScoreSystem: GameSystem {
             if s.newTotal > highScore {
                 highScore = s.newTotal
                 eventBus.fire(HighScoreChangedEvent(newHighScore: highScore))
-                highScoreStore.saveHighScore(highScore)
+            }
+        } else if let st = event as? StageStartedEvent {
+            // Reset run high score only at the beginning of a new run (stage 1)
+            if st.stageId == 1 {
+                if let player = entityManager.getEntities(with: PlayerComponent.self).first,
+                   let playerComp = player.component(ofType: PlayerComponent.self) {
+                    self.highScore = playerComp.score
+                } else {
+                    self.highScore = 0
+                }
+                eventBus.fire(HighScoreChangedEvent(newHighScore: highScore))
+            }
+        } else if event is GameOverEvent {
+            // Persist best-of-all-time after a run ends (loss)
+            persistIfNewBest()
+        } else if let se = event as? StageEndedEvent {
+            // Persist best-of-all-time at the end of the final stage (win)
+            if se.stageId >= GameFacade.maxStage {
+                persistIfNewBest()
             }
         }
+    }
+    
+    private func persistIfNewBest() {
+        let stored = highScoreStore.loadHighScore()
+        if highScore > stored { highScoreStore.saveHighScore(highScore) }
     }
 }
 

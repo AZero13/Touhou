@@ -36,8 +36,7 @@ final class SceneCoordinator: EventListener {
     func presentWinScene(totalScore: Int, transition: SKTransition? = nil) {
         guard let view = skView else { return }
         let scene = WinScene(totalScore: totalScore) { [weak self] in
-            GameFacade.shared.restartGame()
-            GameFacade.shared.getEventBus().fire(StageStartedEvent(stageId: 1))
+            GameFacade.shared.startStage(stageId: 1)
             let fade = SKTransition.fade(withDuration: 1.0)
             self?.presentGameplayScene(transition: fade)
         }
@@ -56,8 +55,7 @@ final class SceneCoordinator: EventListener {
         let scene = ScoreScene(totalScore: totalScore, nextStageId: nextStageId) { [weak self] in
             GameFacade.shared.advanceStage()
             let newStage = GameFacade.shared.getCurrentStage()
-            GameFacade.shared.restartGame()
-            GameFacade.shared.getEventBus().fire(StageStartedEvent(stageId: newStage))
+            GameFacade.shared.startStage(stageId: newStage)
             let fade = SKTransition.fade(withDuration: 1.0)
             self?.presentGameplayScene(transition: fade)
         }

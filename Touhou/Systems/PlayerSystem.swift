@@ -58,12 +58,17 @@ final class PlayerSystem: GameSystem {
                 spawnPlayer()
             }
         case is StageStartedEvent:
-            // New stage: ensure player is present
+            // New stage: ensure player is present and reset position to start
             if playerEntity == nil {
                 spawnPlayer()
             } else if let player = playerEntity,
                       !entityManager.getAllEntities().contains(player) {
                 spawnPlayer()
+            }
+            if let entity = playerEntity,
+               let transform = entity.component(ofType: TransformComponent.self) {
+                let area = GameFacade.playArea
+                transform.position = CGPoint(x: area.midX, y: area.minY + 50)
             }
         default:
             break

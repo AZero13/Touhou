@@ -181,6 +181,9 @@ class GameFacade {
     func getCurrentStage() -> Int { currentStage }
     
     func advanceStage() {
-        currentStage = min(currentStage + 1, 6)
+        if currentStage == 6 {
+            return
+        }
+        currentStage += 1
     }
 }

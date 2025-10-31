@@ -54,8 +54,8 @@ class GameFacade {
         // Add systems in update order
         addSystem(PlayerSystem())
         addSystem(EnemySystem())
+        addSystem(BulletHomingSystem()) // Apply homing steering before movement for immediate effect
         addSystem(BulletSystem())
-        addSystem(BulletHomingSystem()) // Handle homing after movement
         addSystem(CollisionSystem()) // Detect collisions
         addSystem(HealthSystem()) // Process damage/death
         addSystem(ItemSystem()) // Items: drops and collection
@@ -113,7 +113,7 @@ class GameFacade {
         for entity in allEntities {
             entityManager.markForDestruction(entity)
         }
-        
+
         // Clean up immediately (processEvents happens once per frame in update loop)
         entityManager.destroyMarkedEntities()
         

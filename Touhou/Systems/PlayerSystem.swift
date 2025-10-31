@@ -69,7 +69,7 @@ final class PlayerSystem: GameSystem {
                       !entityManager.getAllEntities().contains(player) {
                 spawnPlayer()
             }
-        case is StageStartedEvent:
+        case let e as StageStartedEvent:
             // New stage: ensure player is present and reset position to start
             if playerEntity == nil {
                 spawnPlayer()
@@ -80,7 +80,15 @@ final class PlayerSystem: GameSystem {
             if let entity = playerEntity,
                let transform = entity.component(ofType: TransformComponent.self) {
                 let area = GameFacade.playArea
-                transform.position = CGPoint(x: area.midX, y: area.minY + 50)
+                transform.position = CGPoint(x: area.midX, y: area.minY + Tuning.spawnYOffset)
+            }
+            // Starting a new run (stage 1): reset bombs and score
+            if e.stageId == 1, let entity = playerEntity,
+               let player = entity.component(ofType: PlayerComponent.self) {
+                player.bombs = 3
+                player.score = 0
+                eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
+                eventBus.fire(ScoreChangedEvent(newTotal: player.score))
             }
         default:
             break

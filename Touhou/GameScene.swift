@@ -30,8 +30,8 @@ class GameScene: SKScene, EventListener {
         // Register for game events
         GameFacade.shared.registerListener(self)
         
-        // Start the game
-        GameFacade.shared.startGame()
+        // Start a fresh run at app launch
+        GameFacade.shared.startNewRun()
     }
     
     override func update(_ currentTime: TimeInterval) {

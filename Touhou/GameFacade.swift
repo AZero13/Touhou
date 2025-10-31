@@ -70,13 +70,6 @@ class GameFacade {
         systems.append(system)
     }
     
-    // MARK: - Game Loop
-    func startGame() {
-        lastUpdateTime = CACurrentMediaTime()
-        stateMachine.enter(GamePlayingState.self)
-        print("Game started")
-    }
-    
     func update(_ currentTime: TimeInterval) {
 
         let deltaTime = currentTime - lastUpdateTime
@@ -124,6 +117,11 @@ class GameFacade {
     }
     
     // MARK: - Stage Lifecycle
+    func startNewRun() {
+        currentStage = 1
+        startStage(stageId: currentStage)
+    }
+    
     func startStage(stageId: Int) {
         // Reset world state for a clean start
         clearTransientWorld()

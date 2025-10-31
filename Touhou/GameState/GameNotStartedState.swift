@@ -22,7 +22,7 @@ class GameNotStartedState: GKState {
     }
     
     override func update(deltaTime seconds: TimeInterval) {
-        // Do nothing - wait for startGame() to transition
+        // Do nothing - wait for startNewRun() to transition
     }
     
     override func isValidNextState(_ stateClass: AnyClass) -> Bool {

@@ -144,8 +144,8 @@ class GameScene: SKScene, EventListener {
     }
 
     private func showGrazeEffect(atLogical position: CGPoint) {
-        let scaleX = size.width / 384
-        let scaleY = size.height / 448
+        let scaleX = size.width / GameFacade.playArea.width
+        let scaleY = size.height / GameFacade.playArea.height
         let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
         let radius: CGFloat = 8 * max(scaleX, scaleY)
         let node = SKShapeNode(circleOfRadius: radius)

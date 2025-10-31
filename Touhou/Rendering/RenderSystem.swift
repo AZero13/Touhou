@@ -16,8 +16,8 @@ class RenderSystem {
     private var factories: [String: SpriteFactory] = [:]
     
     // Play area dimensions (logical coordinates)
-    private let logicalWidth: CGFloat = 384
-    private let logicalHeight: CGFloat = 448
+    private var logicalWidth: CGFloat { GameFacade.playArea.width }
+    private var logicalHeight: CGFloat { GameFacade.playArea.height }
     
     init() {
         setupFactories()

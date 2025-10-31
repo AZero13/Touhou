@@ -15,6 +15,18 @@ final class PlayerSystem: GameSystem {
     private var playerEntity: GKEntity?
     private var lastShotTime: TimeInterval = 0
     
+    private enum Tuning {
+        static let unfocusedSpeed: CGFloat = 270    // units per second
+        static let focusedSpeed: CGFloat = 135      // units per second
+        static let shotInterval: TimeInterval = 0.1 // 10 shots per second
+        static let spawnYOffset: CGFloat = 50       // distance above bottom edge
+        static let grazeHitbox: CGFloat = 30
+        static let playerHitbox: CGFloat = 2.5
+        static let shotOffsetY: CGFloat = 20
+        static let sideShotOffsetX: CGFloat = 10
+        static let bombClearEnemyBullets: Bool = true
+    }
+    
     func initialize(entityManager: EntityManager, eventBus: EventBus) {
         self.entityManager = entityManager
         self.eventBus = eventBus
@@ -85,8 +97,10 @@ final class PlayerSystem: GameSystem {
         print("Player created with lives: \(playerComponent.lives)")
         
         entity.addComponent(playerComponent)
-        entity.addComponent(TransformComponent(position: CGPoint(x: 192, y: 50))) // Center bottom
-        entity.addComponent(HitboxComponent(playerHitbox: 2.5, grazeZone: 30))
+        let area = GameFacade.playArea
+        let spawnPosition = CGPoint(x: area.midX, y: area.minY + Tuning.spawnYOffset)
+        entity.addComponent(TransformComponent(position: spawnPosition))
+        entity.addComponent(HitboxComponent(playerHitbox: Tuning.playerHitbox, grazeZone: Tuning.grazeHitbox))
         // No HealthComponent - player just has lives, not HP
         
         playerEntity = entity
@@ -98,7 +112,7 @@ final class PlayerSystem: GameSystem {
               let player = playerEntity.component(ofType: PlayerComponent.self) else { return }
         
         // Calculate movement speed based on focus mode (units per second)
-        let speed: CGFloat = player.isFocused ? 135 : 270 // 2.25 * 60fps, 4.5 * 60fps
+        let speed: CGFloat = player.isFocused ? Tuning.focusedSpeed : Tuning.unfocusedSpeed
         
         // Apply movement (time-based)
         let movement = CGVector(
@@ -122,14 +136,14 @@ final class PlayerSystem: GameSystem {
         guard let playerEntity = playerEntity,
               let transform = playerEntity.component(ofType: TransformComponent.self) else { return }
         
-        if input.shoot.isPressed && currentTime - lastShotTime > 0.1 { // 10 shots per second
+        if input.shoot.isPressed && currentTime - lastShotTime > Tuning.shotInterval {
             lastShotTime = currentTime
             
             // Reimu A shoots 3 bullets: 1 straight + 2 homing at angles via CommandQueue
             let queue = GameFacade.shared.getCommandQueue()
             
             let centerCmd = BulletSpawnCommand(
-                position: CGPoint(x: transform.position.x, y: transform.position.y + 20),
+                position: CGPoint(x: transform.position.x, y: transform.position.y + Tuning.shotOffsetY),
                 velocity: CGVector(dx: 0, dy: 200),
                 bulletType: .amulet,
                 physics: PhysicsConfig(speed: 200, damage: 1),
@@ -139,7 +153,7 @@ final class PlayerSystem: GameSystem {
             queue.enqueue(.spawnBullet(centerCmd, ownedByPlayer: true))
             
             let leftCmd = BulletSpawnCommand(
-                position: CGPoint(x: transform.position.x - 10, y: transform.position.y + 20),
+                position: CGPoint(x: transform.position.x - Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY),
                 velocity: CGVector(dx: -50, dy: 180),
                 bulletType: .homingAmulet,
                 physics: PhysicsConfig(speed: 180, damage: 1),
@@ -149,7 +163,7 @@ final class PlayerSystem: GameSystem {
             queue.enqueue(.spawnBullet(leftCmd, ownedByPlayer: true))
             
             let rightCmd = BulletSpawnCommand(
-                position: CGPoint(x: transform.position.x + 10, y: transform.position.y + 20),
+                position: CGPoint(x: transform.position.x + Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY),
                 velocity: CGVector(dx: 50, dy: 180),
                 bulletType: .homingAmulet,
                 physics: PhysicsConfig(speed: 180, damage: 1),
@@ -171,10 +185,12 @@ final class PlayerSystem: GameSystem {
         eventBus.fire(BombActivatedEvent(playerEntity: entity))
         
         // Clear enemy bullets immediately
-        let bullets = entityManager.getEntities(with: BulletComponent.self)
-        for b in bullets {
-            if let comp = b.component(ofType: BulletComponent.self), !comp.ownedByPlayer {
-                GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(b))
+        if Tuning.bombClearEnemyBullets {
+            let bullets = entityManager.getEntities(with: BulletComponent.self)
+            for b in bullets {
+                if let comp = b.component(ofType: BulletComponent.self), !comp.ownedByPlayer {
+                    GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(b))
+                }
             }
         }
     }

@@ -53,9 +53,7 @@ final class SceneCoordinator: EventListener {
             return
         }
         let scene = ScoreScene(totalScore: totalScore, nextStageId: nextStageId) { [weak self] in
-            GameFacade.shared.advanceStage()
-            let newStage = GameFacade.shared.getCurrentStage()
-            GameFacade.shared.startStage(stageId: newStage)
+            GameFacade.shared.startStage(stageId: nextStageId)
             let fade = SKTransition.fade(withDuration: 1.0)
             self?.presentGameplayScene(transition: fade)
         }

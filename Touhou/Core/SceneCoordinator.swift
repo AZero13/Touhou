@@ -14,7 +14,7 @@ import GameplayKit
 final class SceneCoordinator: EventListener {
     static let shared = SceneCoordinator()
     private init() {
-        GameFacade.shared.getEventBus().register(listener: self)
+        GameFacade.shared.registerListener(self)
     }
     
     private weak var skView: SKView?

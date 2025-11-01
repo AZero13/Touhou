@@ -199,12 +199,7 @@ final class PlayerSystem: GameSystem {
         
         // Clear enemy bullets immediately
         if Tuning.bombClearEnemyBullets {
-            let bullets = entityManager.getEntities(with: BulletComponent.self)
-            for b in bullets {
-                if let comp = b.component(ofType: BulletComponent.self), !comp.ownedByPlayer {
-                    GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(b))
-                }
-            }
+            CommandQueue.despawnAllBullets(entityManager: entityManager) { !$0.ownedByPlayer }
         }
     }
 }

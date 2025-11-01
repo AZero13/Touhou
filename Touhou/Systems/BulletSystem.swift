@@ -58,13 +58,7 @@ final class BulletSystem: GameSystem {
         // Handle bomb events to clear bullets
         if event is BombActivatedEvent {
             // Clear all enemy bullets
-            let bulletEntities = entityManager.getEntities(with: BulletComponent.self)
-            for entity in bulletEntities {
-                if let bullet = entity.component(ofType: BulletComponent.self),
-                   !bullet.ownedByPlayer {
-                    GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(entity))
-                }
-            }
+            CommandQueue.despawnAllBullets(entityManager: entityManager) { !$0.ownedByPlayer }
         }
     }
 }

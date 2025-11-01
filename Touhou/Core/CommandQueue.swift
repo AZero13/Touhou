@@ -59,6 +59,20 @@ final class CommandQueue {
     }
     
     // MARK: - Helpers
+    
+    /// Despawn all bullets, optionally filtered by selector
+    static func despawnAllBullets(entityManager: EntityManager, selector: ((BulletComponent) -> Bool)? = nil) {
+        let bullets = entityManager.getEntities(with: BulletComponent.self)
+        let queue = GameFacade.shared.getCommandQueue()
+        for bullet in bullets {
+            guard let bulletComp = bullet.component(ofType: BulletComponent.self) else { continue }
+            if let selector = selector {
+                if !selector(bulletComp) { continue }
+            }
+            queue.enqueue(.destroyEntity(bullet))
+        }
+    }
+    
     private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) {
         let entity = BulletFactory.createEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
         

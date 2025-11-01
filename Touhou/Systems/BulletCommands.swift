@@ -43,11 +43,19 @@ struct BehaviorConfig {
     let homingStrength: CGFloat?
     let maxTurnRate: CGFloat?
     let delay: TimeInterval
+    // TH06-style discrete retargeting
+    let retargetInterval: TimeInterval?
+    let maxRetargets: Int?
+    let rotationOffset: CGFloat
     
-    init(homingStrength: CGFloat? = nil, maxTurnRate: CGFloat? = nil, delay: TimeInterval = 0) {
+    init(homingStrength: CGFloat? = nil, maxTurnRate: CGFloat? = nil, delay: TimeInterval = 0,
+         retargetInterval: TimeInterval? = nil, maxRetargets: Int? = nil, rotationOffset: CGFloat = 0) {
         self.homingStrength = homingStrength
         self.maxTurnRate = maxTurnRate
         self.delay = delay
+        self.retargetInterval = retargetInterval
+        self.maxRetargets = maxRetargets
+        self.rotationOffset = rotationOffset
     }
 }
 

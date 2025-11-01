@@ -78,6 +78,13 @@ class BulletComponent: GKComponent, Damaging {
     var damage: Int
     var homingStrength: CGFloat? // 0.0 to 1.0 for homing bullets (Reimu's shots)
     var maxTurnRate: CGFloat? // radians per second for smooth homing
+    // TH06-style discrete retargeting parameters
+    var retargetInterval: TimeInterval?
+    var maxRetargets: Int?
+    var rotationOffset: CGFloat
+    // Internal state for retargeting
+    var retargetTimer: TimeInterval = 0
+    var retargetedCount: Int = 0
     
     // Visual properties
     var size: BulletSize
@@ -86,15 +93,17 @@ class BulletComponent: GKComponent, Damaging {
     var hasTrail: Bool
     var trailLength: Int // Number of trail segments
     
-    init(ownedByPlayer: Bool, bulletType: BulletType = .needle, damage: Int = 1, 
-         homingStrength: CGFloat? = nil, maxTurnRate: CGFloat? = nil,
-         size: BulletSize = .small, shape: BulletShape = .circle, 
+    init(ownedByPlayer: Bool, bulletType: BulletType = .needle, damage: Int = 1,
+         size: BulletSize = .small, shape: BulletShape = .circle,
          color: BulletColor = .red, hasTrail: Bool = false, trailLength: Int = 3) {
         self.ownedByPlayer = ownedByPlayer
         self.bulletType = bulletType
         self.damage = damage
-        self.homingStrength = homingStrength
-        self.maxTurnRate = maxTurnRate
+        self.homingStrength = nil
+        self.maxTurnRate = nil
+        self.retargetInterval = nil
+        self.maxRetargets = nil
+        self.rotationOffset = 0
         self.size = size
         self.shape = shape
         self.color = color

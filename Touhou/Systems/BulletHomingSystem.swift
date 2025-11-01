@@ -24,14 +24,36 @@ final class BulletHomingSystem: GameSystem {
         
         for entity in bulletEntities {
             guard let bullet = entity.component(ofType: BulletComponent.self),
-                  let transform = entity.component(ofType: TransformComponent.self),
-                  let homingStrength = bullet.homingStrength,
-                  let maxTurnRate = bullet.maxTurnRate else { continue }
+                  let transform = entity.component(ofType: TransformComponent.self) else { continue }
             
             // Find nearest target
             let target = findNearestTarget(for: bullet, from: transform.position)
             guard let targetPosition = target else { continue }
             
+            // If TH06-style retargeting is configured, do discrete snaps and skip continuous steering
+            if let interval = bullet.retargetInterval {
+                bullet.retargetTimer -= deltaTime
+                if bullet.retargetTimer <= 0 {
+                    if let maxTimes = bullet.maxRetargets {
+                        if bullet.retargetedCount >= maxTimes {
+                            continue
+                        }
+                    }
+                    let toTarget = CGVector(dx: targetPosition.x - transform.position.x,
+                                             dy: targetPosition.y - transform.position.y)
+                    let angle = atan2(toTarget.dy, toTarget.dx) + bullet.rotationOffset
+                    let speed = sqrt(transform.velocity.dx * transform.velocity.dx + transform.velocity.dy * transform.velocity.dy)
+                    transform.velocity = CGVector(dx: cos(angle) * speed, dy: sin(angle) * speed)
+                    bullet.retargetedCount += 1
+                    bullet.retargetTimer += max(0, interval)
+                }
+                continue
+            }
+            
+            // Continuous steering fallback (uses homingStrength and maxTurnRate)
+            guard let homingStrength = bullet.homingStrength,
+                  let maxTurnRate = bullet.maxTurnRate else { continue }
+
             // Calculate direction to target
             let directionToTarget = CGVector(
                 dx: targetPosition.x - transform.position.x,

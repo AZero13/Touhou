@@ -166,7 +166,7 @@ final class PlayerSystem: GameSystem {
                 bulletType: .homingAmulet,
                 physics: PhysicsConfig(speed: 180, damage: 1),
                 visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
-                behavior: BehaviorConfig(homingStrength: 0.9, maxTurnRate: 6.0, delay: 0)
+                behavior: BehaviorConfig()
             )
             queue.enqueue(.spawnBullet(leftCmd, ownedByPlayer: true))
             
@@ -176,7 +176,7 @@ final class PlayerSystem: GameSystem {
                 bulletType: .homingAmulet,
                 physics: PhysicsConfig(speed: 180, damage: 1),
                 visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
-                behavior: BehaviorConfig(homingStrength: 0.9, maxTurnRate: 6.0, delay: 0)
+                behavior: BehaviorConfig()
             )
             queue.enqueue(.spawnBullet(rightCmd, ownedByPlayer: true))
         }

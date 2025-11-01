@@ -202,6 +202,11 @@ class GameFacade {
         currentStage += 1
     }
     
+    // MARK: - State Query
+    func isInNotStartedState() -> Bool {
+        return stateMachine.currentState is GameNotStartedState
+    }
+    
     // MARK: - Time Freeze Control
     func isFrozen() -> Bool {
         return isTimeFrozen

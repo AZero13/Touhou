@@ -30,8 +30,11 @@ class GameScene: SKScene, EventListener {
         // Register for game events
         GameFacade.shared.registerListener(self)
         
-        // Start a fresh run at app launch
-        GameFacade.shared.startNewRun()
+        // Only start a new run if we're in NotStarted state (i.e., app just launched)
+        // Don't reset if we're transitioning between stages (scene is recreated but game continues)
+        if GameFacade.shared.isInNotStartedState() {
+            GameFacade.shared.startNewRun()
+        }
     }
     
     override func update(_ currentTime: TimeInterval) {

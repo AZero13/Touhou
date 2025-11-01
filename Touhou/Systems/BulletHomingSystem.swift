@@ -142,8 +142,7 @@ final class BulletHomingSystem: GameSystem {
             return nearestEnemy?.component(ofType: TransformComponent.self)?.position
         } else {
             // Enemy bullets home towards player
-            let players = entityManager.getEntities(with: PlayerComponent.self)
-            return players.first?.component(ofType: TransformComponent.self)?.position
+            return PlayerUtility.getPosition(entityManager: entityManager)
         }
     }
 }

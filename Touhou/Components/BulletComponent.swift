@@ -92,6 +92,10 @@ class BulletComponent: GKComponent, Damaging {
     var color: BulletColor
     var hasTrail: Bool
     var trailLength: Int // Number of trail segments
+    // Identification for scripting/selectors
+    var groupId: Int?
+    var patternId: Int?
+    var tags: Set<String>
     
     init(ownedByPlayer: Bool, bulletType: BulletType = .needle, damage: Int = 1,
          size: BulletSize = .small, shape: BulletShape = .circle,
@@ -109,6 +113,9 @@ class BulletComponent: GKComponent, Damaging {
         self.color = color
         self.hasTrail = hasTrail
         self.trailLength = trailLength
+        self.groupId = nil
+        self.patternId = nil
+        self.tags = []
         super.init()
     }
     

@@ -26,6 +26,11 @@ final class BulletHomingSystem: GameSystem {
             guard let bullet = entity.component(ofType: BulletComponent.self),
                   let transform = entity.component(ofType: TransformComponent.self) else { continue }
             
+            // Respect freeze/time scaling: skip steering if frozen
+            if let mods = entity.component(ofType: BulletMotionModifiersComponent.self), mods.timeScale <= 0 {
+                continue
+            }
+            
             // Find nearest target
             let target = findNearestTarget(for: bullet, from: transform.position)
             guard let targetPosition = target else { continue }

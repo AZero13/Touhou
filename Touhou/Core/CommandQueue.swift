@@ -60,7 +60,17 @@ final class CommandQueue {
     
     // MARK: - Helpers
     private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) {
-        _ = BulletFactory.createEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
+        let entity = BulletFactory.createEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
+        
+        // If time is frozen, immediately apply freeze modifier to newly spawned bullet
+        if GameFacade.shared.isFrozen() {
+            let mods = entity.component(ofType: BulletMotionModifiersComponent.self)
+                ?? BulletMotionModifiersComponent()
+            if entity.component(ofType: BulletMotionModifiersComponent.self) == nil {
+                entity.addComponent(mods)
+            }
+            mods.timeScale = 0.0
+        }
     }
 
     private func spawnItem(type: ItemType, position: CGPoint, velocity: CGVector, entityManager: EntityManager) {

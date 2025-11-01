@@ -19,6 +19,11 @@ final class CollisionSystem: GameSystem {
     }
     
     func update(deltaTime: TimeInterval) {
+        // Skip all collision/graze checks when time is frozen
+        if GameFacade.shared.isFrozen() {
+            return
+        }
+        
         // Get all bullets and all enemies separately
         let bullets = entityManager.getEntities(with: BulletComponent.self)
         let enemies = entityManager.getEntities(with: EnemyComponent.self)

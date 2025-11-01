@@ -41,6 +41,7 @@ class GameFacade {
     private var lastUpdateTime: TimeInterval = 0
     private var currentStage: Int = 1
     private var pendingNextStageId: Int?
+    private var isTimeFrozen: Bool = false
     
     // MARK: - Setup
     private func setupStateMachine() {
@@ -85,15 +86,17 @@ class GameFacade {
         
         // Only update game systems if we're in playing state
         if stateMachine.currentState is GamePlayingState {
-            // Update all systems in order
-            for system in systems {
-                system.update(deltaTime: deltaTime)
-            }
-            
-            // Run scheduled tasks (patterns, phases)
+            // Run scheduled tasks even during freeze (so freeze scripts can advance to unfreeze)
             taskScheduler.update(deltaTime: deltaTime, entityManager: entityManager, commandQueue: commandQueue)
             
-            // Apply buffered world mutations
+            // Update all systems in order (only if not frozen)
+            if !isTimeFrozen {
+                for system in systems {
+                    system.update(deltaTime: deltaTime)
+                }
+            }
+            
+            // Apply buffered world mutations (always process, even during freeze, to handle unfreeze commands)
             commandQueue.process(entityManager: entityManager, eventBus: eventBus)
         }
         
@@ -197,5 +200,14 @@ class GameFacade {
             return
         }
         currentStage += 1
+    }
+    
+    // MARK: - Time Freeze Control
+    func isFrozen() -> Bool {
+        return isTimeFrozen
+    }
+    
+    func setTimeFrozen(_ frozen: Bool) {
+        isTimeFrozen = frozen
     }
 }

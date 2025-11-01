@@ -35,6 +35,10 @@ final class BulletFactory {
         bullet.retargetInterval = command.behavior.retargetInterval ?? defaultRetargetInterval
         bullet.maxRetargets = command.behavior.maxRetargets ?? defaultMaxRetargets
         bullet.rotationOffset = (command.behavior.rotationOffset != 0 ? command.behavior.rotationOffset : defaultRotationOffset)
+        // Identification fields for scripting/selectors
+        bullet.groupId = command.groupId
+        bullet.patternId = command.patternId
+        bullet.tags = command.tags
         entity.addComponent(bullet)
         entity.addComponent(TransformComponent(position: command.position, velocity: command.velocity))
         return entity

@@ -25,9 +25,26 @@ final class BulletSystem: GameSystem {
         for entity in bulletEntities {
             guard let transform = entity.component(ofType: TransformComponent.self) else { continue }
             
-            // Update position based on velocity
-            transform.position.x += transform.velocity.dx * deltaTime
-            transform.position.y += transform.velocity.dy * deltaTime
+            // Apply motion modifiers (freeze/time scale, speed scaling, acceleration)
+            let mods = entity.component(ofType: BulletMotionModifiersComponent.self)
+            let timeScale: CGFloat = mods?.timeScale ?? 1.0
+            let speedScale: CGFloat = mods?.speedScale ?? 1.0
+            if timeScale <= 0 { continue }
+            // Acceleration
+            if let a = mods?.acceleration, (a.dx != 0 || a.dy != 0) {
+                transform.velocity.dx += a.dx * deltaTime
+                transform.velocity.dy += a.dy * deltaTime
+            }
+            // Angle lock (preserve facing while allowing speed changes)
+            if let angle = mods?.angleLock {
+                let speed = sqrt(transform.velocity.dx * transform.velocity.dx + transform.velocity.dy * transform.velocity.dy)
+                transform.velocity.dx = cos(angle) * speed
+                transform.velocity.dy = sin(angle) * speed
+            }
+            
+            // Update position based on effective velocity
+            transform.position.x += transform.velocity.dx * deltaTime * timeScale * speedScale
+            transform.position.y += transform.velocity.dy * deltaTime * timeScale * speedScale
             
             // Mark bullets that are out of bounds for destruction
             if transform.position.x < 0 || transform.position.x > 384 ||

@@ -63,7 +63,17 @@ final class TaskScheduler {
                     let consume = min(dt, task.waitRemaining)
                     task.waitRemaining -= consume
                     dt -= consume
-                    if task.waitRemaining > 0 { continue }
+                    if task.waitRemaining > 0 {
+                        continue // Still waiting
+                    }
+                    // Wait just finished
+                    // If we're at index 0 after a repeat wait, we want to process step 0 (don't advance)
+                    // Otherwise, advance to next step
+                    if task.currentIndex != 0 || task.repeatEvery == nil {
+                        task.currentIndex += 1
+                        continue
+                    }
+                    // At index 0 with repeatEvery - repeat interval just finished, process step 0
                 }
                 if task.currentIndex >= task.steps.count {
                     // Completed sequence
@@ -80,8 +90,8 @@ final class TaskScheduler {
                 switch step {
                 case let .wait(t):
                     task.waitRemaining = t
-                    // Loop will consume wait on next iteration
-                    // Do not advance time here; immediately iterate to handle waitRemaining
+                    // Don't advance index yet - will advance when wait completes
+                    // Continue to consume wait time on next iteration
                     continue
                 case let .run(action):
                     action(entityManager, commandQueue)

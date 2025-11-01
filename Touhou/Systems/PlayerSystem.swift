@@ -45,6 +45,11 @@ final class PlayerSystem: GameSystem {
         }
         guard playerEntity != nil else { return }
         
+        // Skip all player actions if time is frozen
+        if GameFacade.shared.isFrozen() {
+            return
+        }
+        
         // Get current input
         let input = InputManager.shared.getCurrentInput()
         

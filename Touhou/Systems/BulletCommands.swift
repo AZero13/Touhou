@@ -64,6 +64,10 @@ struct BulletSpawnCommand {
     let position: CGPoint
     let velocity: CGVector
     let bulletType: BulletComponent.BulletType
+    // Identification for scripting/selection
+    let groupId: Int?
+    let patternId: Int?
+    let tags: Set<String>
     
     // Configuration objects
     let physics: PhysicsConfig
@@ -73,13 +77,17 @@ struct BulletSpawnCommand {
     init(position: CGPoint, velocity: CGVector, bulletType: BulletComponent.BulletType = .enemyBullet,
          physics: PhysicsConfig = PhysicsConfig(),
          visual: VisualConfig = VisualConfig(),
-         behavior: BehaviorConfig = BehaviorConfig()) {
+         behavior: BehaviorConfig = BehaviorConfig(),
+         groupId: Int? = nil, patternId: Int? = nil, tags: Set<String> = []) {
         self.position = position
         self.velocity = velocity
         self.bulletType = bulletType
         self.physics = physics
         self.visual = visual
         self.behavior = behavior
+        self.groupId = groupId
+        self.patternId = patternId
+        self.tags = tags
     }
 }
 

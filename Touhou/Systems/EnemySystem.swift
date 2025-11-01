@@ -41,20 +41,7 @@ final class EnemySystem: GameSystem {
         if stageScript.allSatisfy({ $0.hasSpawned }) && !bossSpawned {
             let boss = EnemyFactory.createBoss(name: "Stage Boss", position: CGPoint(x: 192, y: 360), entityManager: entityManager)
             bossSpawned = true
-            // Schedule boss shooting task
-            if let shootable = boss.component(ofType: EnemyComponent.self) {
-                let scheduler = GameFacade.shared.getTaskScheduler()
-                let steps: [TaskScheduler.Step] = [
-                    .run { entityManager, commandQueue in
-                        guard let t = boss.component(ofType: TransformComponent.self) else { return }
-                        let players = entityManager.getEntities(with: PlayerComponent.self)
-                        let playerPosition = players.first?.component(ofType: TransformComponent.self)?.position
-                        let commands = shootable.getBulletCommands(from: t.position, targetPosition: playerPosition)
-                        for c in commands { commandQueue.enqueue(.spawnBullet(c, ownedByPlayer: false)) }
-                    }
-                ]
-                _ = scheduler.schedule(owner: boss, steps: steps, repeatEvery: shootable.shotInterval)
-            }
+            scheduleBossSpellcard(boss: boss)
         }
         
         // After boss defeated (no enemies remain), move to score scene once
@@ -157,6 +144,10 @@ final class EnemySystem: GameSystem {
                 let scheduler = GameFacade.shared.getTaskScheduler()
                 let steps: [TaskScheduler.Step] = [
                     .run { entityManager, commandQueue in
+                        // Skip shooting if time is frozen (only scripted boss shooting should happen during freeze)
+                        if GameFacade.shared.isFrozen() {
+                            return
+                        }
                         guard let t = enemy.component(ofType: TransformComponent.self) else { return }
                         let players = entityManager.getEntities(with: PlayerComponent.self)
                         let playerPosition = players.first?.component(ofType: TransformComponent.self)?.position
@@ -189,6 +180,71 @@ final class EnemySystem: GameSystem {
     
     private func updateEnemyShooting(deltaTime: TimeInterval) {
         // Shooting is driven by TaskScheduler via scheduled tasks on spawn.
+    }
+    
+    /// Schedule boss spellcard pattern (extracted for flexibility - can be configured per boss/spellcard)
+    private func scheduleBossSpellcard(boss: GKEntity) {
+        guard let shootable = boss.component(ofType: EnemyComponent.self) else { return }
+        let scheduler = GameFacade.shared.getTaskScheduler()
+        
+        // Sakuya freeze gimmick spellcard - for testing
+        let freezeSteps: [TaskScheduler.Step] = [
+            // Freeze everything globally
+            .run { entityManager, _ in
+                print("FREEZE: Freezing everything")
+                GameFacade.shared.setTimeFrozen(true)
+                BulletModifierHelpers.freezeAllBullets(entityManager: entityManager)
+            },
+            .wait(1.0), // Longer freeze duration
+            // Spawn aimed bullets at player (visible but frozen)
+            .run { entityManager, commandQueue in
+                print("FREEZE: After wait, spawning bullets")
+                guard let t = boss.component(ofType: TransformComponent.self) else {
+                    print("FREEZE: Boss transform missing")
+                    return
+                }
+                let players = entityManager.getEntities(with: PlayerComponent.self)
+                guard let playerPos = players.first?.component(ofType: TransformComponent.self)?.position else {
+                    print("FREEZE: Player position missing")
+                    return
+                }
+                
+                print("FREEZE: Spawning bullets at boss pos \(t.position) aiming at player \(playerPos)")
+                
+                // Calculate angle to player
+                let dx = playerPos.x - t.position.x
+                let dy = playerPos.y - t.position.y
+                let angle = atan2(dy, dx)
+                let speed: CGFloat = 180
+                let velocity = CGVector(dx: cos(angle) * speed, dy: sin(angle) * speed)
+                
+                // Spawn multiple aimed bullets for visibility
+                for i in 0..<3 {
+                    let offset = CGFloat(i - 1) * 10.0 // Spread slightly
+                    let offsetX = cos(angle + .pi/2) * offset
+                    let offsetY = sin(angle + .pi/2) * offset
+                    
+                    let freezeBullet = BulletSpawnCommand(
+                        position: CGPoint(x: t.position.x + offsetX, y: t.position.y + offsetY),
+                        velocity: velocity,
+                        bulletType: .enemyBullet,
+                        physics: PhysicsConfig(speed: speed, damage: 1),
+                        visual: VisualConfig(size: .small, shape: .circle, color: .red)
+                    )
+                    commandQueue.enqueue(.spawnBullet(freezeBullet, ownedByPlayer: false))
+                }
+                print("FREEZE: Bullets spawned")
+            },
+            .wait(0.3), // Brief pause so bullets are visible frozen
+            // Unfreeze everything
+            .run { entityManager, _ in
+                print("FREEZE: Unfreezing everything")
+                GameFacade.shared.setTimeFrozen(false)
+                BulletModifierHelpers.unfreezeAllBullets(entityManager: entityManager)
+            }
+        ]
+        // Repeat freeze pattern every 4 seconds
+        _ = scheduler.schedule(owner: boss, steps: freezeSteps, repeatEvery: 4.0)
     }
 }
 

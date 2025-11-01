@@ -39,6 +39,21 @@ final class EnemySystem: GameSystem {
         
         // If all scripted enemies have spawned and none remain, spawn boss once
         if stageScript.allSatisfy({ $0.hasSpawned }) && !bossSpawned {
+            // Despawn any remaining regular enemies and all bullets before boss appears
+            let enemies = entityManager.getEntities(with: EnemyComponent.self)
+            for enemy in enemies {
+                // Only despawn non-boss enemies (bosses have BossComponent)
+                if enemy.component(ofType: BossComponent.self) == nil {
+                    GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(enemy))
+                }
+            }
+            
+            // Despawn all bullets
+            let bullets = entityManager.getEntities(with: BulletComponent.self)
+            for bullet in bullets {
+                GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(bullet))
+            }
+            
             let boss = EnemyFactory.createBoss(name: "Stage Boss", position: CGPoint(x: 192, y: 360), entityManager: entityManager)
             bossSpawned = true
             scheduleBossSpellcard(boss: boss)
@@ -163,6 +178,8 @@ final class EnemySystem: GameSystem {
     }
     
     private func updateEnemyMovement(deltaTime: TimeInterval) {
+        // During freeze, only bosses can move (and only bosses exist during boss fights)
+        // No need to check - if freeze is active and enemies exist, they're bosses that should move
         let enemies = entityManager.getEntities(with: EnemyComponent.self)
         
         for enemy in enemies {
@@ -184,7 +201,7 @@ final class EnemySystem: GameSystem {
     
     /// Schedule boss spellcard pattern (extracted for flexibility - can be configured per boss/spellcard)
     private func scheduleBossSpellcard(boss: GKEntity) {
-        guard let shootable = boss.component(ofType: EnemyComponent.self) else { return }
+        guard boss.component(ofType: EnemyComponent.self) != nil else { return }
         let scheduler = GameFacade.shared.getTaskScheduler()
         
         // Sakuya freeze gimmick spellcard - for testing

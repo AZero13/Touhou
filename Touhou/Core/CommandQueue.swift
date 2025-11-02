@@ -114,7 +114,9 @@ final class CommandQueue {
         if player.lives <= 0 {
             eventBus.fire(GameOverEvent(finalScore: player.score))
         } else if delta < 0 {
-            // respawn on life loss
+            // respawn on life loss - reset bombs to 3
+            player.bombs = 3
+            eventBus.fire(BombsChangedEvent(newTotal: 3))
             if let transform = playerEntity.component(ofType: TransformComponent.self) {
                 transform.position = CGPoint(x: 192, y: 50)
             }

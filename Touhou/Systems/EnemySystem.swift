@@ -17,8 +17,6 @@ final class EnemySystem: GameSystem {
     private var stageCompleteDispatched: Bool = false
     private var bossSpawned: Bool = false
     
-    private var lastShotTime: TimeInterval = 0
-    
     func initialize(entityManager: EntityManager, eventBus: EventBus) {
         self.entityManager = entityManager
         self.eventBus = eventBus
@@ -35,7 +33,6 @@ final class EnemySystem: GameSystem {
         
         // Update enemy movement and shooting
         updateEnemyMovement(deltaTime: deltaTime)
-        updateEnemyShooting(deltaTime: deltaTime)
         
         // If all scripted enemies have spawned and none remain, spawn boss once
         // Also check that we actually have a script (empty scripts shouldn't trigger boss)
@@ -68,7 +65,6 @@ final class EnemySystem: GameSystem {
                 )
             )
             bossSpawned = true
-            scheduleBossSpellcard(boss: boss)
         }
         
         // After boss defeated (no enemies remain), move to score scene once
@@ -199,18 +195,6 @@ final class EnemySystem: GameSystem {
                 GameFacade.shared.entities.destroy(enemy)
             }
         }
-    }
-    
-    private func updateEnemyShooting(deltaTime: TimeInterval) {
-        // Shooting is driven by TaskScheduler via scheduled tasks on spawn.
-    }
-    
-    /// Schedule boss spellcard pattern (extracted for flexibility - can be configured per boss/spellcard)
-    /// Each boss should define their own spellcards based on stage/boss identity
-    private func scheduleBossSpellcard(boss: GKEntity) {
-        guard boss.component(ofType: EnemyComponent.self) != nil else { return }
-        // Spellcards will be defined per-boss later
-        // For now, bosses use their default shooting pattern from EnemyComponent
     }
 }
 

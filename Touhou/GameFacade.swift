@@ -213,13 +213,6 @@ class GameFacade {
     
     func getCurrentStage() -> Int { currentStage }
     
-    func advanceStage() {
-        if currentStage >= GameFacade.maxStage {
-            return
-        }
-        currentStage += 1
-    }
-    
     // MARK: - State Query
     func isInNotStartedState() -> Bool {
         return stateMachine.currentState is GameNotStartedState

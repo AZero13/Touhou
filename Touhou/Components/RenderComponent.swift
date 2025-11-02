@@ -48,11 +48,6 @@ final class RenderComponent: GKComponent {
     // MARK: - GameplayKit Lifecycle
     
     /// Called when component is removed from entity - cleanup happens automatically
-    override func didAddToEntity() {
-        // Component added - no action needed yet
-    }
-    
-    /// Called when component is removed from entity - cleanup happens automatically
     override func willRemoveFromEntity() {
         // Remove node from scene tree when component is removed
         node.removeFromParent()

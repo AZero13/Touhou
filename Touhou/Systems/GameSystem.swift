@@ -27,11 +27,6 @@ class EntityManager {
         return entity
     }
     
-    /// Register entity with component systems (called after entity is fully set up)
-    func registerEntityWithSystems(_ entity: GKEntity, gameFacade: GameFacade) {
-        gameFacade.registerEntity(entity)
-    }
-    
     /// Mark an entity for destruction
     func markForDestruction(_ entity: GKEntity) {
         entitiesToDestroy.append(entity)
@@ -40,11 +35,6 @@ class EntityManager {
     /// Actually destroy marked entities
     func destroyMarkedEntities(gameFacade: GameFacade? = nil) {
         for entity in entitiesToDestroy {
-            // Debug: Check if we're destroying a player entity
-            if entity.component(ofType: PlayerComponent.self) != nil {
-                print("WARNING: Player entity is being destroyed!")
-            }
-            
             // Unregister from systems first (removes system-managed components from systems)
             if let facade = gameFacade {
                 facade.unregisterEntity(entity)

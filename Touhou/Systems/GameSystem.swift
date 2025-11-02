@@ -44,29 +44,43 @@ class EntityManager {
             if entity.component(ofType: PlayerComponent.self) != nil {
                 print("WARNING: Player entity is being destroyed!")
             }
-            // Remove all components to trigger lifecycle methods (willRemoveFromEntity)
-            entity.removeComponent(ofType: RenderComponent.self)
-            entity.removeComponent(ofType: PlayerComponent.self)
-            entity.removeComponent(ofType: EnemyComponent.self)
-            entity.removeComponent(ofType: BulletComponent.self)
-            entity.removeComponent(ofType: ItemComponent.self)
-            entity.removeComponent(ofType: TransformComponent.self)
-            entity.removeComponent(ofType: HealthComponent.self)
-            entity.removeComponent(ofType: HitboxComponent.self)
-            entity.removeComponent(ofType: BossComponent.self)
-            entity.removeComponent(ofType: BulletMotionModifiersComponent.self)
-            // Unregister from GameplayKit component systems
+            
+            // Unregister from systems first (removes system-managed components from systems)
             if let facade = gameFacade {
                 facade.unregisterEntity(entity)
             } else {
                 GameFacade.shared.unregisterEntity(entity)
             }
+            
+            // Remove all components from entity to trigger willRemoveFromEntity() cleanup
+            // Note: removeComponent is safe to call even if component doesn't exist (no-op)
+            removeAllComponents(from: entity)
+            
             // Remove entity from tracking
             if let index = entities.firstIndex(of: entity) {
                 entities.remove(at: index)
             }
         }
         entitiesToDestroy.removeAll()
+    }
+    
+    /// Remove all known components from an entity
+    private func removeAllComponents(from entity: GKEntity) {
+        // RenderComponent must be removed to clean up SKNode
+        entity.removeComponent(ofType: RenderComponent.self)
+        
+        // System-managed components (already removed from systems by unregisterEntity)
+        entity.removeComponent(ofType: PlayerComponent.self)
+        entity.removeComponent(ofType: EnemyComponent.self)
+        entity.removeComponent(ofType: BulletComponent.self)
+        entity.removeComponent(ofType: ItemComponent.self)
+        
+        // Data-only components
+        entity.removeComponent(ofType: TransformComponent.self)
+        entity.removeComponent(ofType: HealthComponent.self)
+        entity.removeComponent(ofType: HitboxComponent.self)
+        entity.removeComponent(ofType: BossComponent.self)
+        entity.removeComponent(ofType: BulletMotionModifiersComponent.self)
     }
     
     /// Get all entities

@@ -36,6 +36,9 @@ final class HealthSystem: GameSystem {
         if let collisionEvent = event as? CollisionOccurredEvent {
             print("📨 HealthSystem received collision event: \(collisionEvent.collisionType)")
             handleCollisionEvent(collisionEvent)
+        } else if let died = event as? EnemyDiedEvent {
+            // Handle item drops when enemy dies
+            handleEnemyDeath(died)
         }
     }
     
@@ -57,6 +60,14 @@ final class HealthSystem: GameSystem {
     private func handlePlayerHit(_ playerEntity: GKEntity) {
         // Use combat facade to adjust lives
         GameFacade.shared.combat.adjustLives(delta: -1)
+    }
+    
+    private func handleEnemyDeath(_ event: EnemyDiedEvent) {
+        // Spawn item drop if enemy has one
+        if let itemType = event.dropItem,
+           let transform = event.entity.component(ofType: TransformComponent.self) {
+            GameFacade.shared.entities.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: -50))
+        }
     }
     
 }

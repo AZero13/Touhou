@@ -158,7 +158,10 @@ class GameFacade {
         clearTransientWorld()
         commandQueue.clear()
         currentStage = stageId
+        pendingNextStageId = nil // Clear any pending transitions
         eventBus.fire(StageStartedEvent(stageId: stageId))
+        // Process events immediately to ensure systems reset their state before next frame
+        eventBus.processEvents()
         lastUpdateTime = CACurrentMediaTime()
         stateMachine.enter(GamePlayingState.self)
         print("Stage \(stageId) started")

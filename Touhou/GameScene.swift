@@ -17,9 +17,13 @@ class GameScene: SKScene, EventListener {
     private var closeLabel: SKLabelNode?
     private var restartLabel: SKLabelNode?
     
+    // Effect layer (following SpriteKit best practices for organizing content)
+    private var effectLayer: SKNode!
+    
     // Cached actions for effects (created once, reused many times)
     private var grazeEffectAction: SKAction!
     private var hitEffectAction: SKAction!
+    private var grazeSoundAction: SKAction!
     
     override func didMove(to view: SKView) {
         // Set background color
@@ -27,6 +31,11 @@ class GameScene: SKScene, EventListener {
         
         // Initialize render system
         renderSystem = RenderSystem()
+        
+        // Create effects layer for transient visual effects
+        effectLayer = SKNode()
+        effectLayer.name = "effectLayer"
+        addChild(effectLayer)
 
         // Create cached actions for effects
         setupEffectActions()
@@ -53,6 +62,9 @@ class GameScene: SKScene, EventListener {
         let hitExpand = SKAction.scale(to: 3.0, duration: 0.15)
         let hitFade = SKAction.fadeOut(withDuration: 0.15)
         hitEffectAction = .sequence([.group([hitExpand, hitFade]), .removeFromParent()])
+        
+        // Cache sound actions (created once, reused many times)
+        grazeSoundAction = SKAction.playSoundFileNamed("graze.caf", waitForCompletion: false)
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -177,9 +189,9 @@ class GameScene: SKScene, EventListener {
         node.lineWidth = 1.0
         node.alpha = 1.0
         node.zPosition = 200
-        addChild(node)
+        effectLayer.addChild(node)  // Add to effect layer
         node.run(grazeEffectAction)  // Use cached action
-        run(SKAction.playSoundFileNamed("graze.caf", waitForCompletion: false))
+        run(grazeSoundAction)  // Use cached sound action
     }
     
     private func showHitEffect(atLogical position: CGPoint) {
@@ -194,7 +206,7 @@ class GameScene: SKScene, EventListener {
         node.fillColor = .clear
         node.alpha = 1.0
         node.zPosition = 300  // Above everything
-        addChild(node)
+        effectLayer.addChild(node)  // Add to effect layer
         node.run(hitEffectAction)  // Use cached action
         
         // TODO: Add sound effect here when sound file is ready

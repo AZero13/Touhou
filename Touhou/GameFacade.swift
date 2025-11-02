@@ -140,9 +140,9 @@ class GameFacade {
     
     // MARK: - Game Control
     func restartGame() {
-        // Restart the current stage from the beginning
-        startStage(stageId: currentStage)
-        print("Game restarted from stage \(currentStage)")
+        // Restart from stage 1 (full game reset)
+        startNewRun()
+        print("Game restarted from stage 1")
     }
     
     // MARK: - Stage Lifecycle

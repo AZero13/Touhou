@@ -17,12 +17,19 @@ class GameScene: SKScene, EventListener {
     private var closeLabel: SKLabelNode?
     private var restartLabel: SKLabelNode?
     
+    // Cached actions for effects (created once, reused many times)
+    private var grazeEffectAction: SKAction!
+    private var hitEffectAction: SKAction!
+    
     override func didMove(to view: SKView) {
         // Set background color
         backgroundColor = SKColor.black
         
         // Initialize render system
         renderSystem = RenderSystem()
+
+        // Create cached actions for effects
+        setupEffectActions()
 
         // Create pause menu (initially hidden)
         createPauseMenu()
@@ -35,6 +42,17 @@ class GameScene: SKScene, EventListener {
         if GameFacade.shared.isInNotStartedState() {
             GameFacade.shared.startNewRun()
         }
+    }
+    
+    private func setupEffectActions() {
+        // Create reusable actions for effects (following Apple's best practices)
+        let grazeExpand = SKAction.scale(to: 2.5, duration: 0.2)
+        let grazeFade = SKAction.fadeOut(withDuration: 0.2)
+        grazeEffectAction = .sequence([.group([grazeExpand, grazeFade]), .removeFromParent()])
+        
+        let hitExpand = SKAction.scale(to: 3.0, duration: 0.15)
+        let hitFade = SKAction.fadeOut(withDuration: 0.15)
+        hitEffectAction = .sequence([.group([hitExpand, hitFade]), .removeFromParent()])
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -157,10 +175,7 @@ class GameScene: SKScene, EventListener {
         node.alpha = 1.0
         node.zPosition = 200
         addChild(node)
-        let expand = SKAction.scale(to: 2.5, duration: 0.2)
-        let fade = SKAction.fadeOut(withDuration: 0.2)
-        let group = SKAction.group([expand, fade])
-        node.run(.sequence([group, .removeFromParent()]))
+        node.run(grazeEffectAction)  // Use cached action
         run(SKAction.playSoundFileNamed("graze.caf", waitForCompletion: false))
     }
     
@@ -168,7 +183,6 @@ class GameScene: SKScene, EventListener {
         let scaleX = size.width / GameFacade.playArea.width
         let scaleY = size.height / GameFacade.playArea.height
         let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
-        print("DEBUG: Hit effect scene position: \(scenePosition), scene size: \(size)")
         let radius: CGFloat = 4 * max(scaleX, scaleY)  // Small white circle
         let node = SKShapeNode(circleOfRadius: radius)
         node.position = scenePosition
@@ -178,10 +192,7 @@ class GameScene: SKScene, EventListener {
         node.alpha = 1.0
         node.zPosition = 300  // Above everything
         addChild(node)
-        let expand = SKAction.scale(to: 3.0, duration: 0.15)  // Expand 3x
-        let fade = SKAction.fadeOut(withDuration: 0.15)
-        let group = SKAction.group([expand, fade])
-        node.run(.sequence([group, .removeFromParent()]))
+        node.run(hitEffectAction)  // Use cached action
         
         // TODO: Add sound effect here when sound file is ready
         // run(SKAction.playSoundFileNamed("hit.caf", waitForCompletion: false))

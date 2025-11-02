@@ -44,8 +44,11 @@ class GameFacade {
         CombatFacade(entityManager: entityManager, commandQueue: commandQueue, eventBus: eventBus)
     }()
     
-    // MARK: - Game Systems
-    private var systems: [GameSystem] = []
+    // MARK: - GameplayKit Component Systems (proper ECS)
+    private var componentSystems: [GKComponentSystem] = []
+    
+    // MARK: - Cross-Cutting Systems (handle multi-entity concerns)
+    private var crossCuttingSystems: [GameSystem] = []
     
     // MARK: - Game State Machine
     private var stateMachine: GKStateMachine!
@@ -67,23 +70,45 @@ class GameFacade {
     }
     
     private func setupSystems() {
-        // Add systems in update order
-        addSystem(PlayerSystem())
-        addSystem(EnemySystem())
-        addSystem(BulletHomingSystem()) // Apply homing steering before movement for immediate effect
-        addSystem(BulletSystem())
-        addSystem(CollisionSystem()) // Detect collisions
-        addSystem(HealthSystem()) // Process damage/death
-        addSystem(ItemSystem()) // Items: drops and collection
-        addSystem(ScoreSystem()) // Update score/high score for UI
-        addSystem(CleanupSystem()) // Must be last
+        // GameplayKit Component Systems (order matters for update sequence)
+        componentSystems = [
+            GKComponentSystem(componentClass: PlayerComponent.self),
+            GKComponentSystem(componentClass: EnemyComponent.self),
+            GKComponentSystem(componentClass: BulletComponent.self),  // Bullets update after homing
+            GKComponentSystem(componentClass: ItemComponent.self)
+        ]
+        
+        // Cross-cutting systems (handle interactions between entities)
+        addCrossCuttingSystem(PlayerLifecycleSystem()) // Player spawning/lifecycle only
+        addCrossCuttingSystem(EnemySystem())           // Enemy spawning/AI (movement now in component)
+        addCrossCuttingSystem(BulletHomingSystem())    // Homing before bullet movement
+        addCrossCuttingSystem(CollisionSystem())       // Detect collisions
+        addCrossCuttingSystem(HealthSystem())          // Process damage/death
+        addCrossCuttingSystem(ScoreSystem())           // Update score/high score
+        addCrossCuttingSystem(CleanupSystem())         // Must be last
+        
+        // Note: PlayerComponent, BulletComponent, ItemComponent now update themselves via GKComponentSystem
     }
     
-    /// Add a system to the game loop
-    func addSystem(_ system: GameSystem) {
-        system.initialize(entityManager: entityManager, eventBus: eventBus) // Initialize the system
+    /// Add a cross-cutting system to the game loop
+    private func addCrossCuttingSystem(_ system: GameSystem) {
+        system.initialize(entityManager: entityManager, eventBus: eventBus)
         eventBus.register(listener: system)
-        systems.append(system)
+        crossCuttingSystems.append(system)
+    }
+    
+    /// Register an entity with all component systems (call when entity is created)
+    func registerEntity(_ entity: GKEntity) {
+        for componentSystem in componentSystems {
+            componentSystem.addComponent(foundIn: entity)
+        }
+    }
+    
+    /// Unregister an entity from all component systems (call when entity is destroyed)
+    func unregisterEntity(_ entity: GKEntity) {
+        for componentSystem in componentSystems {
+            componentSystem.removeComponent(foundIn: entity)
+        }
     }
     
     func update(_ currentTime: TimeInterval) {
@@ -104,7 +129,13 @@ class GameFacade {
             
             // Update all systems in order (only if not frozen)
             if !isTimeFrozen {
-                for system in systems {
+                // GameplayKit component systems (proper ECS way)
+                for componentSystem in componentSystems {
+                    componentSystem.update(deltaTime: deltaTime)
+                }
+                
+                // Cross-cutting systems
+                for system in crossCuttingSystems {
                     system.update(deltaTime: deltaTime)
                 }
             }

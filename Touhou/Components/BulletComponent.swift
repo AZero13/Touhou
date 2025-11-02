@@ -122,4 +122,39 @@ class BulletComponent: GKComponent, Damaging {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - GameplayKit Update
+    
+    override func update(deltaTime: TimeInterval) {
+        guard let entity = entity,
+              let transform = entity.component(ofType: TransformComponent.self) else { return }
+        
+        // Apply motion modifiers (freeze/time scale, speed scaling, acceleration)
+        let mods = entity.component(ofType: BulletMotionModifiersComponent.self)
+        let timeScale: CGFloat = mods?.timeScale ?? 1.0
+        let speedScale: CGFloat = mods?.speedScale ?? 1.0
+        if timeScale <= 0 { return }
+        
+        // Acceleration
+        if let a = mods?.acceleration, (a.dx != 0 || a.dy != 0) {
+            transform.velocity.dx += a.dx * deltaTime
+            transform.velocity.dy += a.dy * deltaTime
+        }
+        
+        // Angle lock (preserve facing while allowing speed changes)
+        if let angle = mods?.angleLock {
+            let speed = MathUtility.magnitude(transform.velocity)
+            transform.velocity = MathUtility.velocity(angle: angle, speed: speed)
+        }
+        
+        // Update position based on effective velocity
+        transform.position.x += transform.velocity.dx * deltaTime * timeScale * speedScale
+        transform.position.y += transform.velocity.dy * deltaTime * timeScale * speedScale
+        
+        // Mark bullets that are out of bounds for destruction
+        if transform.position.x < 0 || transform.position.x > 384 ||
+           transform.position.y < 0 || transform.position.y > 448 {
+            GameFacade.shared.entities.destroy(entity)
+        }
+    }
 }

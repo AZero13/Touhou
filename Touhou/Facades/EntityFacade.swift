@@ -49,6 +49,9 @@ final class EntityFacade {
             entity.addComponent(PortraitComponent(portraitId: portraitId, side: portraitSide))
         }
         
+        // Register with component systems after entity is fully set up
+        GameFacade.shared.registerEntity(entity)
+        
         return entity
     }
     
@@ -74,6 +77,9 @@ final class EntityFacade {
         if let pattern = pattern {
             entity.addComponent(AIPatternComponent(currentPattern: pattern))
         }
+        
+        // Register with component systems after entity is fully set up
+        GameFacade.shared.registerEntity(entity)
         
         return entity
     }

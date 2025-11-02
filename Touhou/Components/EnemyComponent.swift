@@ -68,4 +68,19 @@ class EnemyComponent: GKComponent, Shootable, Droppable, Scoreable {
     func getBulletCommands(from position: CGPoint, targetPosition: CGPoint?) -> [BulletSpawnCommand] {
         return attackPattern.getBulletCommands(from: position, targetPosition: targetPosition, config: patternConfig)
     }
+    
+    // MARK: - GameplayKit Update
+    
+    override func update(deltaTime: TimeInterval) {
+        guard let entity = entity,
+              let transform = entity.component(ofType: TransformComponent.self) else { return }
+        
+        // Move enemy down
+        transform.position.y += transform.velocity.dy * deltaTime
+        
+        // Mark enemies that go off bottom of screen for destruction
+        if transform.position.y < -50 {
+            GameFacade.shared.entities.destroy(entity)
+        }
+    }
 }

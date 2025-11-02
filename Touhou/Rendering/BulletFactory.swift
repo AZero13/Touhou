@@ -41,6 +41,10 @@ final class BulletFactory {
         bullet.tags = command.tags
         entity.addComponent(bullet)
         entity.addComponent(TransformComponent(position: command.position, velocity: command.velocity))
+        
+        // Register with component systems after entity is fully set up
+        GameFacade.shared.registerEntity(entity)
+        
         return entity
     }
 }

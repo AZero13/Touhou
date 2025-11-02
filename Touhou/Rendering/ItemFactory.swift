@@ -15,6 +15,10 @@ final class ItemFactory {
         let entity = entityManager.createEntity()
         entity.addComponent(ItemComponent(itemType: type, value: 0))
         entity.addComponent(TransformComponent(position: position, velocity: velocity))
+        
+        // Register with component systems after entity is fully set up
+        GameFacade.shared.registerEntity(entity)
+        
         return entity
     }
 }

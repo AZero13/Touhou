@@ -24,6 +24,10 @@ final class EnemyFactory {
         entity.addComponent(TransformComponent(position: position, velocity: CGVector(dx: 0, dy: -50)))
         entity.addComponent(HitboxComponent(enemyHitbox: 12))
         entity.addComponent(HealthComponent(current: 1, max: 1))
+        
+        // Register with component systems after entity is fully set up
+        GameFacade.shared.registerEntity(entity)
+        
         return entity
     }
     
@@ -42,6 +46,10 @@ final class EnemyFactory {
         entity.addComponent(TransformComponent(position: position, velocity: CGVector(dx: 0, dy: 0)))
         entity.addComponent(HitboxComponent(enemyHitbox: 16))
         entity.addComponent(HealthComponent(current: 20, max: 20))
+        
+        // Register with component systems after entity is fully set up
+        GameFacade.shared.registerEntity(entity)
+        
         return entity
     }
 }

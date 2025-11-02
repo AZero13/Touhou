@@ -58,8 +58,11 @@ class GameScene: SKScene, EventListener {
     override func update(_ currentTime: TimeInterval) {
         // Update game logic
         GameFacade.shared.update(currentTime)
-        
-        // Update rendering
+    }
+    
+    override func didFinishUpdate() {
+        // Update rendering after all actions and physics have been processed
+        // This ensures that any position changes from actions won't be overwritten
         if let renderSystem = renderSystem {
             renderSystem.sync(entityManager: GameFacade.shared.getEntityManager(), scene: self)
         }

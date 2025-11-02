@@ -45,9 +45,8 @@ final class HealthSystem: GameSystem {
     private func handleCollisionEvent(_ event: CollisionOccurredEvent) {
         switch event.collisionType {
         case .playerBulletHitEnemy:
-            // entityA is the bullet, entityB is the enemy
-            let hitPosition = event.entityA.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
-            handleEnemyHit(event.entityB, hitPosition: hitPosition)
+            // entityA is the bullet, entityB is the enemy - use captured position from event
+            handleEnemyHit(event.entityB, hitPosition: event.hitPosition)
         case .enemyBulletHitPlayer, .enemyTouchPlayer:
             handlePlayerHit(event.entityB) // entityB is the player
         }

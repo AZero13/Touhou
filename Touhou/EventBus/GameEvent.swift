@@ -61,12 +61,14 @@ struct CollisionOccurredEvent: GameEvent {
     let entityA: GKEntity
     let entityB: GKEntity
     let collisionType: CollisionKind
+    let hitPosition: CGPoint  // Position captured before entity destruction
     
-    init(entityA: GKEntity, entityB: GKEntity, collisionType: CollisionKind) {
+    init(entityA: GKEntity, entityB: GKEntity, collisionType: CollisionKind, hitPosition: CGPoint) {
         self.timestamp = CACurrentMediaTime()
         self.entityA = entityA
         self.entityB = entityB
         self.collisionType = collisionType
+        self.hitPosition = hitPosition
     }
 }
 

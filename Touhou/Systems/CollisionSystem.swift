@@ -140,6 +140,9 @@ final class CollisionSystem: GameSystem {
         
         // Player bullet hits enemy
         if bullet.ownedByPlayer && target.component(ofType: EnemyComponent.self) != nil {
+            // Capture position BEFORE marking for destruction
+            let hitPosition = damagingEntity!.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
+            
             // Immediately mark bullet for destruction (before processing damage)
             entityManager.markForDestruction(damagingEntity!)
             
@@ -147,12 +150,16 @@ final class CollisionSystem: GameSystem {
             eventBus.fire(CollisionOccurredEvent(
                 entityA: damagingEntity!,
                 entityB: targetEntity!,
-                collisionType: .playerBulletHitEnemy
+                collisionType: .playerBulletHitEnemy,
+                hitPosition: hitPosition
             ))
         }
         
         // Enemy bullet hits player
         if !bullet.ownedByPlayer && target.component(ofType: PlayerComponent.self) != nil {
+            // Capture position BEFORE marking for destruction
+            let hitPosition = damagingEntity!.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
+            
             // Mark bullet for destruction
             entityManager.markForDestruction(damagingEntity!)
             
@@ -160,17 +167,22 @@ final class CollisionSystem: GameSystem {
             eventBus.fire(CollisionOccurredEvent(
                 entityA: damagingEntity!,
                 entityB: targetEntity!,
-                collisionType: .enemyBulletHitPlayer
+                collisionType: .enemyBulletHitPlayer,
+                hitPosition: hitPosition
             ))
         }
     }
     
     private func handleEnemyTouchPlayer(enemy: GKEntity, player: GKEntity) {
+        // Capture enemy position (both exist, no destruction needed)
+        let hitPosition = enemy.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
+        
         // Fire collision event for enemy touching player
         eventBus.fire(CollisionOccurredEvent(
             entityA: enemy,
             entityB: player,
-            collisionType: .enemyTouchPlayer
+            collisionType: .enemyTouchPlayer,
+            hitPosition: hitPosition
         ))
     }
 

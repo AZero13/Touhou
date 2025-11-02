@@ -168,6 +168,7 @@ class GameScene: SKScene, EventListener {
         let scaleX = size.width / GameFacade.playArea.width
         let scaleY = size.height / GameFacade.playArea.height
         let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
+        print("DEBUG: Hit effect scene position: \(scenePosition), scene size: \(size)")
         let radius: CGFloat = 4 * max(scaleX, scaleY)  // Small white circle
         let node = SKShapeNode(circleOfRadius: radius)
         node.position = scenePosition

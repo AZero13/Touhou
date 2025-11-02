@@ -12,8 +12,6 @@ import GameplayKit
 /// RenderSystem - handles visual representation of entities
 /// NOT a GameSystem (doesn't participate in ECS update loop)
 final class RenderSystem {
-    private var entityToNode: [GKEntity: SKNode] = [:]
-    
     // Play area dimensions (logical coordinates)
     private var logicalWidth: CGFloat { GameFacade.playArea.width }
     private var logicalHeight: CGFloat { GameFacade.playArea.height }
@@ -26,10 +24,17 @@ final class RenderSystem {
         let scaleX = scene.size.width / logicalWidth
         let scaleY = scene.size.height / logicalHeight
         
-        // Update existing entities
+        // Update all entities with RenderComponent
         for entity in entities {
-            if let node = entityToNode[entity] {
-                // Update position
+            if let render = entity.component(ofType: RenderComponent.self) {
+                let node = render.node
+                
+                // Ensure node is in scene (SpriteKit tree management)
+                if node.parent == nil {
+                    scene.addChild(node)
+                }
+                
+                // Update position from TransformComponent
                 if let transform = entity.component(ofType: TransformComponent.self) {
                     node.position = CGPoint(
                         x: transform.position.x * scaleX,
@@ -38,10 +43,10 @@ final class RenderSystem {
                     node.zRotation = transform.rotation
                 }
             } else {
-                // Create new node
+                // Create RenderComponent for entities that need rendering but don't have one yet
                 if let node = createNode(for: entity) {
-                    entityToNode[entity] = node
-                    scene.addChild(node)
+                    entity.addComponent(RenderComponent(node: node))
+                    // Node will be added to scene on next iteration (when render != nil)
                     
                     // Set initial position
                     if let transform = entity.component(ofType: TransformComponent.self) {
@@ -54,16 +59,8 @@ final class RenderSystem {
             }
         }
         
-        // Remove nodes for destroyed entities
-        let activeEntities = Set(entities)
-        let nodesToRemove = entityToNode.keys.filter { !activeEntities.contains($0) }
-        
-        for entity in nodesToRemove {
-            if let node = entityToNode[entity] {
-                node.removeFromParent()
-                entityToNode.removeValue(forKey: entity)
-            }
-        }
+        // No manual cleanup needed - nodes are removed when RenderComponent is removed
+        // EntityManager handles component removal when entities are destroyed
         
         // Boss health bar overlay (top of screen)
         if let boss = entities.first(where: { $0.component(ofType: BossComponent.self) != nil }) {

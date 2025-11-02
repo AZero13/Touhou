@@ -44,12 +44,24 @@ class EntityManager {
             if entity.component(ofType: PlayerComponent.self) != nil {
                 print("WARNING: Player entity is being destroyed!")
             }
+            // Remove all components to trigger lifecycle methods (willRemoveFromEntity)
+            entity.removeComponent(ofType: RenderComponent.self)
+            entity.removeComponent(ofType: PlayerComponent.self)
+            entity.removeComponent(ofType: EnemyComponent.self)
+            entity.removeComponent(ofType: BulletComponent.self)
+            entity.removeComponent(ofType: ItemComponent.self)
+            entity.removeComponent(ofType: TransformComponent.self)
+            entity.removeComponent(ofType: HealthComponent.self)
+            entity.removeComponent(ofType: HitboxComponent.self)
+            entity.removeComponent(ofType: BossComponent.self)
+            entity.removeComponent(ofType: BulletMotionModifiersComponent.self)
             // Unregister from GameplayKit component systems
             if let facade = gameFacade {
                 facade.unregisterEntity(entity)
             } else {
                 GameFacade.shared.unregisterEntity(entity)
             }
+            // Remove entity from tracking
             if let index = entities.firstIndex(of: entity) {
                 entities.remove(at: index)
             }

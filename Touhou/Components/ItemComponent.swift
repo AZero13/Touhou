@@ -9,6 +9,9 @@ import Foundation
 import GameplayKit
 import CoreGraphics
 
+// MARK: - Enums
+
+/// Types of collectible items
 enum ItemType: String, CaseIterable {
     case power = "power"
     case point = "point"
@@ -16,7 +19,10 @@ enum ItemType: String, CaseIterable {
     case life = "life"
 }
 
-class ItemComponent: GKComponent {
+// MARK: - Component
+
+/// ItemComponent - handles item state, movement, and collection
+final class ItemComponent: GKComponent {
     var itemType: ItemType
     var value: Int
     var isAttractedToPlayer: Bool

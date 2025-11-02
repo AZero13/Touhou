@@ -158,23 +158,9 @@ final class EnemySystem: GameSystem {
     private func spawnEnemy(type: EnemyComponent.EnemyType, position: CGPoint, pattern: EnemyPattern, patternConfig: PatternConfig) {
         switch type {
         case .fairy:
+            // Enemy shooting is now handled in EnemyComponent.update() - no TaskScheduler needed!
             let enemy = EnemyFactory.createFairy(position: position, pattern: pattern, patternConfig: patternConfig, entityManager: entityManager)
-            if let shootable = enemy.component(ofType: EnemyComponent.self) {
-                let scheduler = GameFacade.shared.getTaskScheduler()
-                let steps: [TaskScheduler.Step] = [
-                    .run { entityManager, commandQueue in
-                        // Skip shooting if time is frozen (only scripted boss shooting should happen during freeze)
-                        if GameFacade.shared.isFrozen() {
-                            return
-                        }
-                        guard let t = enemy.component(ofType: TransformComponent.self) else { return }
-                        let playerPosition = PlayerUtility.getPosition(entityManager: entityManager)
-                        let commands = shootable.getBulletCommands(from: t.position, targetPosition: playerPosition)
-                        for c in commands { commandQueue.enqueue(.spawnBullet(c, ownedByPlayer: false)) }
-                    }
-                ]
-                _ = scheduler.schedule(owner: enemy, steps: steps, repeatEvery: shootable.shotInterval)
-            }
+            _ = enemy // Silence unused warning
         default:
             break
         }

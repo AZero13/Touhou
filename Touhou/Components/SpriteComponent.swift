@@ -9,7 +9,8 @@ import Foundation
 import AppKit
 import GameplayKit
 
-class SpriteComponent: GKComponent {
+/// SpriteComponent - handles visual representation metadata
+final class SpriteComponent: GKComponent {
     var textureName: String
     var zIndex: Int
     var color: NSColor?

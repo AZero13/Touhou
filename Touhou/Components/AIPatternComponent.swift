@@ -8,7 +8,8 @@
 import Foundation
 import GameplayKit
 
-class AIPatternComponent: GKComponent {
+/// AIPatternComponent - handles AI pattern state and timing
+final class AIPatternComponent: GKComponent {
     var currentPattern: String // "circle", "aimed", "spiral"
     var patternTimer: TimeInterval
     var phaseIndex: Int

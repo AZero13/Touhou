@@ -9,7 +9,8 @@ import Foundation
 import CoreGraphics
 import GameplayKit
 
-class HitboxComponent: GKComponent {
+/// HitboxComponent - handles collision detection zones for different interaction types
+final class HitboxComponent: GKComponent {
     var playerHitbox: CGFloat?      // tiny 2x2 pixel zone
     var grazeZone: CGFloat?         // 32 pixel radius
     var enemyHitbox: CGFloat?       // for receiving damage

@@ -9,13 +9,18 @@ import Foundation
 import CoreGraphics
 import GameplayKit
 
+// MARK: - Protocols
+
 /// Protocol for entities that can move
 protocol Movable {
     var position: CGPoint { get set }
     var velocity: CGVector { get set }
 }
 
-class TransformComponent: GKComponent, Movable {
+// MARK: - Component
+
+/// TransformComponent - handles entity position, velocity, and rotation
+final class TransformComponent: GKComponent, Movable {
     var position: CGPoint
     var velocity: CGVector
     var rotation: CGFloat = 0

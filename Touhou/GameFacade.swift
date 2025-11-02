@@ -29,7 +29,6 @@ class GameFacade {
     private let entityManager = EntityManager()
     private let eventBus = EventBus()
     private let commandQueue = CommandQueue()
-    private let taskScheduler = TaskScheduler()
     
     // MARK: - Facades (public - simplified APIs)
     private(set) lazy var entities: EntityFacade = {
@@ -124,9 +123,6 @@ class GameFacade {
         
         // Only update game systems if we're in playing state
         if stateMachine.currentState is GamePlayingState {
-            // Run scheduled tasks even during freeze (so freeze scripts can advance to unfreeze)
-            taskScheduler.update(deltaTime: deltaTime, entityManager: entityManager, commandQueue: commandQueue)
-            
             // Update all systems in order (only if not frozen)
             if !isTimeFrozen {
                 // GameplayKit component systems (proper ECS way)
@@ -175,7 +171,6 @@ class GameFacade {
         // Reset world state for a clean start
         clearTransientWorld()
         commandQueue.clear()
-        taskScheduler.reset()
         currentStage = stageId
         eventBus.fire(StageStartedEvent(stageId: stageId))
         lastUpdateTime = CACurrentMediaTime()
@@ -189,7 +184,6 @@ class GameFacade {
         eventBus.fire(StageEndedEvent(stageId: currentStage))
         clearTransientWorld()
         commandQueue.clear()
-        taskScheduler.reset()
         print("Stage \(currentStage) ended")
     }
     
@@ -234,10 +228,6 @@ class GameFacade {
         return commandQueue
     }
     
-    /// @deprecated Use task scheduling facade (to be created)
-    func getTaskScheduler() -> TaskScheduler {
-        return taskScheduler
-    }
     
     /// Register an event listener (still needed for systems)
     func registerListener(_ listener: EventListener) {

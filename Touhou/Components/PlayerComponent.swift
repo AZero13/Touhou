@@ -9,7 +9,8 @@ import Foundation
 import GameplayKit
 import CoreGraphics
 
-class PlayerComponent: GKComponent {
+/// PlayerComponent - handles player state, input, movement, and shooting
+final class PlayerComponent: GKComponent {
     var power: Int
     var lives: Int
     var bombs: Int

@@ -8,7 +8,8 @@
 import Foundation
 import GameplayKit
 
-class BulletSpawnerComponent: GKComponent {
+/// BulletSpawnerComponent - handles automatic bullet pattern spawning
+final class BulletSpawnerComponent: GKComponent {
     var patternToFire: String
     var fireRate: TimeInterval
     var lastFireTime: TimeInterval

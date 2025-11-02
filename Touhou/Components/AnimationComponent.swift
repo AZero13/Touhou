@@ -8,7 +8,8 @@
 import Foundation
 import GameplayKit
 
-class AnimationComponent: GKComponent {
+/// AnimationComponent - handles animation state and frame tracking
+final class AnimationComponent: GKComponent {
     var currentState: String // "idle", "moving", "shooting"
     var frameTimer: TimeInterval
     var frameIndex: Int

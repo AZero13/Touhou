@@ -18,6 +18,14 @@ final class BulletMotionModifiersComponent: GKComponent {
     var angleLock: CGFloat?
     /// Optional acceleration applied in movement system (units per second^2)
     var acceleration: CGVector = .zero
+    
+    override init() {
+        super.init()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 

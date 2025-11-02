@@ -23,6 +23,7 @@ class ViewController: NSViewController, EventListener {
     // MARK: - UI flash tasks
     private var scoreFlashTask: Task<Void, Never>?
     private var highScoreFlashTask: Task<Void, Never>?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -30,12 +31,50 @@ class ViewController: NSViewController, EventListener {
         GameplayView.showsNodeCount = true
         GameplayView.ignoresSiblingOrder = true
         
-        // Configure scene coordinator and present initial gameplay scene
-        SceneCoordinator.shared.configure(with: GameplayView)
-        SceneCoordinator.shared.presentGameplayScene()
+        // Present initial gameplay scene
+        presentGameplayScene()
         
         // Register for game events to keep UI in sync
         GameFacade.shared.registerListener(self)
+    }
+    
+    // MARK: - Scene Presentation
+    
+    private func presentGameplayScene(transition: SKTransition? = nil) {
+        let scene = GameScene()
+        scene.scaleMode = .aspectFill
+        scene.size = GameplayView.bounds.size
+        if let t = transition {
+            GameplayView.presentScene(scene, transition: t)
+        } else {
+            GameplayView.presentScene(scene)
+        }
+    }
+    
+    private func presentWinScene(totalScore: Int) {
+        let scene = WinScene(totalScore: totalScore) { [weak self] in
+            GameFacade.shared.startNewRun()
+            let fade = SKTransition.fade(withDuration: 1.0)
+            self?.presentGameplayScene(transition: fade)
+        }
+        scene.scaleMode = .aspectFill
+        scene.size = GameplayView.bounds.size
+        GameplayView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
+    }
+    
+    private func presentScoreScene(totalScore: Int, nextStageId: Int) {
+        if nextStageId > GameFacade.maxStage {
+            presentWinScene(totalScore: totalScore)
+            return
+        }
+        let scene = ScoreScene(totalScore: totalScore, nextStageId: nextStageId) { [weak self] in
+            GameFacade.shared.startStage(stageId: nextStageId)
+            let fade = SKTransition.fade(withDuration: 1.0)
+            self?.presentGameplayScene(transition: fade)
+        }
+        scene.scaleMode = .aspectFill
+        scene.size = GameplayView.bounds.size
+        GameplayView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
     }
     
 
@@ -67,6 +106,11 @@ class ViewController: NSViewController, EventListener {
             if e.value > 0 {
                 self.ValueLabel.stringValue = "VALUE: \(e.value)"
             }
+        case let e as StageTransitionEvent:
+            // When a stage transitions, show intermediate score scene
+            let score = GameFacade.shared.entities.getPlayer()?
+                .component(ofType: PlayerComponent.self)?.score ?? 0
+            presentScoreScene(totalScore: score, nextStageId: e.nextStageId)
         default:
             break
         }

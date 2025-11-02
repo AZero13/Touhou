@@ -31,7 +31,7 @@ final class GameIntermissionState: GKState {
         if input.enter.justPressed || input.shoot.justPressed {
             guard let next = gameFacade.getPendingNextStageId() else { return }
             if next > GameFacade.maxStage {
-                // End-of-run win handling: let SceneCoordinator present win based on prior events
+                // End-of-run win handling: ViewController presents win scene
                 gameFacade.endStage()
             } else {
                 gameFacade.startStage(stageId: next)

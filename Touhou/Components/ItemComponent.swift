@@ -22,10 +22,16 @@ enum ItemType: String, CaseIterable {
 // MARK: - Component
 
 /// ItemComponent - handles item state, movement, and collection
+/// TH06-style physics: items accelerate upward until reaching max speed, then fall at that speed
 final class ItemComponent: GKComponent {
     var itemType: ItemType
     var value: Int
     var isAttractedToPlayer: Bool
+    
+    // TH06-style physics: items accelerate upward, then fall
+    // Scaled up from TH06 values (-2.2 → 3.0, 0.03/frame) for visibility
+    private let maxDownwardVelocity: CGFloat = -100   // Cap velocity (negative = down in SpriteKit)
+    private let accelerationRate: CGFloat = -30      // Acceleration per second (negative = toward down)
     
     init(itemType: ItemType, value: Int, isAttractedToPlayer: Bool = false) {
         self.itemType = itemType
@@ -44,11 +50,18 @@ final class ItemComponent: GKComponent {
         guard let entity = entity,
               let transform = entity.component(ofType: TransformComponent.self) else { return }
         
-        // Basic downward drift
+        // TH06-style: accelerate velocity.y toward maxDownwardVelocity
+        // Velocity starts positive (40) and decreases toward maxDownwardVelocity (-100)
+        // Items rise up, then fall down as velocity crosses zero and becomes negative
+        if transform.velocity.dy > maxDownwardVelocity {
+            transform.velocity.dy = max(maxDownwardVelocity, transform.velocity.dy + accelerationRate * deltaTime)
+        }
+        
+        // Move based on velocity
         transform.position.y += transform.velocity.dy * deltaTime
         
-        // Despawn off-screen
-        if transform.position.y < -50 {
+        // Despawn off-screen (TH06 style: bottom or top out of bounds)
+        if transform.position.y < -50 || transform.position.y > 448 {
             GameFacade.shared.entities.destroy(entity)
             return
         }

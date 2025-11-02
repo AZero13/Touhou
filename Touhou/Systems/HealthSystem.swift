@@ -69,7 +69,8 @@ final class HealthSystem: GameSystem {
         // Spawn item drop if enemy has one
         if let itemType = event.dropItem,
            let transform = event.entity.component(ofType: TransformComponent.self) {
-            GameFacade.shared.entities.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: -50))
+            // Initial upward velocity - brief pop then fall
+            GameFacade.shared.entities.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: 40))
         }
     }
     

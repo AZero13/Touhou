@@ -17,29 +17,29 @@ class GameScene: SKScene, EventListener {
     private var closeLabel: SKLabelNode?
     private var restartLabel: SKLabelNode?
     
-    // Layers (following SpriteKit best practices for organizing content)
+    // Layers
     private var worldLayer: SKNode!      // Game entities: bullets, enemies, player, items
     private var bossLayer: SKNode!       // Boss-specific content: boss health bar, phase effects
     private var effectLayer: SKNode!     // Transient visual effects: graze, hits
     private var uiLayer: SKNode!         // Persistent UI: pause menu, score display
     
-    // Cached actions for effects (created once, reused many times)
+    // Cached actions for effects
     private var grazeEffectAction: SKAction!
     private var hitEffectAction: SKAction!
     private var grazeSoundAction: SKAction!
     
     override func didMove(to view: SKView) {
-        // Set background color
         backgroundColor = SKColor.black
         
         // Initialize render system
         renderSystem = RenderSystem()
         
-        // Create layers for organizing content (following SpriteKit best practices)
+        // World layer
         worldLayer = SKNode()
         worldLayer.name = "worldLayer"
         addChild(worldLayer)
         
+        // Boss UI (healthbar)
         bossLayer = SKNode()
         bossLayer.name = "bossLayer"
         bossLayer.isHidden = true  // Hidden until boss appears

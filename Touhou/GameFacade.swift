@@ -142,19 +142,9 @@ class GameFacade {
     
     // MARK: - Game Control
     func restartGame() {
-        // Clear all entities (player will be respawned by PlayerSystem)
-        let allEntities = entityManager.getAllEntities()
-        for entity in allEntities {
-            entityManager.markForDestruction(entity)
-        }
-
-        // Clean up immediately (processEvents happens once per frame in update loop)
-        entityManager.destroyMarkedEntities()
-        
-        lastUpdateTime = CACurrentMediaTime()
-        
-        // PlayerSystem will respawn player on next update
-        print("Game restarted")
+        // Restart the current stage from the beginning
+        startStage(stageId: currentStage)
+        print("Game restarted from stage \(currentStage)")
     }
     
     // MARK: - Stage Lifecycle

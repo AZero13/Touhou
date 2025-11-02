@@ -65,8 +65,7 @@ class GamePausedState: GKState {
         case .close:
             stateMachine?.enter(GamePlayingState.self)
         case .restart:
-            gameFacade.startNewRun()
-            stateMachine?.enter(GamePlayingState.self)
+            gameFacade.restartGame()
         }
     }
     

@@ -50,7 +50,7 @@ final class EnemySystem: GameSystem {
             BulletUtility.clearBullets(entityManager: entityManager)
             
             // Use facade for boss creation
-            let boss = GameFacade.shared.entities.spawnBoss(
+            _ = GameFacade.shared.entities.spawnBoss(
                 name: "Stage Boss",
                 health: 300,
                 position: CGPoint(x: 192, y: 360),

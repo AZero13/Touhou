@@ -51,7 +51,6 @@ class GameFacade {
     // MARK: - Game State
     private var lastUpdateTime: TimeInterval = 0
     private var currentStage: Int = 1
-    private var pendingNextStageId: Int?
     private var isTimeFrozen: Bool = false
     
     // MARK: - Setup
@@ -59,8 +58,7 @@ class GameFacade {
         let notStartedState = GameNotStartedState(gameFacade: self)
         let playingState = GamePlayingState(gameFacade: self)
         let pausedState = GamePausedState(gameFacade: self)
-        let intermissionState = GameIntermissionState(gameFacade: self)
-        stateMachine = GKStateMachine(states: [notStartedState, playingState, pausedState, intermissionState])
+        stateMachine = GKStateMachine(states: [notStartedState, playingState, pausedState])
         stateMachine.enter(GameNotStartedState.self)
     }
     
@@ -158,7 +156,6 @@ class GameFacade {
         clearTransientWorld()
         commandQueue.clear()
         currentStage = stageId
-        pendingNextStageId = nil // Clear any pending transitions
         eventBus.fire(StageStartedEvent(stageId: stageId))
         // Process events immediately to ensure systems reset their state before next frame
         eventBus.processEvents()
@@ -175,14 +172,6 @@ class GameFacade {
         commandQueue.clear()
         print("Stage \(currentStage) ended")
     }
-    
-    // MARK: - Intermission
-    func enterIntermission(nextStageId: Int) {
-        pendingNextStageId = nextStageId
-        stateMachine.enter(GameIntermissionState.self)
-    }
-    
-    func getPendingNextStageId() -> Int? { pendingNextStageId }
     
     private func clearTransientWorld() {
         // Remove bullets, enemies, items, and spawners; keep persistent/player

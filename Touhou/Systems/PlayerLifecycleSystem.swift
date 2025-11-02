@@ -62,11 +62,13 @@ final class PlayerLifecycleSystem: GameSystem {
                 let area = GameFacade.playArea
                 transform.position = CGPoint(x: area.midX, y: area.minY + Tuning.spawnYOffset)
             }
-            // Starting a new run (stage 1): reset bombs and score
+            // Starting a new run (stage 1): reset lives, bombs, and score
             if e.stageId == 1, let entity = playerEntity,
                let player = entity.component(ofType: PlayerComponent.self) {
+                player.lives = 3
                 player.bombs = 3
                 player.score = 0
+                eventBus.fire(LivesChangedEvent(newTotal: player.lives))
                 eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
                 eventBus.fire(ScoreChangedEvent(newTotal: player.score))
             }

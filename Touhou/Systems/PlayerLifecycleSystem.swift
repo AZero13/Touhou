@@ -44,20 +44,24 @@ final class PlayerLifecycleSystem: GameSystem {
         case let e as PlayerRespawnedEvent:
             // Player respawned (e.g., after losing a life) - reset position
             resetPlayerPosition(entity: e.entity)
-        case is StageStartedEvent:
+        case let e as StageStartedEvent:
             // New stage: reset position to start
             if let entity = playerEntity {
                 resetPlayerPosition(entity: entity)
+            }
+            // Stage 1 = new run: reset stats
+            if e.stageId == 1 {
+                resetPlayerStats()
             }
         default:
             break
         }
     }
     
-    // MARK: - Public Methods
+    // MARK: - Private Methods
     
     /// Reset player stats to initial values (for new run)
-    func resetPlayerStats() {
+    private func resetPlayerStats() {
         guard let entity = playerEntity,
               let player = entity.component(ofType: PlayerComponent.self) else { return }
         player.lives = 3
@@ -67,8 +71,6 @@ final class PlayerLifecycleSystem: GameSystem {
         eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
         eventBus.fire(ScoreChangedEvent(newTotal: player.score))
     }
-    
-    // MARK: - Private Methods
     
     private func spawnPlayer() {
         let entity = entityManager.createEntity()

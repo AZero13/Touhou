@@ -44,7 +44,6 @@ class GameFacade {
     
     // MARK: - Cross-Cutting Systems (handle multi-entity concerns)
     private var crossCuttingSystems: [GameSystem] = []
-    private var playerLifecycleSystem: PlayerLifecycleSystem!
     
     // MARK: - Game State Machine
     private var stateMachine: GKStateMachine!
@@ -73,8 +72,7 @@ class GameFacade {
         ]
         
         // Cross-cutting systems (handle interactions between entities)
-        playerLifecycleSystem = PlayerLifecycleSystem()
-        addCrossCuttingSystem(playerLifecycleSystem) // Player spawning/lifecycle only
+        addCrossCuttingSystem(PlayerLifecycleSystem()) // Player spawning/lifecycle only
         addCrossCuttingSystem(EnemySystem())           // Enemy spawning/AI (movement now in component)
         addCrossCuttingSystem(BulletHomingSystem())    // Homing before bullet movement
         addCrossCuttingSystem(CollisionSystem())       // Detect collisions
@@ -150,8 +148,6 @@ class GameFacade {
     // MARK: - Stage Lifecycle
     func startNewRun() {
         currentStage = 1
-        // Reset player stats for new run
-        playerLifecycleSystem.resetPlayerStats()
         startStage(stageId: currentStage)
     }
     

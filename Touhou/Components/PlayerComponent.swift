@@ -18,6 +18,9 @@ final class PlayerComponent: GKComponent {
     var score: Int
     var powerItemCountForScore: Int // For tracking power items collected when at full power
     
+    // Visual size (matches the rendered sprite radius)
+    var visualRadius: CGFloat = 8.0
+    
     // Internal state for update logic
     private var lastShotTime: TimeInterval = 0
     
@@ -84,10 +87,10 @@ final class PlayerComponent: GKComponent {
         transform.position.x += movement.dx
         transform.position.y += movement.dy
         
-        // Clamp to logical play area bounds
+        // Clamp to logical play area bounds (accounting for player visual radius)
         let area = GameFacade.playArea
-        transform.position.x = max(area.minX, min(area.maxX, transform.position.x))
-        transform.position.y = max(area.minY, min(area.maxY, transform.position.y))
+        transform.position.x = max(area.minX + visualRadius, min(area.maxX - visualRadius, transform.position.x))
+        transform.position.y = max(area.minY + visualRadius, min(area.maxY - visualRadius, transform.position.y))
         
         // Update focus state
         isFocused = input.focus.isPressed

@@ -114,7 +114,7 @@ final class RenderSystem {
     private func createNode(for entity: GKEntity) -> SKNode? {
         // Determine entity type and create appropriate node
         if entity.component(ofType: PlayerComponent.self) != nil {
-            return createPlayerNode()
+            return createPlayerNode(for: entity)
         } else if let bullet = entity.component(ofType: BulletComponent.self) {
             return createBulletNode(for: bullet)
         } else if entity.component(ofType: EnemyComponent.self) != nil {
@@ -126,8 +126,10 @@ final class RenderSystem {
         return nil
     }
     
-    private func createPlayerNode() -> SKNode {
-        let circle = SKShapeNode(circleOfRadius: 8)
+    private func createPlayerNode(for entity: GKEntity) -> SKNode {
+        // Get visual radius from PlayerComponent (component owns visual size)
+        let radius = entity.component(ofType: PlayerComponent.self)?.visualRadius ?? 8.0
+        let circle = SKShapeNode(circleOfRadius: radius)
         circle.fillColor = .white
         circle.strokeColor = .clear
         circle.zPosition = 100

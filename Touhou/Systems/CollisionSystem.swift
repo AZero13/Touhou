@@ -93,18 +93,31 @@ final class CollisionSystem: GameSystem {
     }
     
     private func getCollisionRadius(for entity: GKEntity) -> CGFloat {
-        // Determine collision radius based on entity type
-        if entity.component(ofType: PlayerComponent.self) != nil {
-            return 8.0 // Player radius
-        } else if entity.component(ofType: BulletComponent.self) != nil {
-            return 3.0 // Bullet radius
-        } else if entity.component(ofType: EnemyComponent.self) != nil {
-            return 12.0 // Enemy radius
-        } else if entity.component(ofType: ItemComponent.self) != nil {
-            return 6.0 // Item radius
+        // Prefer HitboxComponent if present for accurate collision detection
+        if let hitbox = entity.component(ofType: HitboxComponent.self) {
+            if entity.component(ofType: PlayerComponent.self) != nil {
+                return hitbox.playerHitbox ?? 8.0  // Use playerHitbox if specified
+            } else if entity.component(ofType: BulletComponent.self) != nil {
+                return hitbox.bulletHitbox ?? 3.0  // Use bulletHitbox if specified
+            } else if entity.component(ofType: EnemyComponent.self) != nil {
+                return hitbox.enemyHitbox ?? 12.0  // Use enemyHitbox if specified
+            } else if entity.component(ofType: ItemComponent.self) != nil {
+                return hitbox.itemCollectionZone ?? 6.0  // Use itemCollectionZone if specified
+            }
         }
         
-        return 5.0 // Default radius
+        // Fallback to defaults based on entity type
+        if entity.component(ofType: PlayerComponent.self) != nil {
+            return 8.0  // Player radius default
+        } else if entity.component(ofType: BulletComponent.self) != nil {
+            return 3.0  // Bullet radius default
+        } else if entity.component(ofType: EnemyComponent.self) != nil {
+            return 12.0  // Enemy radius default
+        } else if entity.component(ofType: ItemComponent.self) != nil {
+            return 6.0  // Item radius default
+        }
+        
+        return 5.0  // Generic default radius
     }
     
     private func handleCollision(entityA: GKEntity, entityB: GKEntity) {

@@ -60,6 +60,8 @@ class GameScene: SKScene, EventListener {
             self.updatePauseMenuSelection(selectedOption: e.selectedOption)
         case let e as GrazeEvent:
             self.playGrazeEffect(for: e.bulletEntity)
+        case let e as EnemyHitEvent:
+            self.showHitEffect(atLogical: e.hitPosition)
         default:
             break
         }
@@ -160,5 +162,27 @@ class GameScene: SKScene, EventListener {
         let group = SKAction.group([expand, fade])
         node.run(.sequence([group, .removeFromParent()]))
         run(SKAction.playSoundFileNamed("graze.caf", waitForCompletion: false))
+    }
+    
+    private func showHitEffect(atLogical position: CGPoint) {
+        let scaleX = size.width / GameFacade.playArea.width
+        let scaleY = size.height / GameFacade.playArea.height
+        let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
+        let radius: CGFloat = 4 * max(scaleX, scaleY)  // Small white circle
+        let node = SKShapeNode(circleOfRadius: radius)
+        node.position = scenePosition
+        node.strokeColor = .white
+        node.lineWidth = 1.5
+        node.fillColor = .clear
+        node.alpha = 1.0
+        node.zPosition = 300  // Above everything
+        addChild(node)
+        let expand = SKAction.scale(to: 3.0, duration: 0.15)  // Expand 3x
+        let fade = SKAction.fadeOut(withDuration: 0.15)
+        let group = SKAction.group([expand, fade])
+        node.run(.sequence([group, .removeFromParent()]))
+        
+        // TODO: Add sound effect here when sound file is ready
+        // run(SKAction.playSoundFileNamed("hit.caf", waitForCompletion: false))
     }
 }

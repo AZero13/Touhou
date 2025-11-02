@@ -36,7 +36,6 @@ final class CollisionSystem: GameSystem {
             
             for enemy in enemies {
                 if checkCollision(entityA: bullet, entityB: enemy) {
-                    print("Player bullet hit enemy")
                     handleCollision(entityA: bullet, entityB: enemy)
                 }
             }
@@ -61,7 +60,6 @@ final class CollisionSystem: GameSystem {
         for enemy in enemies {
             for player in players {
                 if checkCollision(entityA: enemy, entityB: player) {
-                    print("Enemy touched player")
                     handleEnemyTouchPlayer(enemy: enemy, player: player)
                 }
             }
@@ -129,12 +127,10 @@ final class CollisionSystem: GameSystem {
         
         // Player bullet hits enemy
         if bullet.ownedByPlayer && target.component(ofType: EnemyComponent.self) != nil {
-            print("Firing collision event: playerBulletHitEnemy")
-            
-            // Mark bullet for destruction
+            // Immediately mark bullet for destruction (before processing damage)
             entityManager.markForDestruction(damagingEntity!)
             
-            // Fire collision event
+            // Fire collision event (damage will be processed by HealthSystem)
             eventBus.fire(CollisionOccurredEvent(
                 entityA: damagingEntity!,
                 entityB: targetEntity!,
@@ -144,8 +140,6 @@ final class CollisionSystem: GameSystem {
         
         // Enemy bullet hits player
         if !bullet.ownedByPlayer && target.component(ofType: PlayerComponent.self) != nil {
-            print("Firing collision event: enemyBulletHitPlayer")
-            
             // Mark bullet for destruction
             entityManager.markForDestruction(damagingEntity!)
             

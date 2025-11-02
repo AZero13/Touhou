@@ -107,6 +107,18 @@ struct GrazeEvent: GameEvent {
     }
 }
 
+struct EnemyHitEvent: GameEvent {
+    let timestamp: TimeInterval
+    let enemyEntity: GKEntity
+    let hitPosition: CGPoint  // Position where the hit occurred (bullet position)
+    
+    init(enemyEntity: GKEntity, hitPosition: CGPoint) {
+        self.timestamp = CACurrentMediaTime()
+        self.enemyEntity = enemyEntity
+        self.hitPosition = hitPosition
+    }
+}
+
 struct ScoreChangedEvent: GameEvent {
     let timestamp: TimeInterval
     let newTotal: Int

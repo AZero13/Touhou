@@ -34,7 +34,6 @@ final class HealthSystem: GameSystem {
     
     func handleEvent(_ event: GameEvent) {
         if let collisionEvent = event as? CollisionOccurredEvent {
-            print("📨 HealthSystem received collision event: \(collisionEvent.collisionType)")
             handleCollisionEvent(collisionEvent)
         } else if let died = event as? EnemyDiedEvent {
             // Handle item drops when enemy dies
@@ -46,13 +45,18 @@ final class HealthSystem: GameSystem {
     private func handleCollisionEvent(_ event: CollisionOccurredEvent) {
         switch event.collisionType {
         case .playerBulletHitEnemy:
-            handleEnemyHit(event.entityB) // entityB is the enemy
+            // entityA is the bullet, entityB is the enemy
+            let hitPosition = event.entityA.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
+            handleEnemyHit(event.entityB, hitPosition: hitPosition)
         case .enemyBulletHitPlayer, .enemyTouchPlayer:
             handlePlayerHit(event.entityB) // entityB is the player
         }
     }
     
-    private func handleEnemyHit(_ enemyEntity: GKEntity) {
+    private func handleEnemyHit(_ enemyEntity: GKEntity, hitPosition: CGPoint) {
+        // Fire hit effect event for visuals with the actual collision point
+        eventBus.fire(EnemyHitEvent(enemyEntity: enemyEntity, hitPosition: hitPosition))
+        
         // Use combat facade to apply damage
         GameFacade.shared.combat.damage(enemyEntity, amount: 1)
     }

@@ -41,7 +41,7 @@ class GameScene: SKScene, EventListener {
         // Update game logic
         GameFacade.shared.update(currentTime)
         
-        // Update rendering (still needs direct EntityManager access for now)
+        // Update rendering
         if let renderSystem = renderSystem {
             renderSystem.sync(entityManager: GameFacade.shared.getEntityManager(), scene: self)
         }

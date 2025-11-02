@@ -50,7 +50,7 @@ final class EnemySystem: GameSystem {
             }
             
             // Despawn all bullets
-            CommandQueue.despawnAllBullets(entityManager: entityManager)
+            BulletUtility.clearBullets(entityManager: entityManager)
             
             let boss = EnemyFactory.createBoss(name: "Stage Boss", position: CGPoint(x: 192, y: 360), entityManager: entityManager)
             bossSpawned = true

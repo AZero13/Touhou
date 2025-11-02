@@ -234,6 +234,45 @@ struct ShowDialogueEvent: GameEvent {
     }
 }
 
+// MARK: - Dialogue Events
+
+enum DialogueEvent: GameEvent {
+    case showDialogue(text: String, speaker: String?, portraitId: String?, autoAdvanceDelay: TimeInterval?)
+    case queueDialogue(entries: [DialogueEntry])
+    case advanceDialogue
+    case clearDialogue
+    
+    var timestamp: TimeInterval {
+        return CACurrentMediaTime()
+    }
+}
+
+struct DialogueDisplayEvent: GameEvent {
+    let timestamp: TimeInterval
+    let entry: DialogueEntry
+    
+    init(entry: DialogueEntry) {
+        self.timestamp = CACurrentMediaTime()
+        self.entry = entry
+    }
+}
+
+struct DialogueClearedEvent: GameEvent {
+    let timestamp: TimeInterval
+    
+    init() {
+        self.timestamp = CACurrentMediaTime()
+    }
+}
+
+// Forward declaration - defined in DialogueSystem.swift
+struct DialogueEntry {
+    let text: String
+    let speaker: String?
+    let portraitId: String?
+    let autoAdvanceDelay: TimeInterval?
+}
+
 struct PlaySoundEffectEvent: GameEvent {
     let timestamp: TimeInterval
     let sfxName: String

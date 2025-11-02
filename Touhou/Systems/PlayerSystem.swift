@@ -199,7 +199,7 @@ final class PlayerSystem: GameSystem {
         
         // Clear enemy bullets immediately
         if Tuning.bombClearEnemyBullets {
-            CommandQueue.despawnAllBullets(entityManager: entityManager) { !$0.ownedByPlayer }
+            BulletUtility.clearEnemyBullets(entityManager: entityManager)
         }
     }
 }

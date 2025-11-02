@@ -87,29 +87,19 @@ enum EnemyPattern: CaseIterable {
                 return EnemyPattern.singleShot.getBulletCommands(from: position, config: config)
             }
             
-            let dx = target.x - position.x
-            let dy = target.y - position.y
-            let distance = sqrt(dx * dx + dy * dy)
             let speed = config.physics.speed
+            let velocity = MathUtility.velocity(from: position, to: target, speed: speed)
             
-            if distance > 0 {
-                let velocity = CGVector(
-                    dx: (dx / distance) * speed,
-                    dy: (dy / distance) * speed
+            return [
+                BulletSpawnCommand(
+                    position: position,
+                    velocity: velocity,
+                    bulletType: .enemyBullet,
+                    physics: config.physics,
+                    visual: config.visual,
+                    behavior: config.behavior
                 )
-                
-                return [
-                    BulletSpawnCommand(
-                        position: position,
-                        velocity: velocity,
-                        bulletType: .enemyBullet,
-                        physics: config.physics,
-                        visual: config.visual,
-                        behavior: config.behavior
-                    )
-                ]
-            }
-            return []
+            ]
             
         case .spiralShot:
             var commands: [BulletSpawnCommand] = []

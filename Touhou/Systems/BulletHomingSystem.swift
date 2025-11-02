@@ -44,11 +44,9 @@ final class BulletHomingSystem: GameSystem {
                             continue
                         }
                     }
-                    let toTarget = CGVector(dx: targetPosition.x - transform.position.x,
-                                             dy: targetPosition.y - transform.position.y)
-                    let angle = atan2(toTarget.dy, toTarget.dx) + bullet.rotationOffset
-                    let speed = sqrt(transform.velocity.dx * transform.velocity.dx + transform.velocity.dy * transform.velocity.dy)
-                    transform.velocity = CGVector(dx: cos(angle) * speed, dy: sin(angle) * speed)
+                    let angle = MathUtility.angle(from: transform.position, to: targetPosition) + bullet.rotationOffset
+                    let speed = MathUtility.magnitude(transform.velocity)
+                    transform.velocity = MathUtility.velocity(angle: angle, speed: speed)
                     bullet.retargetedCount += 1
                     bullet.retargetTimer += max(0, interval)
                 }
@@ -59,42 +57,14 @@ final class BulletHomingSystem: GameSystem {
             guard let homingStrength = bullet.homingStrength,
                   let maxTurnRate = bullet.maxTurnRate else { continue }
 
-            // Calculate direction to target
-            let directionToTarget = CGVector(
-                dx: targetPosition.x - transform.position.x,
-                dy: targetPosition.y - transform.position.y
-            )
-            
-            // Normalize direction
-            let distance = sqrt(directionToTarget.dx * directionToTarget.dx + directionToTarget.dy * directionToTarget.dy)
-            guard distance > 0 else { continue }
-            
-            let normalizedDirection = CGVector(
-                dx: directionToTarget.dx / distance,
-                dy: directionToTarget.dy / distance
-            )
-            
-            // Calculate desired velocity
-            let speed = sqrt(transform.velocity.dx * transform.velocity.dx + transform.velocity.dy * transform.velocity.dy)
-            let desiredVelocity = CGVector(
-                dx: normalizedDirection.dx * speed,
-                dy: normalizedDirection.dy * speed
-            )
-            
-            // Gradually turn towards target (limited by maxTurnRate)
-            let currentDirection = CGVector(
-                dx: transform.velocity.dx / speed,
-                dy: transform.velocity.dy / speed
-            )
+            // Calculate desired velocity towards target
+            let speed = MathUtility.magnitude(transform.velocity)
+            let desiredVelocity = MathUtility.velocity(from: transform.position, to: targetPosition, speed: speed)
             
             // Calculate angle difference
-            let currentAngle = atan2(currentDirection.dy, currentDirection.dx)
-            let targetAngle = atan2(desiredVelocity.dy, desiredVelocity.dx)
-            var angleDiff = targetAngle - currentAngle
-            
-            // Normalize angle difference to [-π, π]
-            while angleDiff > .pi { angleDiff -= 2 * .pi }
-            while angleDiff < -.pi { angleDiff += 2 * .pi }
+            let currentAngle = MathUtility.angle(of: transform.velocity)
+            let targetAngle = MathUtility.angle(of: desiredVelocity)
+            let angleDiff = MathUtility.angleDifference(from: currentAngle, to: targetAngle)
             
             // Limit turn rate
             let maxTurnThisFrame = maxTurnRate * deltaTime
@@ -105,10 +75,7 @@ final class BulletHomingSystem: GameSystem {
             
             // Rotate velocity vector
             let newAngle = currentAngle + turnAmount
-            transform.velocity = CGVector(
-                dx: cos(newAngle) * speed,
-                dy: sin(newAngle) * speed
-            )
+            transform.velocity = MathUtility.velocity(angle: newAngle, speed: speed)
         }
     }
     
@@ -128,10 +95,7 @@ final class BulletHomingSystem: GameSystem {
             for enemy in enemies {
                 guard let enemyTransform = enemy.component(ofType: TransformComponent.self) else { continue }
                 
-                let distance = sqrt(
-                    pow(enemyTransform.position.x - position.x, 2) +
-                    pow(enemyTransform.position.y - position.y, 2)
-                )
+                let distance = MathUtility.distance(from: position, to: enemyTransform.position)
                 
                 if distance < nearestDistance {
                     nearestDistance = distance

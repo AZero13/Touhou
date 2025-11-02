@@ -37,9 +37,8 @@ final class BulletSystem: GameSystem {
             }
             // Angle lock (preserve facing while allowing speed changes)
             if let angle = mods?.angleLock {
-                let speed = sqrt(transform.velocity.dx * transform.velocity.dx + transform.velocity.dy * transform.velocity.dy)
-                transform.velocity.dx = cos(angle) * speed
-                transform.velocity.dy = sin(angle) * speed
+                let speed = MathUtility.magnitude(transform.velocity)
+                transform.velocity = MathUtility.velocity(angle: angle, speed: speed)
             }
             
             // Update position based on effective velocity
@@ -58,7 +57,7 @@ final class BulletSystem: GameSystem {
         // Handle bomb events to clear bullets
         if event is BombActivatedEvent {
             // Clear all enemy bullets
-            CommandQueue.despawnAllBullets(entityManager: entityManager) { !$0.ownedByPlayer }
+            BulletUtility.clearEnemyBullets(entityManager: entityManager)
         }
     }
 }

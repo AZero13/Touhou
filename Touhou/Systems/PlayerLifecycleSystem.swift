@@ -41,40 +41,31 @@ final class PlayerLifecycleSystem: GameSystem {
     
     func handleEvent(_ event: GameEvent) {
         switch event {
-        case is GameResumedEvent:
-            // After unpausing, guarantee the player entity exists
-            if playerEntity == nil {
-                spawnPlayer()
-            } else if let player = playerEntity,
-                      !entityManager.getAllEntities().contains(player) {
-                spawnPlayer()
-            }
-        case let e as StageStartedEvent:
-            // New stage: ensure player is present and reset position to start
-            if playerEntity == nil {
-                spawnPlayer()
-            } else if let player = playerEntity,
-                      !entityManager.getAllEntities().contains(player) {
-                spawnPlayer()
-            }
-            if let entity = playerEntity,
-               let transform = entity.component(ofType: TransformComponent.self) {
-                let area = GameFacade.playArea
-                transform.position = CGPoint(x: area.midX, y: area.minY + Tuning.spawnYOffset)
-            }
-            // Starting a new run (stage 1): reset lives, bombs, and score
-            if e.stageId == 1, let entity = playerEntity,
-               let player = entity.component(ofType: PlayerComponent.self) {
-                player.lives = 3
-                player.bombs = 3
-                player.score = 0
-                eventBus.fire(LivesChangedEvent(newTotal: player.lives))
-                eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
-                eventBus.fire(ScoreChangedEvent(newTotal: player.score))
+        case let e as PlayerRespawnedEvent:
+            // Player respawned (e.g., after losing a life) - reset position
+            resetPlayerPosition(entity: e.entity)
+        case is StageStartedEvent:
+            // New stage: reset position to start
+            if let entity = playerEntity {
+                resetPlayerPosition(entity: entity)
             }
         default:
             break
         }
+    }
+    
+    // MARK: - Public Methods
+    
+    /// Reset player stats to initial values (for new run)
+    func resetPlayerStats() {
+        guard let entity = playerEntity,
+              let player = entity.component(ofType: PlayerComponent.self) else { return }
+        player.lives = 3
+        player.bombs = 3
+        player.score = 0
+        eventBus.fire(LivesChangedEvent(newTotal: player.lives))
+        eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
+        eventBus.fire(ScoreChangedEvent(newTotal: player.score))
     }
     
     // MARK: - Private Methods
@@ -87,15 +78,24 @@ final class PlayerLifecycleSystem: GameSystem {
         print("Player created with lives: \(playerComponent.lives)")
         
         entity.addComponent(playerComponent)
-        let area = GameFacade.playArea
-        let spawnPosition = CGPoint(x: area.midX, y: area.minY + Tuning.spawnYOffset)
-        entity.addComponent(TransformComponent(position: spawnPosition))
+        resetPlayerPosition(entity: entity)
         entity.addComponent(HitboxComponent(playerHitbox: Tuning.playerHitbox, grazeZone: Tuning.grazeHitbox))
         
         // Register with component systems after entity is fully set up
         GameFacade.shared.registerEntity(entity)
         
         playerEntity = entity
+    }
+    
+    /// Reset player position to starting spawn position
+    private func resetPlayerPosition(entity: GKEntity) {
+        let area = GameFacade.playArea
+        let spawnPosition = CGPoint(x: area.midX, y: area.minY + Tuning.spawnYOffset)
+        if let existingTransform = entity.component(ofType: TransformComponent.self) {
+            existingTransform.position = spawnPosition
+        } else {
+            entity.addComponent(TransformComponent(position: spawnPosition))
+        }
     }
 }
 

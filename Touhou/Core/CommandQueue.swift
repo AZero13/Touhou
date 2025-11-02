@@ -116,10 +116,8 @@ final class CommandQueue {
         } else if delta < 0 {
             // respawn on life loss - reset bombs to 3
             player.bombs = 3
-            eventBus.fire(BombsChangedEvent(newTotal: 3))
-            if let transform = playerEntity.component(ofType: TransformComponent.self) {
-                transform.position = CGPoint(x: 192, y: 50)
-            }
+            eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
+            // Fire respawn event - PlayerLifecycleSystem will handle position reset
             eventBus.fire(PlayerRespawnedEvent(entity: playerEntity))
         }
     }

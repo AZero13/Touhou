@@ -52,7 +52,21 @@ final class EnemySystem: GameSystem {
             // Despawn all bullets
             BulletUtility.clearBullets(entityManager: entityManager)
             
-            let boss = EnemyFactory.createBoss(name: "Stage Boss", position: CGPoint(x: 192, y: 360), entityManager: entityManager)
+            // Use facade for boss creation
+            let boss = GameFacade.shared.entities.spawnBoss(
+                name: "Stage Boss",
+                health: 300,
+                position: CGPoint(x: 192, y: 360),
+                phaseNumber: 1,
+                attackPattern: .tripleShot,
+                patternConfig: PatternConfig(
+                    physics: PhysicsConfig(speed: 120),
+                    visual: VisualConfig(shape: .star, color: .purple),
+                    bulletCount: 8,
+                    spread: 80,
+                    spiralSpeed: 12
+                )
+            )
             bossSpawned = true
             scheduleBossSpellcard(boss: boss)
         }
@@ -158,9 +172,12 @@ final class EnemySystem: GameSystem {
     private func spawnEnemy(type: EnemyComponent.EnemyType, position: CGPoint, pattern: EnemyPattern, patternConfig: PatternConfig) {
         switch type {
         case .fairy:
-            // Enemy shooting is now handled in EnemyComponent.update() - no TaskScheduler needed!
-            let enemy = EnemyFactory.createFairy(position: position, pattern: pattern, patternConfig: patternConfig, entityManager: entityManager)
-            _ = enemy // Silence unused warning
+            // Use facade for entity creation
+            GameFacade.shared.entities.spawnFairy(
+                position: position,
+                attackPattern: pattern,
+                patternConfig: patternConfig
+            )
         default:
             break
         }

@@ -104,12 +104,12 @@ final class EnemyComponent: GKComponent, Shootable, Droppable, Scoreable {
             lastShotTime = currentTime
             
             // Get player position for aimed shots
-            let playerPosition = PlayerUtility.getPosition(entityManager: GameFacade.shared.getEntityManager())
+            let playerPosition = GameFacade.shared.entities.getPlayer()?.component(ofType: TransformComponent.self)?.position
             let commands = getBulletCommands(from: transform.position, targetPosition: playerPosition)
             
-            // Spawn bullets via facade
+            // Spawn bullets via command queue
             for cmd in commands {
-                GameFacade.shared.getCommandQueue().enqueue(.spawnBullet(cmd, ownedByPlayer: false))
+                GameFacade.shared.combat.spawnEnemyBullet(cmd)
             }
         }
     }

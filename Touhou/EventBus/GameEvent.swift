@@ -80,39 +80,6 @@ struct BombActivatedEvent: GameEvent {
     }
 }
 
-struct SpellCardActivatedEvent: GameEvent {
-    let timestamp: TimeInterval
-    let bossEntity: GKEntity
-    let spellName: String
-    
-    init(bossEntity: GKEntity, spellName: String) {
-        self.timestamp = CACurrentMediaTime()
-        self.bossEntity = bossEntity
-        self.spellName = spellName
-    }
-}
-
-struct SpellCardFailedEvent: GameEvent {
-    let timestamp: TimeInterval
-    let bossEntity: GKEntity
-    
-    init(bossEntity: GKEntity) {
-        self.timestamp = CACurrentMediaTime()
-        self.bossEntity = bossEntity
-    }
-}
-
-struct SpellCardCapturedEvent: GameEvent {
-    let timestamp: TimeInterval
-    let bossEntity: GKEntity
-    let bonusValue: Int
-    
-    init(bossEntity: GKEntity, bonusValue: Int) {
-        self.timestamp = CACurrentMediaTime()
-        self.bossEntity = bossEntity
-        self.bonusValue = bonusValue
-    }
-}
 
 // MARK: - Player & Resource Events
 
@@ -222,56 +189,6 @@ struct BossIntroStartedEvent: GameEvent {
     }
 }
 
-struct ShowDialogueEvent: GameEvent {
-    let timestamp: TimeInterval
-    let speaker: String
-    let text: String
-    
-    init(speaker: String, text: String) {
-        self.timestamp = CACurrentMediaTime()
-        self.speaker = speaker
-        self.text = text
-    }
-}
-
-// MARK: - Dialogue Events
-
-enum DialogueEvent: GameEvent {
-    case showDialogue(text: String, speaker: String?, portraitId: String?, autoAdvanceDelay: TimeInterval?)
-    case queueDialogue(entries: [DialogueEntry])
-    case advanceDialogue
-    case clearDialogue
-    
-    var timestamp: TimeInterval {
-        return CACurrentMediaTime()
-    }
-}
-
-struct DialogueDisplayEvent: GameEvent {
-    let timestamp: TimeInterval
-    let entry: DialogueEntry
-    
-    init(entry: DialogueEntry) {
-        self.timestamp = CACurrentMediaTime()
-        self.entry = entry
-    }
-}
-
-struct DialogueClearedEvent: GameEvent {
-    let timestamp: TimeInterval
-    
-    init() {
-        self.timestamp = CACurrentMediaTime()
-    }
-}
-
-// Forward declaration - defined in DialogueSystem.swift
-struct DialogueEntry {
-    let text: String
-    let speaker: String?
-    let portraitId: String?
-    let autoAdvanceDelay: TimeInterval?
-}
 
 struct PlaySoundEffectEvent: GameEvent {
     let timestamp: TimeInterval

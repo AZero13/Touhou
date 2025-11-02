@@ -35,10 +35,6 @@ class GameFacade {
         EntityFacade(entityManager: entityManager, commandQueue: commandQueue, eventBus: eventBus)
     }()
     
-    private(set) lazy var dialogue: DialogueFacade = {
-        DialogueFacade(entityManager: entityManager, eventBus: eventBus)
-    }()
-    
     private(set) lazy var combat: CombatFacade = {
         CombatFacade(entityManager: entityManager, commandQueue: commandQueue, eventBus: eventBus)
     }()

@@ -73,7 +73,7 @@ final class CommandQueue {
     }
     
     private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) {
-        let entity = BulletFactory.createEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
+        let entity = createBulletEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
         
         // If time is frozen, immediately apply freeze modifier to newly spawned bullet
         if GameFacade.shared.isFrozen() {
@@ -87,7 +87,12 @@ final class CommandQueue {
     }
 
     private func spawnItem(type: ItemType, position: CGPoint, velocity: CGVector, entityManager: EntityManager) {
-        _ = ItemFactory.createEntity(type: type, position: position, velocity: velocity, entityManager: entityManager)
+        let entity = entityManager.createEntity()
+        entity.addComponent(ItemComponent(itemType: type, value: 0))
+        entity.addComponent(TransformComponent(position: position, velocity: velocity))
+        
+        // Register with component systems
+        GameFacade.shared.registerEntity(entity)
     }
 
     private func applyDamage(entity: GKEntity, amount: Int, entityManager: EntityManager, eventBus: EventBus) {
@@ -133,6 +138,44 @@ final class CommandQueue {
         guard let player = entityManager.getEntities(with: PlayerComponent.self).first?.component(ofType: PlayerComponent.self) else { return }
         player.score += amount
         eventBus.fire(ScoreChangedEvent(newTotal: player.score))
+    }
+    
+    // MARK: - Entity Creation Helpers (moved from factories)
+    
+    private func createBulletEntity(from command: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) -> GKEntity {
+        let entity = entityManager.createEntity()
+        
+        // Apply TH06-style defaults for player homing amulets
+        let isPlayerHomingAmulet = ownedByPlayer && command.bulletType == .homingAmulet
+        let defaultRetargetInterval: TimeInterval? = isPlayerHomingAmulet ? 0.066 : nil
+        let defaultMaxRetargets: Int? = isPlayerHomingAmulet ? nil : nil
+        
+        let bullet = BulletComponent(
+            ownedByPlayer: ownedByPlayer,
+            bulletType: command.bulletType,
+            damage: command.physics.damage,
+            size: command.visual.size,
+            shape: command.visual.shape,
+            color: command.visual.color,
+            hasTrail: command.visual.hasTrail,
+            trailLength: command.visual.trailLength
+        )
+        bullet.homingStrength = command.behavior.homingStrength
+        bullet.maxTurnRate = command.behavior.maxTurnRate
+        bullet.retargetInterval = command.behavior.retargetInterval ?? defaultRetargetInterval
+        bullet.maxRetargets = command.behavior.maxRetargets ?? defaultMaxRetargets
+        bullet.rotationOffset = (command.behavior.rotationOffset != 0 ? command.behavior.rotationOffset : 0)
+        bullet.groupId = command.groupId
+        bullet.patternId = command.patternId
+        bullet.tags = command.tags
+        
+        entity.addComponent(bullet)
+        entity.addComponent(TransformComponent(position: command.position, velocity: command.velocity))
+        
+        // Register with component systems
+        GameFacade.shared.registerEntity(entity)
+        
+        return entity
     }
 }
 

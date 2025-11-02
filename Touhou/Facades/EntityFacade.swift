@@ -24,30 +24,31 @@ final class EntityFacade {
     
     // MARK: - Boss Operations
     
-    /// Spawn a boss enemy with dialogue and portrait capabilities
+    /// Spawn a boss enemy
     @discardableResult
     func spawnBoss(
         name: String,
         health: Int,
         position: CGPoint,
         phaseNumber: Int = 1,
-        portraitId: String? = nil,
-        portraitSide: PortraitSide = .right
+        attackPattern: EnemyPattern = .tripleShot,
+        patternConfig: PatternConfig = PatternConfig(),
+        shotInterval: TimeInterval = 1.2
     ) -> GKEntity {
         let entity = entityManager.createEntity()
-        entity.addComponent(BossComponent(name: name, health: health, phaseNumber: phaseNumber))
-        entity.addComponent(TransformComponent(position: position))
+        entity.addComponent(BossComponent(name: name, phaseNumber: phaseNumber))
+        entity.addComponent(EnemyComponent(
+            enemyType: .custom("boss_\(name)"),
+            scoreValue: 5000,
+            dropItem: .life,
+            attackPattern: attackPattern,
+            patternConfig: patternConfig,
+            shotInterval: shotInterval
+        ))
+        entity.addComponent(TransformComponent(position: position, velocity: .zero))
         entity.addComponent(HealthComponent(current: health, max: health))
         entity.addComponent(HitboxComponent(enemyHitbox: 16))
         entity.addComponent(SpriteComponent(textureName: "boss_\(name.lowercased())", zIndex: 100))
-        
-        // Add dialogue capability
-        entity.addComponent(DialogueComponent(speaker: name))
-        
-        // Add portrait if provided
-        if let portraitId = portraitId {
-            entity.addComponent(PortraitComponent(portraitId: portraitId, side: portraitSide))
-        }
         
         // Register with component systems after entity is fully set up
         GameFacade.shared.registerEntity(entity)
@@ -57,26 +58,28 @@ final class EntityFacade {
     
     // MARK: - Enemy Operations
     
-    /// Spawn a regular enemy
+    /// Spawn a fairy enemy
     @discardableResult
-    func spawnEnemy(
-        type: String,
+    func spawnFairy(
         position: CGPoint,
-        health: Int,
-        scoreValue: Int,
-        pattern: String? = nil
+        attackPattern: EnemyPattern,
+        patternConfig: PatternConfig,
+        shotInterval: TimeInterval = 2.0,
+        dropItem: ItemType? = .power
     ) -> GKEntity {
         let entity = entityManager.createEntity()
-        let enemyType: EnemyComponent.EnemyType = (type == "fairy") ? .fairy : .custom(type)
-        entity.addComponent(EnemyComponent(enemyType: enemyType, scoreValue: scoreValue))
-        entity.addComponent(TransformComponent(position: position))
-        entity.addComponent(HealthComponent(current: health, max: health))
-        entity.addComponent(HitboxComponent(enemyHitbox: 8))
-        entity.addComponent(SpriteComponent(textureName: "enemy_\(type)", zIndex: 50))
-        
-        if let pattern = pattern {
-            entity.addComponent(AIPatternComponent(currentPattern: pattern))
-        }
+        entity.addComponent(EnemyComponent(
+            enemyType: .fairy,
+            scoreValue: 100,
+            dropItem: dropItem,
+            attackPattern: attackPattern,
+            patternConfig: patternConfig,
+            shotInterval: shotInterval
+        ))
+        entity.addComponent(TransformComponent(position: position, velocity: CGVector(dx: 0, dy: -50)))
+        entity.addComponent(HitboxComponent(enemyHitbox: 12))
+        entity.addComponent(HealthComponent(current: 1, max: 1))
+        entity.addComponent(SpriteComponent(textureName: "fairy", zIndex: 50))
         
         // Register with component systems after entity is fully set up
         GameFacade.shared.registerEntity(entity)

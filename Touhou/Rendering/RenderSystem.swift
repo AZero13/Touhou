@@ -11,24 +11,12 @@ import GameplayKit
 
 /// RenderSystem - handles visual representation of entities
 /// NOT a GameSystem (doesn't participate in ECS update loop)
-class RenderSystem {
+final class RenderSystem {
     private var entityToNode: [GKEntity: SKNode] = [:]
-    private var factories: [String: SpriteFactory] = [:]
     
     // Play area dimensions (logical coordinates)
     private var logicalWidth: CGFloat { GameFacade.playArea.width }
     private var logicalHeight: CGFloat { GameFacade.playArea.height }
-    
-    init() {
-        setupFactories()
-    }
-    
-    private func setupFactories() {
-        factories["player"] = PlayerSpriteFactory()
-        factories["bullet"] = BulletSpriteFactory()
-        factories["enemy"] = EnemySpriteFactory()
-        factories["item"] = ItemSpriteFactory()
-    }
     
     /// Sync entities with their visual representations
     func sync(entityManager: EntityManager, scene: SKScene) {
@@ -95,13 +83,10 @@ class RenderSystem {
                 scene.addChild(bg!)
             }
             var fill = scene.childNode(withName: fillName) as? SKShapeNode
-            // Prefer HealthComponent if present, fallback to BossComponent
+            // Get health percentage from HealthComponent
             let pct: CGFloat = {
                 if let hc = boss.component(ofType: HealthComponent.self) {
                     return max(0, min(1, CGFloat(hc.health) / CGFloat(hc.maxHealth)))
-                }
-                if let bc = boss.component(ofType: BossComponent.self) {
-                    return max(0, min(1, CGFloat(bc.health) / CGFloat(bc.maxHealth)))
                 }
                 return 0
             }()
@@ -124,18 +109,110 @@ class RenderSystem {
         }
     }
     
+    // MARK: - Node Creation (consolidated from SpriteFactory)
+    
     private func createNode(for entity: GKEntity) -> SKNode? {
-        // Determine entity type based on components
+        // Determine entity type and create appropriate node
         if entity.component(ofType: PlayerComponent.self) != nil {
-            return factories["player"]?.createNode(for: entity)
-        } else if entity.component(ofType: BulletComponent.self) != nil {
-            return factories["bullet"]?.createNode(for: entity)
+            return createPlayerNode()
+        } else if let bullet = entity.component(ofType: BulletComponent.self) {
+            return createBulletNode(for: bullet)
         } else if entity.component(ofType: EnemyComponent.self) != nil {
-            return factories["enemy"]?.createNode(for: entity)
-        } else if entity.component(ofType: ItemComponent.self) != nil {
-            return factories["item"]?.createNode(for: entity)
+            return createEnemyNode()
+        } else if let item = entity.component(ofType: ItemComponent.self) {
+            return createItemNode(for: item)
         }
         
         return nil
+    }
+    
+    private func createPlayerNode() -> SKNode {
+        let circle = SKShapeNode(circleOfRadius: 8)
+        circle.fillColor = .white
+        circle.strokeColor = .clear
+        circle.zPosition = 100
+        return circle
+    }
+    
+    private func createBulletNode(for bullet: BulletComponent) -> SKNode {
+        let radius = bullet.size.radius
+        let shape: SKShapeNode
+        
+        switch bullet.shape {
+        case .circle:
+            shape = SKShapeNode(circleOfRadius: radius)
+        case .diamond:
+            shape = createDiamondShape(radius: radius)
+        case .star:
+            shape = createStarShape(radius: radius)
+        case .square:
+            shape = SKShapeNode(rectOf: CGSize(width: radius * 2, height: radius * 2))
+        }
+        
+        shape.fillColor = bullet.color.nsColor
+        shape.strokeColor = .clear
+        shape.zPosition = 50 + CGFloat(bullet.size.radius)
+        
+        return shape
+    }
+    
+    private func createDiamondShape(radius: CGFloat) -> SKShapeNode {
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0, y: radius))
+        path.addLine(to: CGPoint(x: radius, y: 0))
+        path.addLine(to: CGPoint(x: 0, y: -radius))
+        path.addLine(to: CGPoint(x: -radius, y: 0))
+        path.closeSubpath()
+        return SKShapeNode(path: path)
+    }
+    
+    private func createStarShape(radius: CGFloat) -> SKShapeNode {
+        let path = CGMutablePath()
+        let outerRadius = radius
+        let innerRadius = radius * 0.4
+        let points = 5
+        
+        for i in 0..<points * 2 {
+            let angle = CGFloat.pi * CGFloat(i) / CGFloat(points)
+            let currentRadius = i % 2 == 0 ? outerRadius : innerRadius
+            let x = cos(angle) * currentRadius
+            let y = sin(angle) * currentRadius
+            
+            if i == 0 {
+                path.move(to: CGPoint(x: x, y: y))
+            } else {
+                path.addLine(to: CGPoint(x: x, y: y))
+            }
+        }
+        path.closeSubpath()
+        
+        return SKShapeNode(path: path)
+    }
+    
+    private func createEnemyNode() -> SKNode {
+        let circle = SKShapeNode(circleOfRadius: 12)
+        circle.fillColor = .yellow
+        circle.strokeColor = .clear
+        circle.zPosition = 75
+        return circle
+    }
+    
+    private func createItemNode(for item: ItemComponent) -> SKNode {
+        let circle = SKShapeNode(circleOfRadius: 6)
+        
+        switch item.itemType {
+        case .power:
+            circle.fillColor = .red
+        case .point:
+            circle.fillColor = .blue
+        case .bomb:
+            circle.fillColor = .purple
+        case .life:
+            circle.fillColor = .green
+        }
+        
+        circle.strokeColor = .clear
+        circle.zPosition = 25
+        return circle
     }
 }

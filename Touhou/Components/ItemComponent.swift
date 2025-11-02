@@ -72,8 +72,8 @@ final class ItemComponent: GKComponent {
                 powerItemCount: playerComp.powerItemCountForScore
             )
             
-            // Emit power-up collected with calculated value
-            GameFacade.shared.getEventBus().fire(PowerUpCollectedEvent(itemType: itemType, value: calculatedValue))
+            // Fire collection event and destroy item
+            GameFacade.shared.combat.fireItemCollectionEvent(itemType: itemType, value: calculatedValue)
             GameFacade.shared.entities.destroy(entity)
         }
     }

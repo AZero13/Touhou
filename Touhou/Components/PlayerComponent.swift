@@ -144,9 +144,6 @@ final class PlayerComponent: GKComponent {
         // Activate bomb via facade
         GameFacade.shared.combat.activateBomb(playerEntity: entity)
         
-        // Clear enemy bullets immediately
-        if Tuning.bombClearEnemyBullets {
-            BulletUtility.clearEnemyBullets(entityManager: GameFacade.shared.getEntityManager())
-        }
+        // Bomb clearing is handled in CombatFacade.activateBomb()
     }
 }

@@ -80,5 +80,17 @@ final class CombatFacade {
         // Deduct a bomb
         adjustBombs(delta: -1)
     }
+    
+    // MARK: - Helper Methods
+    
+    /// Spawn enemy bullet (for component use)
+    func spawnEnemyBullet(_ command: BulletSpawnCommand) {
+        commandQueue.enqueue(.spawnBullet(command, ownedByPlayer: false))
+    }
+    
+    /// Fire item collection event (for component use)
+    func fireItemCollectionEvent(itemType: ItemType, value: Int) {
+        eventBus.fire(PowerUpCollectedEvent(itemType: itemType, value: value))
+    }
 }
 

@@ -48,7 +48,6 @@ final class EntityFacade {
         entity.addComponent(TransformComponent(position: position, velocity: .zero))
         entity.addComponent(HealthComponent(current: health, max: health))
         entity.addComponent(HitboxComponent(enemyHitbox: 16))
-        entity.addComponent(SpriteComponent(textureName: "boss_\(name.lowercased())", zIndex: 100))
         
         // Register with component systems after entity is fully set up
         GameFacade.shared.registerEntity(entity)
@@ -79,7 +78,6 @@ final class EntityFacade {
         entity.addComponent(TransformComponent(position: position, velocity: CGVector(dx: 0, dy: -50)))
         entity.addComponent(HitboxComponent(enemyHitbox: 12))
         entity.addComponent(HealthComponent(current: 1, max: 1))
-        entity.addComponent(SpriteComponent(textureName: "fairy", zIndex: 50))
         
         // Register with component systems after entity is fully set up
         GameFacade.shared.registerEntity(entity)

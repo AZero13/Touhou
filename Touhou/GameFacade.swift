@@ -198,8 +198,7 @@ class GameFacade {
             let hasBullet = entity.component(ofType: BulletComponent.self) != nil
             let hasEnemy = entity.component(ofType: EnemyComponent.self) != nil
             let hasItem = entity.component(ofType: ItemComponent.self) != nil
-            let hasSpawner = entity.component(ofType: BulletSpawnerComponent.self) != nil
-            if hasBullet || hasEnemy || hasItem || hasSpawner {
+            if hasBullet || hasEnemy || hasItem {
                 entityManager.markForDestruction(entity)
             }
         }

@@ -33,28 +33,28 @@ final class ScoreSystem: GameSystem {
     
     func handleEvent(_ event: GameEvent) {
         if let e = event as? EnemyDiedEvent {
-            // Add score via CommandQueue
-            GameFacade.shared.getCommandQueue().enqueue(.adjustScore(amount: e.scoreValue))
+            // Add score via CombatFacade
+            GameFacade.shared.combat.adjustScore(amount: e.scoreValue)
         } else if let g = event as? GrazeEvent {
-            GameFacade.shared.getCommandQueue().enqueue(.adjustScore(amount: g.grazeValue))
+            GameFacade.shared.combat.adjustScore(amount: g.grazeValue)
         } else if let p = event as? PowerUpCollectedEvent {
             if let player = entityManager.getEntities(with: PlayerComponent.self).first,
                let playerComp = player.component(ofType: PlayerComponent.self) {
                 switch p.itemType {
                 case .point:
-                    GameFacade.shared.getCommandQueue().enqueue(.adjustScore(amount: p.value))
+                    GameFacade.shared.combat.adjustScore(amount: p.value)
                 case .power:
                     if playerComp.power < 128 {
                         // Full power: gain score defined in value
-                        GameFacade.shared.getCommandQueue().enqueue(.adjustPower(delta: 1))
+                        GameFacade.shared.combat.adjustPower(delta: 1)
                     }
-                    GameFacade.shared.getCommandQueue().enqueue(.adjustScore(amount: p.value))
+                    GameFacade.shared.combat.adjustScore(amount: p.value)
                 case .bomb:
                     if playerComp.bombs < 8 {
-                        GameFacade.shared.getCommandQueue().enqueue(.adjustBombs(delta: 1))
+                        GameFacade.shared.combat.adjustBombs(delta: 1)
                     }
                 case .life:
-                    GameFacade.shared.getCommandQueue().enqueue(.adjustLives(delta: 1))
+                    GameFacade.shared.combat.adjustLives(delta: 1)
                 }
             }
         } else if let s = event as? ScoreChangedEvent {

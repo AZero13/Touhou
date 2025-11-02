@@ -45,7 +45,7 @@ final class EnemySystem: GameSystem {
             for enemy in enemies {
                 // Only despawn non-boss enemies (bosses have BossComponent)
                 if enemy.component(ofType: BossComponent.self) == nil {
-                    GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(enemy))
+                    GameFacade.shared.entities.destroy(enemy)
                 }
             }
             
@@ -193,7 +193,7 @@ final class EnemySystem: GameSystem {
             
             // Mark enemies that go off bottom of screen for destruction
             if transform.position.y < -50 {
-                GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(enemy))
+                GameFacade.shared.entities.destroy(enemy)
             }
         }
     }

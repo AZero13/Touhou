@@ -19,6 +19,7 @@ final class GameIntermissionState: GKState {
     
     override func didEnter(from previousState: GKState?) {
         // Announce transition for UI (score screen) and audio fades
+        // Still needs direct EventBus access as facades don't cover all events yet
         if let next = gameFacade.getPendingNextStageId() {
             gameFacade.getEventBus().fire(StageTransitionEvent(nextStageId: next))
         }

@@ -8,24 +8,45 @@
 import Foundation
 import GameplayKit
 
-/// BossComponent - represents a boss enemy that can have spellcards, dialogue, and phases
-/// Bosses can optionally conform to Spellcardable, Dialogueable, and Portraitable protocols
-final class BossComponent: GKComponent, Phased {
+// MARK: - Protocols
+
+/// Protocol for entities that can execute spellcards
+/// Bosses implement this to define spellcard phases and patterns
+/// Uses GameFacade for simplified access to game systems
+protocol Spellcardable {
+    /// Unique identifier for this spellcard
+    var spellcardId: String { get }
+    /// Display name for this spellcard
+    var spellcardName: String { get }
+    /// Current phase index (0-based)
+    var currentPhase: Int { get set }
+    /// Total number of phases
+    var phaseCount: Int { get }
+    /// Duration of current phase in seconds
+    var currentPhaseDuration: TimeInterval { get }
+    /// Whether the spellcard is currently active
+    var isActive: Bool { get set }
+    
+    /// Start executing the spellcard
+    func startSpellcard(game: GameFacade)
+    /// Update spellcard logic (called each frame while active)
+    func updateSpellcard(deltaTime: TimeInterval, game: GameFacade)
+    /// Advance to next phase or end spellcard
+    func advancePhase(game: GameFacade)
+    /// End the spellcard
+    func endSpellcard(game: GameFacade)
+}
+
+// MARK: - Component
+
+/// BossComponent - represents a boss enemy with health and phase tracking
+/// Add DialogueComponent and PortraitComponent for dialogue/portrait capabilities
+/// Implement Spellcardable for spellcard execution behavior
+final class BossComponent: GKComponent {
     let name: String
     var maxHealth: Int
     var health: Int
-    
-    // Phased conformance
-    var currentHealth: Int {
-        get { return health }
-        set { health = newValue }
-    }
-    
-    var maxHealthForPhase: Int {
-        return maxHealth
-    }
-    
-    var phaseNumber: Int = 1
+    var phaseNumber: Int
     
     init(name: String, health: Int, phaseNumber: Int = 1) {
         self.name = name

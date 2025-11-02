@@ -50,13 +50,13 @@ final class HealthSystem: GameSystem {
     }
     
     private func handleEnemyHit(_ enemyEntity: GKEntity) {
-        // Use command queue to apply damage deterministically
-        GameFacade.shared.getCommandQueue().enqueue(.applyDamage(entity: enemyEntity, amount: 1))
+        // Use combat facade to apply damage
+        GameFacade.shared.combat.damage(enemyEntity, amount: 1)
     }
     
     private func handlePlayerHit(_ playerEntity: GKEntity) {
-        // Enqueue life decrement; queue will handle events and respawn
-        GameFacade.shared.getCommandQueue().enqueue(.adjustLives(delta: -1))
+        // Use combat facade to adjust lives
+        GameFacade.shared.combat.adjustLives(delta: -1)
     }
     
 }

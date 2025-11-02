@@ -25,11 +25,24 @@ class GameFacade {
         setupSystems()
     }
     
-    // MARK: - Core Systems
+    // MARK: - Core Systems (private - hidden from external access)
     private let entityManager = EntityManager()
     private let eventBus = EventBus()
     private let commandQueue = CommandQueue()
     private let taskScheduler = TaskScheduler()
+    
+    // MARK: - Facades (public - simplified APIs)
+    private(set) lazy var entities: EntityFacade = {
+        EntityFacade(entityManager: entityManager, commandQueue: commandQueue, eventBus: eventBus)
+    }()
+    
+    private(set) lazy var dialogue: DialogueFacade = {
+        DialogueFacade(entityManager: entityManager, eventBus: eventBus)
+    }()
+    
+    private(set) lazy var combat: CombatFacade = {
+        CombatFacade(entityManager: entityManager, commandQueue: commandQueue, eventBus: eventBus)
+    }()
     
     // MARK: - Game Systems
     private var systems: [GameSystem] = []
@@ -172,23 +185,30 @@ class GameFacade {
         entityManager.destroyMarkedEntities()
     }
     
-    // MARK: - System Access
+    // MARK: - System Access (deprecated - use facades instead)
+    
+    /// @deprecated Use facades (entities, dialogue, combat) for most operations
+    /// Only use this for special cases not covered by facades
     func getEntityManager() -> EntityManager {
         return entityManager
     }
     
+    /// @deprecated Use facades for event-based operations
     func getEventBus() -> EventBus {
         return eventBus
     }
     
+    /// @deprecated Use facades for command-based operations
     func getCommandQueue() -> CommandQueue {
         return commandQueue
     }
     
+    /// @deprecated Use task scheduling facade (to be created)
     func getTaskScheduler() -> TaskScheduler {
         return taskScheduler
     }
     
+    /// Register an event listener (still needed for systems)
     func registerListener(_ listener: EventListener) {
         eventBus.register(listener: listener)
     }

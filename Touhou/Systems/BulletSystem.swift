@@ -48,7 +48,7 @@ final class BulletSystem: GameSystem {
             // Mark bullets that are out of bounds for destruction
             if transform.position.x < 0 || transform.position.x > 384 ||
                transform.position.y < 0 || transform.position.y > 448 {
-                GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(entity))
+                GameFacade.shared.entities.destroy(entity)
             }
         }
     }

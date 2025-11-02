@@ -41,7 +41,7 @@ final class ItemSystem: GameSystem {
             transform.position.y += transform.velocity.dy * deltaTime
             
             // Despawn off-screen
-            if transform.position.y < -50 { GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(item)) }
+            if transform.position.y < -50 { GameFacade.shared.entities.destroy(item) }
             
             // Check collection with player
             if let player = entityManager.getEntities(with: PlayerComponent.self).first,
@@ -63,7 +63,7 @@ final class ItemSystem: GameSystem {
                         
                         // Emit power-up collected with calculated value
                         eventBus.fire(PowerUpCollectedEvent(itemType: itemComp.itemType, value: calculatedValue))
-                        GameFacade.shared.getCommandQueue().enqueue(.destroyEntity(item))
+                        GameFacade.shared.entities.destroy(item)
                     }
                 }
             }
@@ -75,7 +75,7 @@ final class ItemSystem: GameSystem {
             // Spawn a single item if enemy has a drop
             if let itemType = died.dropItem,
                let enemyTransform = died.entity.component(ofType: TransformComponent.self) {
-                GameFacade.shared.getCommandQueue().enqueue(.spawnItem(type: itemType, position: enemyTransform.position, velocity: CGVector(dx: 0, dy: -50)))
+                GameFacade.shared.entities.spawnItem(type: itemType, at: enemyTransform.position, velocity: CGVector(dx: 0, dy: -50))
             }
         }
     }

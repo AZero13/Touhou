@@ -152,38 +152,41 @@ final class PlayerSystem: GameSystem {
         if input.shoot.isPressed && currentTime - lastShotTime > Tuning.shotInterval {
             lastShotTime = currentTime
             
-            // Reimu A shoots 3 bullets: 1 straight + 2 homing at angles via CommandQueue
-            let queue = GameFacade.shared.getCommandQueue()
+            // Reimu A shoots 3 bullets: 1 straight + 2 homing at angles via EntityFacade
+            let game = GameFacade.shared
             
-            let centerCmd = BulletSpawnCommand(
+            // Center bullet (straight up)
+            game.entities.spawnBullet(
                 position: CGPoint(x: transform.position.x, y: transform.position.y + Tuning.shotOffsetY),
                 velocity: CGVector(dx: 0, dy: 200),
                 bulletType: .amulet,
+                ownedByPlayer: true,
                 physics: PhysicsConfig(speed: 200, damage: 1),
                 visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
                 behavior: BehaviorConfig(homingStrength: nil, maxTurnRate: nil, delay: 0)
             )
-            queue.enqueue(.spawnBullet(centerCmd, ownedByPlayer: true))
             
-            let leftCmd = BulletSpawnCommand(
+            // Left homing bullet
+            game.entities.spawnBullet(
                 position: CGPoint(x: transform.position.x - Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY),
                 velocity: CGVector(dx: -50, dy: 180),
                 bulletType: .homingAmulet,
+                ownedByPlayer: true,
                 physics: PhysicsConfig(speed: 180, damage: 1),
                 visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
                 behavior: BehaviorConfig()
             )
-            queue.enqueue(.spawnBullet(leftCmd, ownedByPlayer: true))
             
-            let rightCmd = BulletSpawnCommand(
+            // Right homing bullet
+            game.entities.spawnBullet(
                 position: CGPoint(x: transform.position.x + Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY),
                 velocity: CGVector(dx: 50, dy: 180),
                 bulletType: .homingAmulet,
+                ownedByPlayer: true,
                 physics: PhysicsConfig(speed: 180, damage: 1),
                 visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
                 behavior: BehaviorConfig()
             )
-            queue.enqueue(.spawnBullet(rightCmd, ownedByPlayer: true))
         }
     }
     
@@ -193,9 +196,8 @@ final class PlayerSystem: GameSystem {
         guard input.bomb.justPressed else { return }
         guard player.bombs > 0 else { return }
         
-        // Decrement bombs via queue and emit activation event
-        GameFacade.shared.getCommandQueue().enqueue(.adjustBombs(delta: -1))
-        eventBus.fire(BombActivatedEvent(playerEntity: entity))
+        // Activate bomb via facade
+        GameFacade.shared.combat.activateBomb(playerEntity: entity)
         
         // Clear enemy bullets immediately
         if Tuning.bombClearEnemyBullets {

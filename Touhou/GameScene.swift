@@ -41,7 +41,7 @@ class GameScene: SKScene, EventListener {
         // Update game logic
         GameFacade.shared.update(currentTime)
         
-        // Update rendering
+        // Update rendering (still needs direct EntityManager access for now)
         if let renderSystem = renderSystem {
             renderSystem.sync(entityManager: GameFacade.shared.getEntityManager(), scene: self)
         }
@@ -138,10 +138,7 @@ class GameScene: SKScene, EventListener {
 
     // MARK: - Effects
     private func playGrazeEffect(for bulletEntity: GKEntity) {
-        if let transform = GameFacade.shared.getEntityManager()
-            .getAllEntities()
-            .first(where: { $0 == bulletEntity })?
-            .component(ofType: TransformComponent.self) {
+        if let transform = bulletEntity.component(ofType: TransformComponent.self) {
             self.showGrazeEffect(atLogical: transform.position)
         }
     }

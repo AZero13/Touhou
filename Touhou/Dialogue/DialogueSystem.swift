@@ -10,6 +10,7 @@ import GameplayKit
 
 /// DialogueSystem - manages dialogue display and progression
 /// Handles dialogue queuing, timing, and portrait display coordination
+/// Works with DialogueComponent and PortraitComponent for entity dialogue
 final class DialogueSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!

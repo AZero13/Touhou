@@ -67,9 +67,7 @@ final class SceneCoordinator: EventListener {
     func handleEvent(_ event: GameEvent) {
         // When a stage transitions, show intermediate score scene
         if let e = event as? StageTransitionEvent {
-            let score = GameFacade.shared.getEntityManager()
-                .getEntities(with: PlayerComponent.self)
-                .first?
+            let score = GameFacade.shared.entities.getPlayer()?
                 .component(ofType: PlayerComponent.self)?.score ?? 0
             let fade = SKTransition.fade(withDuration: 1.0)
             presentScoreScene(totalScore: score, nextStageId: e.nextStageId, transition: fade)

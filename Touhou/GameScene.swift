@@ -17,8 +17,11 @@ class GameScene: SKScene, EventListener {
     private var closeLabel: SKLabelNode?
     private var restartLabel: SKLabelNode?
     
-    // Effect layer (following SpriteKit best practices for organizing content)
-    private var effectLayer: SKNode!
+    // Layers (following SpriteKit best practices for organizing content)
+    private var worldLayer: SKNode!      // Game entities: bullets, enemies, player, items
+    private var bossLayer: SKNode!       // Boss-specific content: boss health bar, phase effects
+    private var effectLayer: SKNode!     // Transient visual effects: graze, hits
+    private var uiLayer: SKNode!         // Persistent UI: pause menu, score display
     
     // Cached actions for effects (created once, reused many times)
     private var grazeEffectAction: SKAction!
@@ -32,10 +35,23 @@ class GameScene: SKScene, EventListener {
         // Initialize render system
         renderSystem = RenderSystem()
         
-        // Create effects layer for transient visual effects
+        // Create layers for organizing content (following SpriteKit best practices)
+        worldLayer = SKNode()
+        worldLayer.name = "worldLayer"
+        addChild(worldLayer)
+        
+        bossLayer = SKNode()
+        bossLayer.name = "bossLayer"
+        bossLayer.isHidden = true  // Hidden until boss appears
+        addChild(bossLayer)
+        
         effectLayer = SKNode()
         effectLayer.name = "effectLayer"
         addChild(effectLayer)
+        
+        uiLayer = SKNode()
+        uiLayer.name = "uiLayer"
+        addChild(uiLayer)
 
         // Create cached actions for effects
         setupEffectActions()
@@ -143,7 +159,7 @@ class GameScene: SKScene, EventListener {
         menuNode.addChild(overlay)
         
         menuNode.zPosition = 1000 // Above everything
-        addChild(menuNode)
+        uiLayer.addChild(menuNode)  // Add to UI layer
         self.pauseMenuNode = menuNode
     }
     

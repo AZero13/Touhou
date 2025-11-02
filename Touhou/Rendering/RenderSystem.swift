@@ -24,6 +24,9 @@ final class RenderSystem {
         let scaleX = scene.size.width / logicalWidth
         let scaleY = scene.size.height / logicalHeight
         
+        // Get world layer (game entities)
+        let worldLayer = scene.childNode(withName: "worldLayer")
+        
         // Update all entities with RenderComponent
         for entity in entities {
             if let render = entity.component(ofType: RenderComponent.self) {
@@ -31,7 +34,7 @@ final class RenderSystem {
                 
                 // Ensure node is in scene (SpriteKit tree management)
                 if node.parent == nil {
-                    scene.addChild(node)
+                    worldLayer?.addChild(node) ?? scene.addChild(node)  // Add to worldLayer if it exists
                 }
                 
                 // Update position from TransformComponent
@@ -63,13 +66,16 @@ final class RenderSystem {
         // EntityManager handles component removal when entities are destroyed
         
         // Boss health bar overlay (top of screen)
+        let bossLayer = scene.childNode(withName: "bossLayer")
         if let boss = entities.first(where: { $0.component(ofType: BossComponent.self) != nil }) {
+            // Show boss layer when boss exists
+            bossLayer?.isHidden = false
             let barWidth = scene.size.width * 0.8
             let barHeight: CGFloat = 12
             let origin = CGPoint(x: (scene.size.width - barWidth) / 2, y: scene.size.height - 30)
             let bgName = "bossHealthBarBG"
             let fillName = "bossHealthBarFill"
-            var bg = scene.childNode(withName: bgName) as? SKShapeNode
+            var bg = bossLayer?.childNode(withName: bgName) as? SKShapeNode
             if bg == nil {
                 let rect = CGRect(x: origin.x, y: origin.y, width: barWidth, height: barHeight)
                 bg = SKShapeNode(rect: rect, cornerRadius: 4)
@@ -77,9 +83,9 @@ final class RenderSystem {
                 bg?.strokeColor = .white
                 bg?.fillColor = .clear
                 bg?.zPosition = 2000
-                scene.addChild(bg!)
+                bossLayer?.addChild(bg!) ?? scene.addChild(bg!)
             }
-            var fill = scene.childNode(withName: fillName) as? SKShapeNode
+            var fill = bossLayer?.childNode(withName: fillName) as? SKShapeNode
             // Get health percentage from HealthComponent
             let pct: CGFloat = {
                 if let hc = boss.component(ofType: HealthComponent.self) {
@@ -94,15 +100,17 @@ final class RenderSystem {
                 fill?.strokeColor = .clear
                 fill?.fillColor = .systemPink
                 fill?.zPosition = 2001
-                scene.addChild(fill!)
+                bossLayer?.addChild(fill!) ?? scene.addChild(fill!)
             } else {
                 let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
                 fill?.path = CGPath(roundedRect: rect, cornerWidth: 4, cornerHeight: 4, transform: nil)
             }
         } else {
-            // Remove bar if no boss
-            scene.childNode(withName: "bossHealthBarBG")?.removeFromParent()
-            scene.childNode(withName: "bossHealthBarFill")?.removeFromParent()
+            // Hide boss layer when no boss
+            bossLayer?.isHidden = true
+            // Clean up health bar nodes
+            bossLayer?.childNode(withName: "bossHealthBarBG")?.removeFromParent()
+            bossLayer?.childNode(withName: "bossHealthBarFill")?.removeFromParent()
         }
     }
     

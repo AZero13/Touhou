@@ -28,7 +28,7 @@ final class CombatFacade {
         commandQueue.enqueue(.applyDamage(entity: entity, amount: amount))
     }
     
-    /// Heal an entity
+    /// Heal an entity by amount
     func heal(_ entity: GKEntity, amount: Int) {
         guard let healthComp = entity.component(ofType: HealthComponent.self) else {
             return

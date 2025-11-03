@@ -121,35 +121,32 @@ final class CollisionSystem: GameSystem {
     }
     
     private func handleCollision(entityA: GKEntity, entityB: GKEntity) {
-        // Find the damaging entity (bullet) and target using protocol
-        let damagingEntity: GKEntity?
-        let targetEntity: GKEntity?
+        // Find the damaging entity (bullet) and target
+        let (bulletEntity, target): (GKEntity, GKEntity)
         
         if entityA.component(ofType: BulletComponent.self) != nil {
-            damagingEntity = entityA
-            targetEntity = entityB
+            (bulletEntity, target) = (entityA, entityB)
         } else if entityB.component(ofType: BulletComponent.self) != nil {
-            damagingEntity = entityB
-            targetEntity = entityA
+            (bulletEntity, target) = (entityB, entityA)
         } else {
-            return // No damaging entity involved
+            return // No bullet involved
         }
         
-        guard let bullet = damagingEntity?.component(ofType: BulletComponent.self),
-              let target = targetEntity else { return }
+        // bulletEntity guaranteed to have BulletComponent at this point
+        let bullet = bulletEntity.component(ofType: BulletComponent.self)!
         
         // Player bullet hits enemy
         if bullet.ownedByPlayer && target.component(ofType: EnemyComponent.self) != nil {
             // Capture position BEFORE marking for destruction
-            let hitPosition = damagingEntity!.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
+            let hitPosition = bulletEntity.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
             
             // Immediately mark bullet for destruction (before processing damage)
-            entityManager.markForDestruction(damagingEntity!)
+            entityManager.markForDestruction(bulletEntity)
             
             // Fire collision event (damage will be processed by HealthSystem)
             eventBus.fire(CollisionOccurredEvent(
-                entityA: damagingEntity!,
-                entityB: targetEntity!,
+                entityA: bulletEntity,
+                entityB: target,
                 collisionType: .playerBulletHitEnemy,
                 hitPosition: hitPosition
             ))
@@ -158,15 +155,15 @@ final class CollisionSystem: GameSystem {
         // Enemy bullet hits player
         if !bullet.ownedByPlayer && target.component(ofType: PlayerComponent.self) != nil {
             // Capture position BEFORE marking for destruction
-            let hitPosition = damagingEntity!.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
+            let hitPosition = bulletEntity.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
             
             // Mark bullet for destruction
-            entityManager.markForDestruction(damagingEntity!)
+            entityManager.markForDestruction(bulletEntity)
             
             // Fire collision event
             eventBus.fire(CollisionOccurredEvent(
-                entityA: damagingEntity!,
-                entityB: targetEntity!,
+                entityA: bulletEntity,
+                entityB: target,
                 collisionType: .enemyBulletHitPlayer,
                 hitPosition: hitPosition
             ))

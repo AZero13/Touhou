@@ -17,6 +17,7 @@ enum ItemType: String, CaseIterable {
     case point = "point"
     case bomb = "bomb"
     case life = "life"
+    case pointBullet = "pointBullet"  // Special item from bullet-to-point conversion
 }
 
 // MARK: - Component
@@ -82,7 +83,9 @@ final class ItemComponent: GKComponent {
                 itemType: itemType,
                 itemPosition: transform.position,
                 playerPower: playerComp.power,
-                powerItemCount: playerComp.powerItemCountForScore
+                powerItemCount: playerComp.powerItemCountForScore,
+                grazeInStage: playerComp.grazeInStage,
+                isBombActive: playerComp.isBombActive
             )
             
             // Fire collection event and destroy item
@@ -93,7 +96,7 @@ final class ItemComponent: GKComponent {
     
     // MARK: - Static Helpers
     
-    static func calculateItemValue(itemType: ItemType, itemPosition: CGPoint, playerPower: Int, powerItemCount: Int) -> Int {
+    static func calculateItemValue(itemType: ItemType, itemPosition: CGPoint, playerPower: Int, powerItemCount: Int, grazeInStage: Int = 0, isBombActive: Bool = false) -> Int {
         switch itemType {
         case .power:
             // Power items: base value 10, bonus when at full power based on count
@@ -107,6 +110,14 @@ final class ItemComponent: GKComponent {
             let playAreaHeight = GameFacade.playArea.height
             let normalizedY = itemPosition.y / playAreaHeight // 0.0 (bottom) to 1.0 (top)
             return max(100, Int(normalizedY * 1000)) // 100 to 1000
+        case .pointBullet:
+            // TH06 formula: (grazeInStage / 3) * 10 + 500
+            // If bomb is active, reduce to 100
+            var score = (grazeInStage / 3) * 10 + 500
+            if isBombActive {
+                score = 100
+            }
+            return score
         case .bomb:
             return 0
         case .life:

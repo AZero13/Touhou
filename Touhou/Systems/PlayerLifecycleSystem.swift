@@ -48,6 +48,10 @@ final class PlayerLifecycleSystem: GameSystem {
             // New stage: reset position to start
             if let entity = playerEntity {
                 resetPlayerPosition(entity: entity)
+                // Reset graze count for new stage (TH06 behavior)
+                if let player = entity.component(ofType: PlayerComponent.self) {
+                    player.grazeInStage = 0
+                }
             }
             // Stage 1 = new run: reset stats
             if e.stageId == 1 {

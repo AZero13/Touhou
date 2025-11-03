@@ -51,5 +51,20 @@ enum BulletUtility {
     static func countBullets(entityManager: EntityManager, selector: BulletSelector = .all) -> Int {
         return getBullets(entityManager: entityManager, selector: selector).count
     }
+    
+    /// Convert all enemy bullets to point items (TH06 boss death/phase transition style)
+    static func convertBulletsToPoints(entityManager: EntityManager) {
+        let enemyBullets = getBullets(entityManager: entityManager, selector: .enemy)
+        
+        for bullet in enemyBullets {
+            guard let transform = bullet.component(ofType: TransformComponent.self) else { continue }
+            
+            // Spawn a pointBullet item at bullet position
+            GameFacade.shared.entities.spawnItem(type: .pointBullet, at: transform.position, velocity: .zero)
+            
+            // Destroy the bullet
+            entityManager.markForDestruction(bullet)
+        }
+    }
 }
 

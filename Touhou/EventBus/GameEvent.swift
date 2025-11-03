@@ -82,6 +82,13 @@ struct BombActivatedEvent: GameEvent {
     }
 }
 
+struct BulletsConvertedToPointsEvent: GameEvent {
+    let timestamp: TimeInterval
+    
+    init() {
+        self.timestamp = CACurrentMediaTime()
+    }
+}
 
 // MARK: - Player & Resource Events
 

@@ -220,6 +220,8 @@ final class RenderSystem {
             circle.fillColor = .purple
         case .life:
             circle.fillColor = .green
+        case .pointBullet:
+            circle.fillColor = .yellow  // Different color for converted bullets
         }
         
         circle.strokeColor = .clear

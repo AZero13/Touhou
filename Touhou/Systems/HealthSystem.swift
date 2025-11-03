@@ -66,6 +66,13 @@ final class HealthSystem: GameSystem {
     }
     
     private func handleEnemyDeath(_ event: EnemyDiedEvent) {
+        let isBoss = event.entity.component(ofType: BossComponent.self) != nil
+        
+        // Boss death: convert all bullets to points (TH06 behavior)
+        if isBoss {
+            BulletUtility.convertBulletsToPoints(entityManager: entityManager)
+        }
+        
         // Spawn item drop if enemy has one
         if let itemType = event.dropItem,
            let transform = event.entity.component(ofType: TransformComponent.self) {

@@ -36,6 +36,11 @@ final class ScoreSystem: GameSystem {
             // Add score via CombatFacade
             GameFacade.shared.combat.adjustScore(amount: e.scoreValue)
         } else if let g = event as? GrazeEvent {
+            // Increment graze count for pointBullet value calculation
+            if let player = entityManager.getEntities(with: PlayerComponent.self).first,
+               let playerComp = player.component(ofType: PlayerComponent.self) {
+                playerComp.grazeInStage += g.grazeValue
+            }
             GameFacade.shared.combat.adjustScore(amount: g.grazeValue)
         } else if let p = event as? PowerUpCollectedEvent {
             if let player = entityManager.getEntities(with: PlayerComponent.self).first,
@@ -48,6 +53,9 @@ final class ScoreSystem: GameSystem {
                         // Full power: gain score defined in value
                         GameFacade.shared.combat.adjustPower(delta: 1)
                     }
+                    GameFacade.shared.combat.adjustScore(amount: p.value)
+                case .pointBullet:
+                    // Special bullet-to-point conversion item
                     GameFacade.shared.combat.adjustScore(amount: p.value)
                 case .bomb:
                     if playerComp.bombs < 8 {

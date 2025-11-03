@@ -106,8 +106,8 @@ class ViewController: NSViewController, EventListener {
             if e.value > 0 {
                 self.ValueLabel.stringValue = "VALUE: \(e.value)"
             }
-        case let e as StageTransitionEvent:
-            // When a stage transitions, show intermediate score scene
+        case let e as SceneReadyForTransitionEvent:
+            // Scene has faded out, now present the score scene
             presentScoreScene(totalScore: e.totalScore, nextStageId: e.nextStageId)
         default:
             break

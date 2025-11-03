@@ -29,7 +29,7 @@ class GameScene: SKScene, EventListener {
     private var grazeSoundAction: SKAction!
     private var floatingScoreAction: SKAction!
     private var enemyDeathAction: SKAction!
-    
+
     override func didMove(to view: SKView) {
         backgroundColor = SKColor.black
         
@@ -124,6 +124,8 @@ class GameScene: SKScene, EventListener {
             self.showFloatingScore(value: e.value, atLogical: e.position)
         case let e as EnemyDiedEvent:
             self.showEnemyDeathEffect(for: e.entity)
+        case let e as StageTransitionEvent:
+            self.handleStageTransition(nextStageId: e.nextStageId, totalScore: e.totalScore)
         default:
             break
         }
@@ -279,5 +281,20 @@ class GameScene: SKScene, EventListener {
         
         effectLayer.addChild(node)
         node.run(enemyDeathAction)
+    }
+    
+    /// Handle stage transition: fade out scene, then notify for scene change
+    private func handleStageTransition(nextStageId: Int, totalScore: Int) {
+        // Create a cover node that fades to black over the entire scene (same approach as pause menu overlay)
+        let coverNode = SKSpriteNode(color: .black, size: size)
+        coverNode.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        coverNode.alpha = 0.0
+        coverNode.zPosition = 1000  // Above everything
+        addChild(coverNode)
+        
+        let fadeOut = SKAction.fadeIn(withDuration: 3.5)
+        coverNode.run(fadeOut) {
+            GameFacade.shared.getEventBus().fire(SceneReadyForTransitionEvent(nextStageId: nextStageId, totalScore: totalScore))
+        }
     }
 }

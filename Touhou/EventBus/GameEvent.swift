@@ -184,6 +184,18 @@ struct StageTransitionEvent: GameEvent {
     }
 }
 
+struct SceneReadyForTransitionEvent: GameEvent {
+    let timestamp: TimeInterval
+    let nextStageId: Int
+    let totalScore: Int
+    
+    init(nextStageId: Int, totalScore: Int) {
+        self.timestamp = CACurrentMediaTime()
+        self.nextStageId = nextStageId
+        self.totalScore = totalScore
+    }
+}
+
 struct StageStartedEvent: GameEvent {
     let timestamp: TimeInterval
     let stageId: Int

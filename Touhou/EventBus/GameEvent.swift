@@ -89,11 +89,13 @@ struct PowerUpCollectedEvent: GameEvent {
     let timestamp: TimeInterval
     let itemType: ItemType
     let value: Int
+    let position: CGPoint  // Position where item was collected
     
-    init(itemType: ItemType, value: Int) {
+    init(itemType: ItemType, value: Int, position: CGPoint) {
         self.timestamp = CACurrentMediaTime()
         self.itemType = itemType
         self.value = value
+        self.position = position
     }
 }
 

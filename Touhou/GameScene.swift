@@ -111,6 +111,8 @@ class GameScene: SKScene, EventListener {
             self.playGrazeEffect(for: e.bulletEntity)
         case let e as EnemyHitEvent:
             self.showHitEffect(atLogical: e.hitPosition)
+        case let e as PowerUpCollectedEvent:
+            self.showFloatingScore(value: e.value, atLogical: e.position)
         default:
             break
         }
@@ -227,5 +229,33 @@ class GameScene: SKScene, EventListener {
         
         // TODO: Add sound effect here when sound file is ready
         // run(SKAction.playSoundFileNamed("hit.caf", waitForCompletion: false))
+    }
+    
+    /// Show floating score number at collection position (TH06 style)
+    private func showFloatingScore(value: Int, atLogical position: CGPoint) {
+        // Skip if value is 0 (bombs/lives don't award score)
+        guard value > 0 else { return }
+        
+        let scaleX = size.width / GameFacade.playArea.width
+        let scaleY = size.height / GameFacade.playArea.height
+        let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
+        
+        // Create label node
+        let label = SKLabelNode(text: "\(value)")
+        label.fontName = "Menlo-Bold"
+        label.fontSize = 20 * max(scaleX, scaleY)  // Scale font size
+        label.fontColor = value >= 100000 ? .yellow : .white  // Yellow for high value (matching TH06)
+        label.position = scenePosition
+        label.zPosition = 250  // Above items, below bosses
+        label.verticalAlignmentMode = .center
+        label.horizontalAlignmentMode = .center
+        
+        effectLayer.addChild(label)
+        
+        // TH06-style: move up slightly then fade out (60 frames at 60fps = 1 second)
+        let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 1.0)
+        let fadeOut = SKAction.fadeOut(withDuration: 1.0)
+        let remove = SKAction.removeFromParent()
+        label.run(.sequence([.group([moveUp, fadeOut]), remove]))
     }
 }

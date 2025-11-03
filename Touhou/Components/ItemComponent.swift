@@ -86,7 +86,7 @@ final class ItemComponent: GKComponent {
             )
             
             // Fire collection event and destroy item
-            GameFacade.shared.combat.fireItemCollectionEvent(itemType: itemType, value: calculatedValue)
+            GameFacade.shared.combat.fireItemCollectionEvent(itemType: itemType, value: calculatedValue, position: transform.position)
             GameFacade.shared.entities.destroy(entity)
         }
     }

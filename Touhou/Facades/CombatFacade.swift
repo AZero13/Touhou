@@ -89,8 +89,8 @@ final class CombatFacade {
     }
     
     /// Fire item collection event (for component use)
-    func fireItemCollectionEvent(itemType: ItemType, value: Int) {
-        eventBus.fire(PowerUpCollectedEvent(itemType: itemType, value: value))
+    func fireItemCollectionEvent(itemType: ItemType, value: Int, position: CGPoint) {
+        eventBus.fire(PowerUpCollectedEvent(itemType: itemType, value: value, position: position))
     }
 }
 

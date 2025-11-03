@@ -72,7 +72,6 @@ class GameScene: SKScene, EventListener {
     }
     
     private func setupEffectActions() {
-        // Create reusable actions for effects (following Apple's best practices)
         let grazeExpand = SKAction.scale(to: 2.5, duration: 0.2)
         let grazeFade = SKAction.fadeOut(withDuration: 0.2)
         grazeEffectAction = .sequence([.group([grazeExpand, grazeFade]), .removeFromParent()])
@@ -81,16 +80,13 @@ class GameScene: SKScene, EventListener {
         let hitFade = SKAction.fadeOut(withDuration: 0.15)
         hitEffectAction = .sequence([.group([hitExpand, hitFade]), .removeFromParent()])
         
-        // Cache sound actions (created once, reused many times)
         grazeSoundAction = SKAction.playSoundFileNamed("graze.caf", waitForCompletion: false)
         
-        // Floating score action (TH06-style: move up and fade out)
         let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 1.0)
         let fadeOut = SKAction.fadeOut(withDuration: 1.0)
         let remove = SKAction.removeFromParent()
         floatingScoreAction = .sequence([.group([moveUp, fadeOut]), remove])
         
-        // Enemy death effect: expand then fade out
         let deathExpand = SKAction.scale(to: 2.5, duration: 0.25)
         let deathFade = SKAction.fadeOut(withDuration: 0.25)
         enemyDeathAction = .sequence([.group([deathExpand, deathFade]), remove])
@@ -231,19 +227,16 @@ class GameScene: SKScene, EventListener {
         let scaleX = size.width / GameFacade.playArea.width
         let scaleY = size.height / GameFacade.playArea.height
         let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
-        let radius: CGFloat = 4 * max(scaleX, scaleY)  // Small white circle
+        let radius: CGFloat = 4 * max(scaleX, scaleY)
         let node = SKShapeNode(circleOfRadius: radius)
         node.position = scenePosition
         node.strokeColor = .white
         node.lineWidth = 1.5
         node.fillColor = .clear
         node.alpha = 1.0
-        node.zPosition = 300  // Above everything
-        effectLayer.addChild(node)  // Add to effect layer
-        node.run(hitEffectAction)  // Use cached action
-        
-        // TODO: Add sound effect here when sound file is ready
-        // run(SKAction.playSoundFileNamed("hit.caf", waitForCompletion: false))
+        node.zPosition = 300
+        effectLayer.addChild(node)
+        node.run(hitEffectAction)
     }
     
     /// Show floating score number at collection position (TH06 style)
@@ -255,10 +248,9 @@ class GameScene: SKScene, EventListener {
         let scaleY = size.height / GameFacade.playArea.height
         let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
         
-        // Create label node
         let label = SKLabelNode(text: "\(value)")
         label.fontName = "Menlo-Bold"
-        label.fontSize = 20 * max(scaleX, scaleY)  // Scale font size
+        label.fontSize = 20 * max(scaleX, scaleY)
         label.fontColor = value >= 100000 ? .yellow : .white  // Yellow for high value (matching TH06)
         label.position = scenePosition
         label.zPosition = 250  // Above items, below bosses
@@ -266,8 +258,6 @@ class GameScene: SKScene, EventListener {
         label.horizontalAlignmentMode = .center
         
         effectLayer.addChild(label)
-        
-        // Use cached action
         label.run(floatingScoreAction)
     }
     
@@ -278,16 +268,14 @@ class GameScene: SKScene, EventListener {
         let scaleX = size.width / GameFacade.playArea.width
         let scaleY = size.height / GameFacade.playArea.height
         let scenePosition = CGPoint(x: transform.position.x * scaleX, y: transform.position.y * scaleY)
-        
-        // Create death effect circle
-        let radius: CGFloat = 24 * max(scaleX, scaleY)  // Larger than hit effect
+        let radius: CGFloat = 24 * max(scaleX, scaleY)
         let node = SKShapeNode(circleOfRadius: radius)
         node.position = scenePosition
         node.strokeColor = .white
         node.lineWidth = 2.0
         node.fillColor = .clear
         node.alpha = 1.0
-        node.zPosition = 200  // Above graze effects
+        node.zPosition = 200
         
         effectLayer.addChild(node)
         node.run(enemyDeathAction)

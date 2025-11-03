@@ -62,7 +62,9 @@ final class ItemComponent: GKComponent {
         transform.position.y += transform.velocity.dy * deltaTime
         
         // Despawn off-screen (TH06 style: bottom or top out of bounds)
-        if transform.position.y < -50 || transform.position.y > 448 {
+        let playArea = GameFacade.playArea
+        let despawnBuffer: CGFloat = -50  // Buffer beyond bottom edge
+        if transform.position.y < despawnBuffer || transform.position.y > playArea.maxY {
             GameFacade.shared.entities.destroy(entity)
             return
         }

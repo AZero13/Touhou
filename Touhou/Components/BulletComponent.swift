@@ -152,8 +152,9 @@ final class BulletComponent: GKComponent {
         transform.position.y += transform.velocity.dy * deltaTime * timeScale * speedScale
         
         // Mark bullets that are out of bounds for destruction
-        if transform.position.x < 0 || transform.position.x > 384 ||
-           transform.position.y < 0 || transform.position.y > 448 {
+        let playArea = GameFacade.playArea
+        if transform.position.x < playArea.minX || transform.position.x > playArea.maxX ||
+           transform.position.y < playArea.minY || transform.position.y > playArea.maxY {
             GameFacade.shared.entities.destroy(entity)
         }
     }

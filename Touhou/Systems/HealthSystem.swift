@@ -71,13 +71,13 @@ final class HealthSystem: GameSystem {
         // Boss death: convert all bullets to points (TH06 behavior)
         if isBoss {
             BulletUtility.convertBulletsToPoints(entityManager: entityManager)
-        }
-        
-        // Spawn item drop if enemy has one
-        if let itemType = event.dropItem,
-           let transform = event.entity.component(ofType: TransformComponent.self) {
-            // Initial upward velocity - brief pop then fall
-            GameFacade.shared.entities.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: 40))
+        } else {
+            // Regular enemy death: spawn item drop
+            if let itemType = event.dropItem,
+               let transform = event.entity.component(ofType: TransformComponent.self) {
+                // Initial upward velocity - brief pop then fall
+                GameFacade.shared.entities.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: 40))
+            }
         }
     }
     

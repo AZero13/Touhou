@@ -40,7 +40,7 @@ final class EntityFacade {
         entity.addComponent(EnemyComponent(
             enemyType: .custom("boss_\(name)"),
             scoreValue: 5000,
-            dropItem: .life,
+            dropItem: nil,  // Bosses don't drop items (only convert bullets to points)
             attackPattern: attackPattern,
             patternConfig: patternConfig,
             shotInterval: shotInterval

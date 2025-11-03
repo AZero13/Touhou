@@ -18,7 +18,6 @@ final class PlayerComponent: GKComponent {
     var score: Int
     var powerItemCountForScore: Int // For tracking power items collected when at full power
     var grazeInStage: Int // Graze count for current stage (resets each stage)
-    var isBombActive: Bool // Track if bomb is currently active
     
     // Visual size (matches the rendered sprite radius)
     var visualRadius: CGFloat = 8.0
@@ -43,7 +42,6 @@ final class PlayerComponent: GKComponent {
         self.score = score
         self.powerItemCountForScore = 0
         self.grazeInStage = 0
-        self.isBombActive = false
         super.init()
     }
     

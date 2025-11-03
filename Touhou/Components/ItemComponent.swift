@@ -84,8 +84,7 @@ final class ItemComponent: GKComponent {
                 itemPosition: transform.position,
                 playerPower: playerComp.power,
                 powerItemCount: playerComp.powerItemCountForScore,
-                grazeInStage: playerComp.grazeInStage,
-                isBombActive: playerComp.isBombActive
+                grazeInStage: playerComp.grazeInStage
             )
             
             // Fire collection event and destroy item
@@ -96,7 +95,7 @@ final class ItemComponent: GKComponent {
     
     // MARK: - Static Helpers
     
-    static func calculateItemValue(itemType: ItemType, itemPosition: CGPoint, playerPower: Int, powerItemCount: Int, grazeInStage: Int = 0, isBombActive: Bool = false) -> Int {
+    static func calculateItemValue(itemType: ItemType, itemPosition: CGPoint, playerPower: Int, powerItemCount: Int, grazeInStage: Int = 0) -> Int {
         switch itemType {
         case .power:
             // Power items: base value 10, bonus when at full power based on count
@@ -112,12 +111,7 @@ final class ItemComponent: GKComponent {
             return max(100, Int(normalizedY * 1000)) // 100 to 1000
         case .pointBullet:
             // TH06 formula: (grazeInStage / 3) * 10 + 500
-            // If bomb is active, reduce to 100
-            var score = (grazeInStage / 3) * 10 + 500
-            if isBombActive {
-                score = 100
-            }
-            return score
+            return (grazeInStage / 3) * 10 + 500
         case .bomb:
             return 0
         case .life:

@@ -27,6 +27,8 @@ class GameScene: SKScene, EventListener {
     private var grazeEffectAction: SKAction!
     private var hitEffectAction: SKAction!
     private var grazeSoundAction: SKAction!
+    private var floatingScoreAction: SKAction!
+    private var enemyDeathAction: SKAction!
     
     override func didMove(to view: SKView) {
         backgroundColor = SKColor.black
@@ -81,6 +83,17 @@ class GameScene: SKScene, EventListener {
         
         // Cache sound actions (created once, reused many times)
         grazeSoundAction = SKAction.playSoundFileNamed("graze.caf", waitForCompletion: false)
+        
+        // Floating score action (TH06-style: move up and fade out)
+        let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 1.0)
+        let fadeOut = SKAction.fadeOut(withDuration: 1.0)
+        let remove = SKAction.removeFromParent()
+        floatingScoreAction = .sequence([.group([moveUp, fadeOut]), remove])
+        
+        // Enemy death effect: expand then fade out
+        let deathExpand = SKAction.scale(to: 2.5, duration: 0.25)
+        let deathFade = SKAction.fadeOut(withDuration: 0.25)
+        enemyDeathAction = .sequence([.group([deathExpand, deathFade]), remove])
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -113,6 +126,8 @@ class GameScene: SKScene, EventListener {
             self.showHitEffect(atLogical: e.hitPosition)
         case let e as PowerUpCollectedEvent:
             self.showFloatingScore(value: e.value, atLogical: e.position)
+        case let e as EnemyDiedEvent:
+            self.showEnemyDeathEffect(for: e.entity)
         default:
             break
         }
@@ -252,10 +267,29 @@ class GameScene: SKScene, EventListener {
         
         effectLayer.addChild(label)
         
-        // TH06-style: move up slightly then fade out (60 frames at 60fps = 1 second)
-        let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 1.0)
-        let fadeOut = SKAction.fadeOut(withDuration: 1.0)
-        let remove = SKAction.removeFromParent()
-        label.run(.sequence([.group([moveUp, fadeOut]), remove]))
+        // Use cached action
+        label.run(floatingScoreAction)
+    }
+    
+    /// Show enemy death effect (TH06 style)
+    private func showEnemyDeathEffect(for enemyEntity: GKEntity) {
+        guard let transform = enemyEntity.component(ofType: TransformComponent.self) else { return }
+        
+        let scaleX = size.width / GameFacade.playArea.width
+        let scaleY = size.height / GameFacade.playArea.height
+        let scenePosition = CGPoint(x: transform.position.x * scaleX, y: transform.position.y * scaleY)
+        
+        // Create death effect circle
+        let radius: CGFloat = 24 * max(scaleX, scaleY)  // Larger than hit effect
+        let node = SKShapeNode(circleOfRadius: radius)
+        node.position = scenePosition
+        node.strokeColor = .white
+        node.lineWidth = 2.0
+        node.fillColor = .clear
+        node.alpha = 1.0
+        node.zPosition = 200  // Above graze effects
+        
+        effectLayer.addChild(node)
+        node.run(enemyDeathAction)
     }
 }

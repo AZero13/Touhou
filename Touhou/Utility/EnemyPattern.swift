@@ -21,106 +21,87 @@ enum EnemyPattern: CaseIterable {
     func getBulletCommands(from position: CGPoint, targetPosition: CGPoint? = nil, config: PatternConfig = PatternConfig()) -> [BulletSpawnCommand] {
         switch self {
         case .singleShot:
-            return [
-                BulletSpawnCommand(
-                    position: position,
-                    velocity: CGVector(dx: 0, dy: -config.physics.speed),
-                    bulletType: .enemyBullet,
-                    physics: config.physics,
-                    visual: config.visual,
-                    behavior: config.behavior
-                )
-            ]
-            
+            return makeSingleShot(position: position, config: config)
         case .tripleShot:
-            let spread = config.spread
-            return [
-                BulletSpawnCommand(
-                    position: position,
-                    velocity: CGVector(dx: 0, dy: -config.physics.speed),
-                    bulletType: .enemyBullet,
-                    physics: config.physics,
-                    visual: config.visual,
-                    behavior: config.behavior
-                ),
-                BulletSpawnCommand(
-                    position: position,
-                    velocity: CGVector(dx: -spread, dy: -config.physics.speed * 0.8),
-                    bulletType: .enemyBullet,
-                    physics: config.physics,
-                    visual: config.visual,
-                    behavior: config.behavior
-                ),
-                BulletSpawnCommand(
-                    position: position,
-                    velocity: CGVector(dx: spread, dy: -config.physics.speed * 0.8),
-                    bulletType: .enemyBullet,
-                    physics: config.physics,
-                    visual: config.visual,
-                    behavior: config.behavior
-                )
-            ]
-            
+            return makeTripleShot(position: position, config: config)
         case .circleShot:
-            var commands: [BulletSpawnCommand] = []
-            let bulletCount = config.bulletCount
-            let speed = config.physics.speed
-            
-            for i in 0..<bulletCount {
-                let angle = (CGFloat.pi * 2 * CGFloat(i)) / CGFloat(bulletCount)
-                let velocity = CGVector(dx: cos(angle) * speed, dy: sin(angle) * speed)
-                
-                commands.append(BulletSpawnCommand(
-                    position: position,
-                    velocity: velocity,
-                    bulletType: .enemyBullet,
-                    physics: config.physics,
-                    visual: config.visual,
-                    behavior: config.behavior
-                ))
-            }
-            return commands
-            
+            return makeCircleShot(position: position, config: config)
         case .aimedShot:
-            guard let target = targetPosition else {
-                // Fallback to single shot if no target
-                return EnemyPattern.singleShot.getBulletCommands(from: position, config: config)
-            }
-            
-            let speed = config.physics.speed
-            let velocity = MathUtility.velocity(from: position, to: target, speed: speed)
-            
-            return [
-                BulletSpawnCommand(
-                    position: position,
-                    velocity: velocity,
-                    bulletType: .enemyBullet,
-                    physics: config.physics,
-                    visual: config.visual,
-                    behavior: config.behavior
-                )
-            ]
-            
+            return makeAimedShot(position: position, targetPosition: targetPosition, config: config)
         case .spiralShot:
-            var commands: [BulletSpawnCommand] = []
-            let bulletCount = config.bulletCount
-            let baseSpeed = config.physics.speed
-            
-            for i in 0..<bulletCount {
-                let angle = (CGFloat.pi * 2 * CGFloat(i)) / CGFloat(bulletCount) + CGFloat.pi * 0.5 // Start pointing down
-                let speed = baseSpeed + CGFloat(i) * config.spiralSpeed
-                let velocity = CGVector(dx: cos(angle) * speed, dy: sin(angle) * speed)
-                
-                commands.append(BulletSpawnCommand(
-                    position: position,
-                    velocity: velocity,
-                    bulletType: .enemyBullet,
-                    physics: config.physics,
-                    visual: config.visual,
-                    behavior: config.behavior
-                ))
-            }
-            return commands
+            return makeSpiralShot(position: position, config: config)
         }
+    }
+    
+    // MARK: - Pattern Implementations
+    
+    private func makeSingleShot(position: CGPoint, config: PatternConfig) -> [BulletSpawnCommand] {
+        return [
+            BulletSpawnCommand(
+                position: position,
+                velocity: CGVector(dx: 0, dy: -config.physics.speed),
+                bulletType: .enemyBullet,
+                physics: config.physics,
+                visual: config.visual,
+                behavior: config.behavior
+            )
+        ]
+    }
+    
+    private func makeTripleShot(position: CGPoint, config: PatternConfig) -> [BulletSpawnCommand] {
+        let spread = config.spread
+        let speed = config.physics.speed
+        return [
+            makeBulletCommand(position: position, velocity: CGVector(dx: 0, dy: -speed), config: config),
+            makeBulletCommand(position: position, velocity: CGVector(dx: -spread, dy: -speed * 0.8), config: config),
+            makeBulletCommand(position: position, velocity: CGVector(dx: spread, dy: -speed * 0.8), config: config)
+        ]
+    }
+    
+    private func makeCircleShot(position: CGPoint, config: PatternConfig) -> [BulletSpawnCommand] {
+        var commands: [BulletSpawnCommand] = []
+        let bulletCount = config.bulletCount
+        let speed = config.physics.speed
+        
+        for i in 0..<bulletCount {
+            let angle = (CGFloat.pi * 2 * CGFloat(i)) / CGFloat(bulletCount)
+            let velocity = CGVector(dx: cos(angle) * speed, dy: sin(angle) * speed)
+            commands.append(makeBulletCommand(position: position, velocity: velocity, config: config))
+        }
+        return commands
+    }
+    
+    private func makeAimedShot(position: CGPoint, targetPosition: CGPoint?, config: PatternConfig) -> [BulletSpawnCommand] {
+        guard let target = targetPosition else {
+            return EnemyPattern.singleShot.getBulletCommands(from: position, config: config)
+        }
+        
+        let velocity = MathUtility.velocity(from: position, to: target, speed: config.physics.speed)
+        return [makeBulletCommand(position: position, velocity: velocity, config: config)]
+    }
+    
+    private func makeSpiralShot(position: CGPoint, config: PatternConfig) -> [BulletSpawnCommand] {
+        var commands: [BulletSpawnCommand] = []
+        let bulletCount = config.bulletCount
+        let baseSpeed = config.physics.speed
+        
+        for i in 0..<bulletCount {
+            let angle = (CGFloat.pi * 2 * CGFloat(i)) / CGFloat(bulletCount) + CGFloat.pi * 0.5
+            let speed = baseSpeed + CGFloat(i) * config.spiralSpeed
+            let velocity = CGVector(dx: cos(angle) * speed, dy: sin(angle) * speed)
+            commands.append(makeBulletCommand(position: position, velocity: velocity, config: config))
+        }
+        return commands
+    }
+    
+    private func makeBulletCommand(position: CGPoint, velocity: CGVector, config: PatternConfig) -> BulletSpawnCommand {
+        return BulletSpawnCommand(
+            position: position,
+            velocity: velocity,
+            bulletType: .enemyBullet,
+            physics: config.physics,
+            visual: config.visual,
+            behavior: config.behavior
+        )
     }
 }

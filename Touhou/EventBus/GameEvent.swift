@@ -175,10 +175,12 @@ struct BombsChangedEvent: GameEvent {
 struct StageTransitionEvent: GameEvent {
     let timestamp: TimeInterval
     let nextStageId: Int
+    let totalScore: Int
     
-    init(nextStageId: Int) {
+    init(nextStageId: Int, totalScore: Int) {
         self.timestamp = CACurrentMediaTime()
         self.nextStageId = nextStageId
+        self.totalScore = totalScore
     }
 }
 

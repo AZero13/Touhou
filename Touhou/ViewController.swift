@@ -108,9 +108,7 @@ class ViewController: NSViewController, EventListener {
             }
         case let e as StageTransitionEvent:
             // When a stage transitions, show intermediate score scene
-            let score = GameFacade.shared.entities.getPlayer()?
-                .component(ofType: PlayerComponent.self)?.score ?? 0
-            presentScoreScene(totalScore: score, nextStageId: e.nextStageId)
+            presentScoreScene(totalScore: e.totalScore, nextStageId: e.nextStageId)
         default:
             break
         }

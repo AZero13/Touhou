@@ -100,45 +100,43 @@ final class PlayerComponent: GKComponent {
     
     private func handleShooting(input: InputState, currentTime: TimeInterval) {
         guard let transform = entity?.component(ofType: TransformComponent.self) else { return }
+        guard input.shoot.isPressed && currentTime - lastShotTime > Tuning.shotInterval else { return }
         
-        if input.shoot.isPressed && currentTime - lastShotTime > Tuning.shotInterval {
-            lastShotTime = currentTime
-            
-            let game = GameFacade.shared
-            
-            // Center bullet (straight up)
-            game.entities.spawnBullet(
-                position: CGPoint(x: transform.position.x, y: transform.position.y + Tuning.shotOffsetY),
-                velocity: CGVector(dx: 0, dy: 200),
-                bulletType: .amulet,
-                ownedByPlayer: true,
-                physics: PhysicsConfig(speed: 200, damage: 1),
-                visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
-                behavior: BehaviorConfig(homingStrength: nil, maxTurnRate: nil, delay: 0)
-            )
-            
-            // Left homing bullet
-            game.entities.spawnBullet(
-                position: CGPoint(x: transform.position.x - Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY),
-                velocity: CGVector(dx: -50, dy: 180),
-                bulletType: .homingAmulet,
-                ownedByPlayer: true,
-                physics: PhysicsConfig(speed: 180, damage: 1),
-                visual: VisualConfig(size: .small, shape: .circle, color: .blue, hasTrail: false, trailLength: 3),
-                behavior: BehaviorConfig()
-            )
-            
-            // Right homing bullet
-            game.entities.spawnBullet(
-                position: CGPoint(x: transform.position.x + Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY),
-                velocity: CGVector(dx: 50, dy: 180),
-                bulletType: .homingAmulet,
-                ownedByPlayer: true,
-                physics: PhysicsConfig(speed: 180, damage: 1),
-                visual: VisualConfig(size: .small, shape: .circle, color: .blue, hasTrail: false, trailLength: 3),
-                behavior: BehaviorConfig()
-            )
-        }
+        lastShotTime = currentTime
+        let game = GameFacade.shared
+        
+        // Center bullet (straight up)
+        game.entities.spawnBullet(
+            position: CGPoint(x: transform.position.x, y: transform.position.y + Tuning.shotOffsetY),
+            velocity: CGVector(dx: 0, dy: 200),
+            bulletType: .amulet,
+            ownedByPlayer: true,
+            physics: PhysicsConfig(speed: 200, damage: 1),
+            visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
+            behavior: BehaviorConfig(homingStrength: nil, maxTurnRate: nil, delay: 0)
+        )
+        
+        // Left homing bullet
+        game.entities.spawnBullet(
+            position: CGPoint(x: transform.position.x - Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY),
+            velocity: CGVector(dx: -50, dy: 180),
+            bulletType: .homingAmulet,
+            ownedByPlayer: true,
+            physics: PhysicsConfig(speed: 180, damage: 1),
+            visual: VisualConfig(size: .small, shape: .circle, color: .blue, hasTrail: false, trailLength: 3),
+            behavior: BehaviorConfig()
+        )
+        
+        // Right homing bullet
+        game.entities.spawnBullet(
+            position: CGPoint(x: transform.position.x + Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY),
+            velocity: CGVector(dx: 50, dy: 180),
+            bulletType: .homingAmulet,
+            ownedByPlayer: true,
+            physics: PhysicsConfig(speed: 180, damage: 1),
+            visual: VisualConfig(size: .small, shape: .circle, color: .blue, hasTrail: false, trailLength: 3),
+            behavior: BehaviorConfig()
+        )
     }
     
     private func handleBomb(input: InputState) {

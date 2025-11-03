@@ -74,8 +74,9 @@ final class EnemySystem: GameSystem {
                 stageCompleteDispatched = true
                 let currentStage = GameFacade.shared.getCurrentStage()
                 let nextId = currentStage >= GameFacade.maxStage ? (GameFacade.maxStage + 1) : (currentStage + 1)
+                let totalScore = entityManager.getEntities(with: PlayerComponent.self).first?.component(ofType: PlayerComponent.self)?.score ?? 0
                 print("Boss defeated! Transitioning from stage \(currentStage) to stage \(nextId)")
-                eventBus.fire(StageTransitionEvent(nextStageId: nextId))
+                eventBus.fire(StageTransitionEvent(nextStageId: nextId, totalScore: totalScore))
             }
         }
     }
@@ -93,64 +94,32 @@ final class EnemySystem: GameSystem {
     // MARK: - Private Methods
     
     private func loadStageScript(stageId: Int) {
-        // Stage 1 script - enemies spawn at specific times with different patterns and visual variety
         switch stageId {
         case 1:
-        stageScript = [
-            // Basic red circles
-            EnemySpawnEvent(time: 1.0, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 100, y: 400), 
-                           pattern: .singleShot, parameters: PatternConfig(
-                               physics: PhysicsConfig(speed: 120),
-                               visual: VisualConfig(shape: .circle, color: .red)
-                           )),
-            
-            // Blue diamonds in triple shot
-            EnemySpawnEvent(time: 2.5, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 200, y: 400), 
-                           pattern: .tripleShot, parameters: PatternConfig(
-                               physics: PhysicsConfig(speed: 100),
-                               visual: VisualConfig(shape: .diamond, color: .blue),
-                               spread: 60
-                           )),
-            
-            // Green aimed shots
-            EnemySpawnEvent(time: 4.0, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 300, y: 400), 
-                           pattern: .aimedShot, parameters: PatternConfig(
-                               physics: PhysicsConfig(speed: 140),
-                               visual: VisualConfig(shape: .circle, color: .green)
-                           )),
-            
-            // Purple stars in circle pattern
-            EnemySpawnEvent(time: 6.0, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 150, y: 400), 
-                           pattern: .circleShot, parameters: PatternConfig(
-                               physics: PhysicsConfig(speed: 80),
-                               visual: VisualConfig(shape: .star, color: .purple),
-                               bulletCount: 12
-                           )),
-            
-            // Orange squares in spiral
-            EnemySpawnEvent(time: 7.5, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 250, y: 400), 
-                           pattern: .spiralShot, parameters: PatternConfig(
-                               physics: PhysicsConfig(speed: 90),
-                               visual: VisualConfig(shape: .square, color: .orange),
-                               bulletCount: 8,
-                               spiralSpeed: 15
-                           )),
-            
-            // Large yellow circles
-            EnemySpawnEvent(time: 10.0, type: EnemyComponent.EnemyType.fairy, position: CGPoint(x: 192, y: 400), 
-                           pattern: .aimedShot, parameters: PatternConfig(
-                               physics: PhysicsConfig(speed: 160),
-                               visual: VisualConfig(size: .large, shape: .circle, color: .yellow)
-                           )),
-        ]
+            stageScript = makeStage1Script()
         default:
+            stageScript = makeDefaultStageScript(stageId: stageId)
+        }
+    }
+    
+    private func makeStage1Script() -> [EnemySpawnEvent] {
+        return [
+            EnemySpawnEvent(time: 1.0, type: .fairy, position: CGPoint(x: 100, y: 400), pattern: .singleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 120), visual: VisualConfig(shape: .circle, color: .red))),
+            EnemySpawnEvent(time: 2.5, type: .fairy, position: CGPoint(x: 200, y: 400), pattern: .tripleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 100), visual: VisualConfig(shape: .diamond, color: .blue), spread: 60)),
+            EnemySpawnEvent(time: 4.0, type: .fairy, position: CGPoint(x: 300, y: 400), pattern: .aimedShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 140), visual: VisualConfig(shape: .circle, color: .green))),
+            EnemySpawnEvent(time: 6.0, type: .fairy, position: CGPoint(x: 150, y: 400), pattern: .circleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 80), visual: VisualConfig(shape: .star, color: .purple), bulletCount: 12)),
+            EnemySpawnEvent(time: 7.5, type: .fairy, position: CGPoint(x: 250, y: 400), pattern: .spiralShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 90), visual: VisualConfig(shape: .square, color: .orange), bulletCount: 8, spiralSpeed: 15)),
+            EnemySpawnEvent(time: 10.0, type: .fairy, position: CGPoint(x: 192, y: 400), pattern: .aimedShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 160), visual: VisualConfig(size: .large, shape: .circle, color: .yellow)))
+        ]
+    }
+    
+    private func makeDefaultStageScript(stageId: Int) -> [EnemySpawnEvent] {
         let speed = CGFloat(120 + (stageId - 1) * 20)
-        stageScript = [
+        return [
             EnemySpawnEvent(time: 1.0, type: .fairy, position: CGPoint(x: 80, y: 400), pattern: .aimedShot, parameters: PatternConfig(physics: PhysicsConfig(speed: speed))),
             EnemySpawnEvent(time: 2.0, type: .fairy, position: CGPoint(x: 192, y: 400), pattern: .tripleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: speed - 10))),
             EnemySpawnEvent(time: 3.0, type: .fairy, position: CGPoint(x: 300, y: 400), pattern: .circleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: speed - 20), bulletCount: 10))
         ]
-        }
     }
     
     private func spawnEnemiesFromScript() {

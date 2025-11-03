@@ -124,7 +124,7 @@ final class PlayerComponent: GKComponent {
                 bulletType: .homingAmulet,
                 ownedByPlayer: true,
                 physics: PhysicsConfig(speed: 180, damage: 1),
-                visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
+                visual: VisualConfig(size: .small, shape: .circle, color: .blue, hasTrail: false, trailLength: 3),
                 behavior: BehaviorConfig()
             )
             
@@ -135,7 +135,7 @@ final class PlayerComponent: GKComponent {
                 bulletType: .homingAmulet,
                 ownedByPlayer: true,
                 physics: PhysicsConfig(speed: 180, damage: 1),
-                visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
+                visual: VisualConfig(size: .small, shape: .circle, color: .blue, hasTrail: false, trailLength: 3),
                 behavior: BehaviorConfig()
             )
         }

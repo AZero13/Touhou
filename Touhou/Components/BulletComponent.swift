@@ -10,13 +10,6 @@ import CoreGraphics
 import GameplayKit
 import AppKit
 
-// MARK: - Protocols
-
-/// Protocol for entities that can deal damage
-protocol Damaging {
-    var damage: Int { get }
-}
-
 // MARK: - Enums
 
 /// Bullet visual properties
@@ -72,7 +65,7 @@ enum BulletColor: String, CaseIterable {
 // MARK: - Component
 
 /// BulletComponent - handles bullet state, movement, and physics
-final class BulletComponent: GKComponent, Damaging {
+final class BulletComponent: GKComponent {
     var ownedByPlayer: Bool
     enum BulletType: Equatable {
         case needle

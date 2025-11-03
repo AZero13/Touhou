@@ -8,33 +8,8 @@
 import Foundation
 import GameplayKit
 
-// MARK: - Protocols
-
-/// Protocol for entities that can shoot
-protocol Shootable {
-    var attackPattern: EnemyPattern { get }
-    var patternConfig: PatternConfig { get }
-    var lastShotTime: TimeInterval { get set }
-    var shotInterval: TimeInterval { get }
-    
-    func canShoot(at currentTime: TimeInterval) -> Bool
-    func getBulletCommands(from position: CGPoint, targetPosition: CGPoint?) -> [BulletSpawnCommand]
-}
-
-/// Protocol for entities that drop items
-protocol Droppable {
-    var dropItem: ItemType? { get }
-}
-
-/// Protocol for entities that can be scored
-protocol Scoreable {
-    var scoreValue: Int { get }
-}
-
-// MARK: - Component
-
 /// EnemyComponent - handles enemy state, movement, shooting, and scoring
-final class EnemyComponent: GKComponent, Shootable, Droppable, Scoreable {
+final class EnemyComponent: GKComponent {
     enum EnemyType: Equatable {
         case fairy
         case custom(String)
@@ -64,7 +39,7 @@ final class EnemyComponent: GKComponent, Shootable, Droppable, Scoreable {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Protocol Conformance
+    // MARK: - Shooting
     
     func canShoot(at currentTime: TimeInterval) -> Bool {
         return currentTime - lastShotTime >= shotInterval

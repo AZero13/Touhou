@@ -83,7 +83,9 @@ final class RenderSystem {
                 bg?.strokeColor = .white
                 bg?.fillColor = .clear
                 bg?.zPosition = 2000
-                bossLayer?.addChild(bg!) ?? scene.addChild(bg!)
+                if let bgToAdd = bg {
+                    bossLayer?.addChild(bgToAdd) ?? scene.addChild(bgToAdd)
+                }
             }
             var fill = bossLayer?.childNode(withName: fillName) as? SKShapeNode
             // Get health percentage from HealthComponent
@@ -100,7 +102,9 @@ final class RenderSystem {
                 fill?.strokeColor = .clear
                 fill?.fillColor = .systemPink
                 fill?.zPosition = 2001
-                bossLayer?.addChild(fill!) ?? scene.addChild(fill!)
+                if let fillToAdd = fill {
+                    bossLayer?.addChild(fillToAdd) ?? scene.addChild(fillToAdd)
+                }
             } else {
                 let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
                 fill?.path = CGPath(roundedRect: rect, cornerWidth: 4, cornerHeight: 4, transform: nil)

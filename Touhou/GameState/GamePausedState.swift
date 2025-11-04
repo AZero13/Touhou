@@ -27,7 +27,7 @@ class GamePausedState: GKState {
     override func didEnter(from previousState: GKState?) {
         selectedOption = .close // Reset to Close on pause
         print("Entered Paused state")
-        gameFacade.getEventBus().fire(GamePausedEvent())
+        gameFacade.fireEvent(GamePausedEvent())
         fireMenuUpdateEvent()
     }
     
@@ -70,7 +70,7 @@ class GamePausedState: GKState {
     }
     
     private func fireMenuUpdateEvent() {
-        gameFacade.getEventBus().fire(PauseMenuUpdateEvent(selectedOption: selectedOption))
+        gameFacade.fireEvent(PauseMenuUpdateEvent(selectedOption: selectedOption))
     }
     
     override func isValidNextState(_ stateClass: AnyClass) -> Bool {
@@ -79,8 +79,8 @@ class GamePausedState: GKState {
     
     override func willExit(to nextState: GKState) {
         print("Exiting Paused state")
-        gameFacade.getEventBus().fire(PauseMenuHiddenEvent())
-        gameFacade.getEventBus().fire(GameResumedEvent())
+        gameFacade.fireEvent(PauseMenuHiddenEvent())
+        gameFacade.fireEvent(GameResumedEvent())
     }
     
     func getSelectedOption() -> PauseMenuOption {

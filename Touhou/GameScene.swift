@@ -101,7 +101,7 @@ class GameScene: SKScene, EventListener {
         // Update rendering after all actions and physics have been processed
         // This ensures that any position changes from actions won't be overwritten
         if let renderSystem = renderSystem {
-            renderSystem.sync(entityManager: GameFacade.shared.getEntityManager(), scene: self)
+            renderSystem.sync(entities: GameFacade.shared.entities, scene: self)
         }
     }
     
@@ -294,7 +294,7 @@ class GameScene: SKScene, EventListener {
         
         let fadeOut = SKAction.fadeIn(withDuration: 3.5)
         coverNode.run(fadeOut) {
-            GameFacade.shared.getEventBus().fire(SceneReadyForTransitionEvent(nextStageId: nextStageId, totalScore: totalScore))
+            GameFacade.shared.fireEvent(SceneReadyForTransitionEvent(nextStageId: nextStageId, totalScore: totalScore))
         }
     }
 }

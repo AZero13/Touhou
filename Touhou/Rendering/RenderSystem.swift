@@ -17,8 +17,8 @@ final class RenderSystem {
     private var logicalHeight: CGFloat { GameFacade.playArea.height }
     
     /// Sync entities with their visual representations
-    func sync(entityManager: EntityManager, scene: SKScene) {
-        let entities = entityManager.getAllEntities()
+    func sync(entities: EntityFacade, scene: SKScene) {
+        let allEntities = entities.getAllEntities()
         
         // Calculate scale factors
         let scaleX = scene.size.width / logicalWidth
@@ -28,7 +28,7 @@ final class RenderSystem {
         let worldLayer = scene.childNode(withName: "worldLayer")
         
         // Update all entities with RenderComponent
-        for entity in entities {
+        for entity in allEntities {
             if let render = entity.component(ofType: RenderComponent.self) {
                 let node = render.node
                 
@@ -36,7 +36,7 @@ final class RenderSystem {
                 if node.parent == nil {
                     worldLayer?.addChild(node) ?? scene.addChild(node)  // Add to worldLayer if it exists
                 }
-                
+
                 // Update position from TransformComponent
                 if let transform = entity.component(ofType: TransformComponent.self) {
                     node.position = CGPoint(
@@ -67,7 +67,7 @@ final class RenderSystem {
         
         // Boss health bar overlay (top of screen)
         let bossLayer = scene.childNode(withName: "bossLayer")
-        if let boss = entities.first(where: { $0.component(ofType: BossComponent.self) != nil }) {
+        if let boss = allEntities.first(where: { $0.component(ofType: BossComponent.self) != nil }) {
             // Show boss layer when boss exists
             bossLayer?.isHidden = false
             let barWidth = scene.size.width * 0.8
@@ -95,6 +95,7 @@ final class RenderSystem {
                 }
                 return 0
             }()
+            
             if fill == nil {
                 let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
                 fill = SKShapeNode(rect: rect, cornerRadius: 4)
@@ -220,7 +221,7 @@ final class RenderSystem {
         case .life:
             circle.fillColor = .green
         case .pointBullet:
-            circle.fillColor = .yellow  // Different color for converted bullets
+            circle.fillColor = .yellow
         }
         
         circle.strokeColor = .clear

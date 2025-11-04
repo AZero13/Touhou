@@ -138,5 +138,10 @@ final class EntityFacade {
     func getEntities<T: GKComponent>(with componentType: T.Type) -> [GKEntity] {
         return entityManager.getEntities(with: componentType)
     }
+    
+    /// Get all entities
+    func getAllEntities() -> [GKEntity] {
+        return entityManager.getAllEntities()
+    }
 }
 

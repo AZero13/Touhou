@@ -190,26 +190,15 @@ class GameFacade {
     
     // MARK: - System Access (deprecated - use facades instead)
     
-    /// @deprecated Use facades (entities, dialogue, combat) for most operations
-    /// Only use this for special cases not covered by facades
-    func getEntityManager() -> EntityManager {
-        return entityManager
-    }
-    
-    /// @deprecated Use facades for event-based operations
-    func getEventBus() -> EventBus {
-        return eventBus
-    }
-    
-    /// @deprecated Use facades for command-based operations
-    func getCommandQueue() -> CommandQueue {
-        return commandQueue
-    }
-    
     
     /// Register an event listener (still needed for systems)
     func registerListener(_ listener: EventListener) {
         eventBus.register(listener: listener)
+    }
+    
+    /// Fire a game event (non-deprecated way to fire events)
+    func fireEvent(_ event: GameEvent) {
+        eventBus.fire(event)
     }
     
     func getCurrentStage() -> Int { currentStage }

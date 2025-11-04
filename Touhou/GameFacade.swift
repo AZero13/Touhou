@@ -75,6 +75,7 @@ class GameFacade {
         addCrossCuttingSystem(PlayerLifecycleSystem()) // Player spawning/lifecycle only
         addCrossCuttingSystem(EnemySystem())           // Enemy spawning/AI (movement now in component)
         addCrossCuttingSystem(BulletHomingSystem())    // Homing before bullet movement
+        addCrossCuttingSystem(ItemAttractionSystem())  // Centralized item attraction handling
         addCrossCuttingSystem(CollisionSystem())       // Detect collisions
         addCrossCuttingSystem(HealthSystem())          // Process damage/death
         addCrossCuttingSystem(ScoreSystem())           // Update score/high score

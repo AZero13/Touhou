@@ -51,15 +51,27 @@ final class ItemComponent: GKComponent {
         guard let entity = entity,
               let transform = entity.component(ofType: TransformComponent.self) else { return }
         
-        // TH06-style: accelerate velocity.y toward maxDownwardVelocity
-        // Velocity starts positive (40) and decreases toward maxDownwardVelocity (-100)
-        // Items rise up, then fall down as velocity crosses zero and becomes negative
-        if transform.velocity.dy > maxDownwardVelocity {
-            transform.velocity.dy = max(maxDownwardVelocity, transform.velocity.dy + accelerationRate * deltaTime)
+        // If attracted, override physics to move toward player each frame
+        if isAttractedToPlayer,
+           let player = GameFacade.shared.entities.getPlayer(),
+           let playerTransform = player.component(ofType: TransformComponent.self) {
+            let target = playerTransform.position
+            let speed: CGFloat = 220
+            let desired = MathUtility.velocity(from: transform.position, to: target, speed: speed)
+            transform.velocity = desired
+            transform.position.x += transform.velocity.dx * deltaTime
+            transform.position.y += transform.velocity.dy * deltaTime
+        } else {
+            // TH06-style: accelerate velocity.y toward maxDownwardVelocity
+            // Velocity starts positive (40) and decreases toward maxDownwardVelocity (-100)
+            // Items rise up, then fall down as velocity crosses zero and becomes negative
+            if transform.velocity.dy > maxDownwardVelocity {
+                transform.velocity.dy = max(maxDownwardVelocity, transform.velocity.dy + accelerationRate * deltaTime)
+            }
+            
+            // Move based on velocity
+            transform.position.y += transform.velocity.dy * deltaTime
         }
-        
-        // Move based on velocity
-        transform.position.y += transform.velocity.dy * deltaTime
         
         // Despawn off-screen (TH06 style: bottom or top out of bounds)
         let playArea = GameFacade.playArea

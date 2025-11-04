@@ -71,6 +71,8 @@ final class HealthSystem: GameSystem {
         // Boss death: convert all bullets to points (TH06 behavior)
         if isBoss {
             BulletUtility.convertBulletsToPoints(entityManager: entityManager)
+            // Fire event for attraction, handled by ItemAttractionSystem
+            eventBus.fire(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
         } else {
             // Regular enemy death: spawn item drop
             if let itemType = event.dropItem,

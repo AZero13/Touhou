@@ -90,6 +90,19 @@ struct BulletsConvertedToPointsEvent: GameEvent {
     }
 }
 
+// MARK: - Item Attraction
+
+/// Global signal to attract certain item types to the player (e.g., after boss defeat)
+struct AttractItemsEvent: GameEvent {
+    let timestamp: TimeInterval
+    let itemTypes: [ItemType]
+    
+    init(itemTypes: [ItemType]) {
+        self.timestamp = CACurrentMediaTime()
+        self.itemTypes = itemTypes
+    }
+}
+
 // MARK: - Player & Resource Events
 
 struct PowerUpCollectedEvent: GameEvent {

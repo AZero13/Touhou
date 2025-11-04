@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class UserDefaultsHighScoreStore: HighScoreStore {
+final class UserDefaultsHighScoreStore {
     private let key = "HighScore"
     private let defaults: UserDefaults
     

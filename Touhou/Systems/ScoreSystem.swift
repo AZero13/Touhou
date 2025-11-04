@@ -13,7 +13,7 @@ final class ScoreSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     private var highScore: Int = 0 // session high score
-    private let highScoreStore: HighScoreStore = UserDefaultsHighScoreStore()
+    private let highScoreStore = UserDefaultsHighScoreStore()
     
     func initialize(entityManager: EntityManager, eventBus: EventBus) {
         self.entityManager = entityManager

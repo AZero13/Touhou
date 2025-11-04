@@ -82,7 +82,7 @@ final class RenderSystem {
                 bg?.name = bgName
                 bg?.strokeColor = .white
                 bg?.fillColor = .clear
-                bg?.zPosition = 2000
+                bg?.zPosition = 301
                 if let bgToAdd = bg {
                     bossLayer?.addChild(bgToAdd) ?? scene.addChild(bgToAdd)
                 }
@@ -101,7 +101,7 @@ final class RenderSystem {
                 fill?.name = fillName
                 fill?.strokeColor = .clear
                 fill?.fillColor = .systemPink
-                fill?.zPosition = 2001
+                fill?.zPosition = 300
                 if let fillToAdd = fill {
                     bossLayer?.addChild(fillToAdd) ?? scene.addChild(fillToAdd)
                 }
@@ -196,7 +196,6 @@ final class RenderSystem {
             }
         }
         path.closeSubpath()
-        
         return SKShapeNode(path: path)
     }
     

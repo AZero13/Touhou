@@ -79,6 +79,7 @@ class GameFacade {
         addCrossCuttingSystem(ItemAttractionSystem())  // Centralized item attraction handling
         addCrossCuttingSystem(CollisionSystem())       // Detect collisions
         addCrossCuttingSystem(HealthSystem())          // Process damage/death
+        addCrossCuttingSystem(PowerSystem())           // Handle power level and patterns
         addCrossCuttingSystem(ScoreSystem())           // Update score/high score
         addCrossCuttingSystem(CleanupSystem())         // Must be last
         

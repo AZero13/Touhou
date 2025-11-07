@@ -121,6 +121,18 @@ final class CommandQueue {
                 playerHealth.invulnerabilityTimer = 6.0
             }
             
+            // TH06: Power loss on death
+            // If power <= 16: drop to 0, else drop by 16
+            if player.power <= 16 {
+                player.power = 0
+            } else {
+                player.power -= 16
+            }
+            eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
+            
+            // Reset power item count for score (TH06 behavior)
+            player.powerItemCountForScore = 0
+            
             // respawn on life loss - reset bombs to 3
             player.bombs = 3
             eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
@@ -137,7 +149,18 @@ final class CommandQueue {
     
     private func adjustPower(delta: Int, entityManager: EntityManager, eventBus: EventBus) {
         guard let player = entityManager.getEntities(with: PlayerComponent.self).first?.component(ofType: PlayerComponent.self) else { return }
+        let oldPower = player.power
         player.power = max(0, min(player.power + delta, 128))
+        
+        // TH06: Reset powerItemCountForScore when power increases (crossing thresholds)
+        if delta > 0 && oldPower < 128 && player.power >= 128 {
+            // Reaching full power - reset counter
+            player.powerItemCountForScore = 0
+        } else if delta > 0 {
+            // Power increased but not at full power - reset counter (TH06 behavior)
+            player.powerItemCountForScore = 0
+        }
+        
         eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
     }
     

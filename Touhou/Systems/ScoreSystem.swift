@@ -49,11 +49,28 @@ final class ScoreSystem: GameSystem {
                 case .point:
                     GameFacade.shared.combat.adjustScore(amount: p.value)
                 case .power:
-                    if playerComp.power < 128 {
-                        // Full power: gain score defined in value
+                    // TH06: At full power, power items give score instead
+                    if playerComp.power >= 128 {
+                        // TH06: Increment count FIRST, then calculate score
+                        playerComp.powerItemCountForScore += 1
+                        // Cap at 30 (TH06 behavior)
+                        if playerComp.powerItemCountForScore > 30 {
+                            playerComp.powerItemCountForScore = 30
+                        }
+                        // Calculate score based on NEW count (TH06 table)
+                        let powerItemScores: [Int] = [
+                            10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+                            200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000,
+                            3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 51200
+                        ]
+                        let index = min(playerComp.powerItemCountForScore, powerItemScores.count - 1)
+                        let actualScore = powerItemScores[index]
+                        GameFacade.shared.combat.adjustScore(amount: actualScore)
+                    } else {
+                        // Not at full power: increase power by 1, base score 10
                         GameFacade.shared.combat.adjustPower(delta: 1)
+                        GameFacade.shared.combat.adjustScore(amount: p.value)
                     }
-                    GameFacade.shared.combat.adjustScore(amount: p.value)
                 case .pointBullet:
                     // Special bullet-to-point conversion item
                     GameFacade.shared.combat.adjustScore(amount: p.value)

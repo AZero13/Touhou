@@ -113,10 +113,18 @@ final class ItemComponent: GKComponent {
     static func calculateItemValue(itemType: ItemType, itemPosition: CGPoint, playerPower: Int, powerItemCount: Int, grazeInStage: Int = 0) -> Int {
         switch itemType {
         case .power:
-            // Power items: base value 10, bonus when at full power based on count
+            // TH06: Power items give 10 base score when not at full power
             if playerPower >= 128 {
-                // Score = 10 x (powerItemCount + 1)
-                return 10 * (powerItemCount + 1)
+                // At full power: use TH06 power item score table
+                // TH06 table: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 51200]
+                let powerItemScores: [Int] = [
+                    10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+                    200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000,
+                    3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 51200
+                ]
+                // Score is based on current count (before incrementing)
+                let index = min(powerItemCount, powerItemScores.count - 1)
+                return powerItemScores[index]
             }
             return 10
         case .point:

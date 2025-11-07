@@ -30,12 +30,20 @@ final class PlayerLifecycleSystem: GameSystem {
     }
     
     func update(deltaTime: TimeInterval) {
-        // Ensure player exists after stage transitions or restarts
+        // Ensure player exists - only spawn if truly missing
+        // Player should persist across stages (power is preserved)
         if playerEntity == nil {
             spawnPlayer()
         } else if let player = playerEntity,
                   !entityManager.getAllEntities().contains(player) {
+            // Player was destroyed (shouldn't happen between stages)
+            // Preserve power if possible, but this shouldn't happen in normal gameplay
+            let oldPower = player.component(ofType: PlayerComponent.self)?.power ?? 0
             spawnPlayer()
+            // Try to restore power if we had it (shouldn't be needed, but safety check)
+            if oldPower > 0, let newPlayer = playerEntity?.component(ofType: PlayerComponent.self) {
+                newPlayer.power = oldPower
+            }
         }
     }
     
@@ -68,16 +76,20 @@ final class PlayerLifecycleSystem: GameSystem {
     
     // MARK: - Private Methods
     
-    /// Reset player stats to initial values (for new run)
+    /// Reset player stats to initial values (for new run - stage 1 only)
     private func resetPlayerStats() {
         guard let entity = playerEntity,
               let player = entity.component(ofType: PlayerComponent.self) else { return }
+        // TH06: Reset all stats on new run (stage 1)
         player.lives = 3
         player.bombs = 3
         player.score = 0
+        player.power = 0  // Reset power only on new run
+        player.powerItemCountForScore = 0
         eventBus.fire(LivesChangedEvent(newTotal: player.lives))
         eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
         eventBus.fire(ScoreChangedEvent(newTotal: player.score))
+        eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
     }
     
     private func spawnPlayer() {

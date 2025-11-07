@@ -52,11 +52,12 @@ final class ItemComponent: GKComponent {
               let transform = entity.component(ofType: TransformComponent.self) else { return }
         
         // If attracted, override physics to move toward player each frame
+        // TH06: Items move at 8.0 units/frame toward player (480 units/second at 60fps)
         if isAttractedToPlayer,
            let player = GameFacade.shared.entities.getPlayer(),
            let playerTransform = player.component(ofType: TransformComponent.self) {
             let target = playerTransform.position
-            let speed: CGFloat = 220
+            let speed: CGFloat = 480  // TH06: 8.0 units/frame * 60fps = 480 units/second
             let desired = MathUtility.velocity(from: transform.position, to: target, speed: speed)
             transform.velocity = desired
             transform.position.x += transform.velocity.dx * deltaTime

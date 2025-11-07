@@ -9,6 +9,7 @@ import Foundation
 import GameplayKit
 
 /// EntityManager wrapper around GameplayKit's GKEntity management
+@MainActor
 class EntityManager {
     private var entities: [GKEntity] = []
     private var entitiesToDestroy: [GKEntity] = []

@@ -10,6 +10,7 @@ import AppKit
 import GameController
 
 /// InputManager - handles both keyboard and gamepad input
+@MainActor
 class InputManager {
     static let shared = InputManager()
     

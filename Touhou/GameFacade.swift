@@ -11,6 +11,7 @@ import CoreGraphics
 
 /// GameFacade - Singleton coordinator that owns all systems and runs the game loop
 /// Contains NO game logic - only coordination
+@MainActor
 class GameFacade {
     
     // MARK: - Singleton

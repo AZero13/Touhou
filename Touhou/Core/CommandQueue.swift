@@ -10,6 +10,7 @@ import CoreGraphics
 import GameplayKit
 
 /// A small, typed command queue to buffer world mutations between system updates
+@MainActor
 final class CommandQueue {
     enum Command {
         case spawnBullet(BulletSpawnCommand, ownedByPlayer: Bool)

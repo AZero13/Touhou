@@ -9,11 +9,13 @@ import Foundation
 import GameplayKit
 
 /// Protocol for objects that can listen to game events
+@MainActor
 protocol EventListener: AnyObject {
     func handleEvent(_ event: GameEvent)
 }
 
 /// EventBus - manages event dispatching using GameplayKit's notification system
+@MainActor
 class EventBus {
     private var eventQueue: [GameEvent] = []
     private var subscribers: [String: [WeakEventListener]] = [:]

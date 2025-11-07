@@ -9,12 +9,12 @@ import Foundation
 import GameplayKit
 
 /// Base protocol for all game events
-protocol GameEvent {
+protocol GameEvent: Sendable {
     var timestamp: TimeInterval { get }
 }
 
 /// Collision categories for strongly-typed collision events
-enum CollisionKind {
+enum CollisionKind: Sendable {
     case playerBulletHitEnemy
     case enemyBulletHitPlayer
     case enemyTouchPlayer
@@ -22,7 +22,7 @@ enum CollisionKind {
 
 // MARK: - Gameplay & Logic Events
 
-struct EnemyDiedEvent: GameEvent {
+struct EnemyDiedEvent: GameEvent, @unchecked Sendable {
     let timestamp: TimeInterval
     let entity: GKEntity
     let scoreValue: Int
@@ -36,7 +36,7 @@ struct EnemyDiedEvent: GameEvent {
     }
 }
 
-struct PlayerDiedEvent: GameEvent {
+struct PlayerDiedEvent: GameEvent, @unchecked Sendable {
     let timestamp: TimeInterval
     let entity: GKEntity
     
@@ -46,7 +46,7 @@ struct PlayerDiedEvent: GameEvent {
     }
 }
 
-struct PlayerRespawnedEvent: GameEvent {
+struct PlayerRespawnedEvent: GameEvent, @unchecked Sendable {
     let timestamp: TimeInterval
     let entity: GKEntity
     
@@ -56,7 +56,7 @@ struct PlayerRespawnedEvent: GameEvent {
     }
 }
 
-struct CollisionOccurredEvent: GameEvent {
+struct CollisionOccurredEvent: GameEvent, @unchecked Sendable {
     let timestamp: TimeInterval
     let entityA: GKEntity
     let entityB: GKEntity
@@ -72,7 +72,7 @@ struct CollisionOccurredEvent: GameEvent {
     }
 }
 
-struct BombActivatedEvent: GameEvent {
+struct BombActivatedEvent: GameEvent, @unchecked Sendable {
     let timestamp: TimeInterval
     let playerEntity: GKEntity
     
@@ -82,7 +82,7 @@ struct BombActivatedEvent: GameEvent {
     }
 }
 
-struct BulletsConvertedToPointsEvent: GameEvent {
+struct BulletsConvertedToPointsEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     
     init() {
@@ -93,7 +93,7 @@ struct BulletsConvertedToPointsEvent: GameEvent {
 // MARK: - Item Attraction
 
 /// Global signal to attract certain item types to the player (e.g., after boss defeat)
-struct AttractItemsEvent: GameEvent {
+struct AttractItemsEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let itemTypes: [ItemType]
     
@@ -105,7 +105,7 @@ struct AttractItemsEvent: GameEvent {
 
 // MARK: - Player & Resource Events
 
-struct PowerUpCollectedEvent: GameEvent {
+struct PowerUpCollectedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let itemType: ItemType
     let value: Int
@@ -119,7 +119,7 @@ struct PowerUpCollectedEvent: GameEvent {
     }
 }
 
-struct GrazeEvent: GameEvent {
+struct GrazeEvent: GameEvent, @unchecked Sendable {
     let timestamp: TimeInterval
     let bulletEntity: GKEntity
     let grazeValue: Int
@@ -131,7 +131,7 @@ struct GrazeEvent: GameEvent {
     }
 }
 
-struct EnemyHitEvent: GameEvent {
+struct EnemyHitEvent: GameEvent, @unchecked Sendable {
     let timestamp: TimeInterval
     let enemyEntity: GKEntity
     let hitPosition: CGPoint  // Position where the hit occurred (bullet position)
@@ -143,7 +143,7 @@ struct EnemyHitEvent: GameEvent {
     }
 }
 
-struct ScoreChangedEvent: GameEvent {
+struct ScoreChangedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let newTotal: Int
     
@@ -153,7 +153,7 @@ struct ScoreChangedEvent: GameEvent {
     }
 }
 
-struct PowerLevelChangedEvent: GameEvent {
+struct PowerLevelChangedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let newTotal: Int
     
@@ -163,7 +163,7 @@ struct PowerLevelChangedEvent: GameEvent {
     }
 }
 
-struct LivesChangedEvent: GameEvent {
+struct LivesChangedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let newTotal: Int
     
@@ -173,7 +173,7 @@ struct LivesChangedEvent: GameEvent {
     }
 }
 
-struct BombsChangedEvent: GameEvent {
+struct BombsChangedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let newTotal: Int
     
@@ -185,7 +185,7 @@ struct BombsChangedEvent: GameEvent {
 
 // MARK: - Scene & Presentation Events
 
-struct StageTransitionEvent: GameEvent {
+struct StageTransitionEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let nextStageId: Int
     let totalScore: Int
@@ -197,7 +197,7 @@ struct StageTransitionEvent: GameEvent {
     }
 }
 
-struct SceneReadyForTransitionEvent: GameEvent {
+struct SceneReadyForTransitionEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let nextStageId: Int
     let totalScore: Int
@@ -209,7 +209,7 @@ struct SceneReadyForTransitionEvent: GameEvent {
     }
 }
 
-struct StageStartedEvent: GameEvent {
+struct StageStartedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let stageId: Int
     
@@ -219,7 +219,7 @@ struct StageStartedEvent: GameEvent {
     }
 }
 
-struct StageEndedEvent: GameEvent {
+struct StageEndedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let stageId: Int
     
@@ -229,7 +229,7 @@ struct StageEndedEvent: GameEvent {
     }
 }
 
-struct BossIntroStartedEvent: GameEvent {
+struct BossIntroStartedEvent: GameEvent, @unchecked Sendable {
     let timestamp: TimeInterval
     let bossEntity: GKEntity
     
@@ -240,7 +240,7 @@ struct BossIntroStartedEvent: GameEvent {
 }
 
 
-struct PlaySoundEffectEvent: GameEvent {
+struct PlaySoundEffectEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let sfxName: String
     let volume: Float
@@ -252,7 +252,7 @@ struct PlaySoundEffectEvent: GameEvent {
     }
 }
 
-struct PlayMusicTrackEvent: GameEvent {
+struct PlayMusicTrackEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let trackName: String
     let fadeIn: Bool
@@ -266,7 +266,7 @@ struct PlayMusicTrackEvent: GameEvent {
 
 // MARK: - Game State Events
 
-struct GamePausedEvent: GameEvent {
+struct GamePausedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     
     init() {
@@ -274,7 +274,7 @@ struct GamePausedEvent: GameEvent {
     }
 }
 
-struct GameResumedEvent: GameEvent {
+struct GameResumedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     
     init() {
@@ -282,7 +282,7 @@ struct GameResumedEvent: GameEvent {
     }
 }
 
-struct PauseMenuUpdateEvent: GameEvent {
+struct PauseMenuUpdateEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let selectedOption: PauseMenuOption
     
@@ -292,7 +292,7 @@ struct PauseMenuUpdateEvent: GameEvent {
     }
 }
 
-struct PauseMenuHiddenEvent: GameEvent {
+struct PauseMenuHiddenEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     
     init() {
@@ -300,7 +300,7 @@ struct PauseMenuHiddenEvent: GameEvent {
     }
 }
 
-struct GameOverEvent: GameEvent {
+struct GameOverEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let finalScore: Int
     
@@ -310,7 +310,7 @@ struct GameOverEvent: GameEvent {
     }
 }
 
-struct HighScoreChangedEvent: GameEvent {
+struct HighScoreChangedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let newHighScore: Int
     

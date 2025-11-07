@@ -141,7 +141,7 @@ class GameFacade {
     
     // MARK: - Game Control
     func restartGame() {
-        // Restart from stage 1 (full game reset)
+        // Restart from stage 1
         startNewRun()
         print("Game restarted from stage 1")
     }
@@ -158,6 +158,7 @@ class GameFacade {
         commandQueue.clear()
         currentStage = stageId
         eventBus.fire(StageStartedEvent(stageId: stageId))
+        
         // Process events immediately to ensure systems reset their state before next frame
         eventBus.processEvents()
         lastUpdateTime = CACurrentMediaTime()

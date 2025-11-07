@@ -29,6 +29,7 @@ class GameScene: SKScene, EventListener {
     private var grazeSoundAction: SKAction!
     private var floatingScoreAction: SKAction!
     private var enemyDeathAction: SKAction!
+    private var bombFlashAction: SKAction!
 
     override func didMove(to view: SKView) {
         backgroundColor = SKColor.black
@@ -90,6 +91,10 @@ class GameScene: SKScene, EventListener {
         let deathExpand = SKAction.scale(to: 2.5, duration: 0.25)
         let deathFade = SKAction.fadeOut(withDuration: 0.25)
         enemyDeathAction = .sequence([.group([deathExpand, deathFade]), remove])
+        
+        // Bomb flash: white overlay that fades out quickly
+        let flashFade = SKAction.fadeOut(withDuration: 0.3)
+        bombFlashAction = .sequence([flashFade, .removeFromParent()])
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -124,6 +129,8 @@ class GameScene: SKScene, EventListener {
             self.showFloatingScore(value: e.value, atLogical: e.position)
         case let e as EnemyDiedEvent:
             self.showEnemyDeathEffect(for: e.entity)
+        case is BombActivatedEvent:
+            self.showBombFlashEffect()
         case let e as StageTransitionEvent:
             self.handleStageTransition(nextStageId: e.nextStageId, totalScore: e.totalScore)
         default:
@@ -281,6 +288,17 @@ class GameScene: SKScene, EventListener {
         
         effectLayer.addChild(node)
         node.run(enemyDeathAction)
+    }
+    
+    /// Show bomb flash effect (white screen flash)
+    private func showBombFlashEffect() {
+        let flashOverlay = SKSpriteNode(color: .white, size: size)
+        flashOverlay.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        flashOverlay.alpha = 0.8  // Start at 80% opacity
+        flashOverlay.zPosition = 999  // Above everything except UI
+        flashOverlay.blendMode = .add  // Additive blending for brighter flash
+        addChild(flashOverlay)
+        flashOverlay.run(bombFlashAction)
     }
     
     /// Handle stage transition: fade out scene, then notify for scene change

@@ -62,11 +62,13 @@ final class CombatFacade {
     // MARK: - Bomb Operations
     
     /// Activate bomb (clears enemy bullets and damages enemies)
+    /// TH06 style: converts enemy bullets to pointBullet items at their positions
     func activateBomb(playerEntity: GKEntity) {
-        // Clear all enemy bullets
-        CommandQueue.despawnAllBullets(entityManager: entityManager) { bullet in
-            !bullet.ownedByPlayer
-        }
+        // Convert all enemy bullets to pointBullet items at their positions (TH06 style)
+        BulletUtility.convertBulletsToPoints(entityManager: entityManager)
+        
+        // Attract pointBullet items to player (like boss death)
+        eventBus.fire(AttractItemsEvent(itemTypes: [.pointBullet]))
         
         // Damage all enemies
         let enemies = entityManager.getEntities(with: EnemyComponent.self)

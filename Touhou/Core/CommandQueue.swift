@@ -115,6 +115,12 @@ final class CommandQueue {
         if player.lives <= 0 {
             eventBus.fire(GameOverEvent(finalScore: player.score))
         } else if delta < 0 {
+            // TH06: Player takes damage - set invulnerability timer
+            // TH06 uses 360 frames of invulnerability after taking damage (6 seconds at 60fps)
+            if let playerHealth = playerEntity.component(ofType: HealthComponent.self) {
+                playerHealth.invulnerabilityTimer = 6.0
+            }
+            
             // respawn on life loss - reset bombs to 3
             player.bombs = 3
             eventBus.fire(BombsChangedEvent(newTotal: player.bombs))

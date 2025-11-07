@@ -64,6 +64,11 @@ final class CombatFacade {
     /// Activate bomb (clears enemy bullets and damages enemies)
     /// TH06 style: converts enemy bullets to pointBullet items at their positions
     func activateBomb(playerEntity: GKEntity) {
+        // TH06: Player is invulnerable during bomb (360 frames = 6 seconds at 60fps)
+        if let playerHealth = playerEntity.component(ofType: HealthComponent.self) {
+            playerHealth.invulnerabilityTimer = 6.0
+        }
+        
         // Convert all enemy bullets to pointBullet items at their positions (TH06 style)
         BulletUtility.convertBulletsToPoints(entityManager: entityManager)
         

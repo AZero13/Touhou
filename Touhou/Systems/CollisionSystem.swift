@@ -56,8 +56,13 @@ final class CollisionSystem: GameSystem {
             }
         }
         
-        // Check enemies touching player directly
+        // Check enemies touching player directly (TH06: only non-boss enemies can damage on touch)
         for enemy in enemies {
+            // Skip bosses - they don't damage player on touch (TH06 behavior)
+            if enemy.component(ofType: BossComponent.self) != nil {
+                continue
+            }
+            
             for player in players {
                 if checkCollision(entityA: enemy, entityB: player) {
                     handleEnemyTouchPlayer(enemy: enemy, player: player)
@@ -154,6 +159,14 @@ final class CollisionSystem: GameSystem {
         
         // Enemy bullet hits player
         if !bullet.ownedByPlayer && target.component(ofType: PlayerComponent.self) != nil {
+            // TH06: Check if player is invulnerable before taking damage
+            if let playerHealth = target.component(ofType: HealthComponent.self),
+               playerHealth.isInvulnerable {
+                // Player is invulnerable - bullet doesn't damage but still gets destroyed
+                entityManager.markForDestruction(bulletEntity)
+                return
+            }
+            
             // Capture position BEFORE marking for destruction
             let hitPosition = bulletEntity.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
             
@@ -171,10 +184,18 @@ final class CollisionSystem: GameSystem {
     }
     
     private func handleEnemyTouchPlayer(enemy: GKEntity, player: GKEntity) {
-        // Capture enemy position (both exist, no destruction needed)
+        // TH06: Only damage player if they're vulnerable (not invulnerable/dead/spawning)
+        // Check if player has HealthComponent (tracks invulnerability)
+        if let playerHealth = player.component(ofType: HealthComponent.self) {
+            // Player is invulnerable - don't take damage from enemy touch
+            if playerHealth.isInvulnerable {
+                return
+            }
+        }
+        
+        // Player is vulnerable - fire collision event
         let hitPosition = enemy.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
         
-        // Fire collision event for enemy touching player
         eventBus.fire(CollisionOccurredEvent(
             entityA: enemy,
             entityB: player,
@@ -184,6 +205,12 @@ final class CollisionSystem: GameSystem {
     }
 
     private func checkGraze(bullet: GKEntity, player: GKEntity) -> Bool {
+        // TH06: No graze during bomb (when invulnerable)
+        if let playerHealth = player.component(ofType: HealthComponent.self),
+           playerHealth.isInvulnerable {
+            return false
+        }
+        
         guard let bulletTransform = bullet.component(ofType: TransformComponent.self),
               let playerTransform = player.component(ofType: TransformComponent.self) else {
             return false

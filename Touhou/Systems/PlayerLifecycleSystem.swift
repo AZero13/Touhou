@@ -42,8 +42,12 @@ final class PlayerLifecycleSystem: GameSystem {
     func handleEvent(_ event: GameEvent) {
         switch event {
         case let e as PlayerRespawnedEvent:
-            // Player respawned (e.g., after losing a life) - reset position
+            // Player respawned (e.g., after losing a life) - reset position and set invulnerability
             resetPlayerPosition(entity: e.entity)
+            // TH06: Player is invulnerable after respawning (same as initial spawn)
+            if let playerHealth = e.entity.component(ofType: HealthComponent.self) {
+                playerHealth.invulnerabilityTimer = 2.0
+            }
         case let e as StageStartedEvent:
             // New stage: reset position to start
             if let entity = playerEntity {
@@ -86,6 +90,10 @@ final class PlayerLifecycleSystem: GameSystem {
         entity.addComponent(playerComponent)
         resetPlayerPosition(entity: entity)
         entity.addComponent(HitboxComponent(playerHitbox: Tuning.playerHitbox, grazeZone: Tuning.grazeHitbox))
+        
+        // Add HealthComponent to track invulnerability (player doesn't have health, but needs invulnerability state)
+        // TH06: Player is invulnerable for a period after spawning/respawning
+        entity.addComponent(HealthComponent(current: 1, max: 1, invulnerabilityTimer: 2.0))
         
         // Register with component systems after entity is fully set up
         GameFacade.shared.registerEntity(entity)

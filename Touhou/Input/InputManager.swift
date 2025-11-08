@@ -143,4 +143,10 @@ class InputManager {
     func getCurrentInput() -> InputState {
         return currentInput
     }
+    
+    // MARK: - Cleanup
+    deinit {
+        // Remove NotificationCenter observers to prevent crashes if notifications are posted after deallocation
+        NotificationCenter.default.removeObserver(self)
+    }
 }

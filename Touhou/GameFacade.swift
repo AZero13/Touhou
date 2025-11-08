@@ -199,6 +199,11 @@ class GameFacade {
         eventBus.register(listener: listener)
     }
     
+    /// Unregister an event listener
+    func unregisterListener(_ listener: EventListener) {
+        eventBus.unregister(listener)
+    }
+    
     /// Fire a game event (non-deprecated way to fire events)
     func fireEvent(_ event: GameEvent) {
         eventBus.fire(event)

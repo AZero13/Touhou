@@ -136,5 +136,17 @@ class ViewController: NSViewController, EventListener {
             }
         }
     }
+    
+    // MARK: - Cleanup
+    deinit {
+        // Cancel async tasks to prevent them from running after deallocation
+        scoreFlashTask?.cancel()
+        highScoreFlashTask?.cancel()
+        
+        // Note: EventBus uses weak references (WeakEventListener), so listeners are automatically
+        // cleaned up when deallocated. No explicit unregister needed, but EventBus will
+        // clean up nil references during its next processEvents() call.
+        // If explicit cleanup is desired, it should be done before deallocation (e.g., in viewWillDisappear).
+    }
 }
 

@@ -25,6 +25,8 @@ final class PlayerComponent: GKComponent {
     // Internal state for update logic
     private var lastShotTime: TimeInterval = 0
     
+    // MARK: - Constants
+    
     private enum Tuning {
         static let unfocusedSpeed: CGFloat = 270
         static let focusedSpeed: CGFloat = 135
@@ -32,6 +34,23 @@ final class PlayerComponent: GKComponent {
         static let shotOffsetY: CGFloat = 20
         static let sideShotOffsetX: CGFloat = 10
         static let bombClearEnemyBullets: Bool = true
+    }
+    
+    /// Constants for player bullet patterns
+    private enum BulletPattern {
+        static let defaultSpeed: CGFloat = 200
+        static let homingSpeed: CGFloat = 180
+        static let defaultDamage: Int = 1
+        static let sideShotVelocityX: CGFloat = 50
+        static let sideShotVelocityY: CGFloat = 180
+        
+        // Spread pattern offsets for different power ranks
+        static let rank3Offsets: [CGFloat] = [-8, 8]
+        static let rank5Offsets: [CGFloat] = [-12, -6, 0, 6, 12]
+        static let rank7Offsets: [CGFloat] = [-16, -12, -8, -4, 0, 4, 8, 12, 16]
+        
+        // Angle calculations for max power pattern
+        static let maxPowerAngleMultiplier: Double = 0.05
     }
     
     init(power: Int = 0, lives: Int = 3, bombs: Int = 3, isFocused: Bool = false, score: Int = 0) {
@@ -112,135 +131,137 @@ final class PlayerComponent: GKComponent {
     
     /// Spawn bullets based on current power rank (TH06-style power system)
     private func spawnBulletsForPowerRank(powerRank: Int, transform: TransformComponent, game: GameFacade) {
-        // Simplified power-based patterns (can be expanded later with full TH06 data)
         switch powerRank {
-        case 0: // Power < 8
-            // Rank 0: Single center bullet
-            game.entities.spawnBullet(
-                position: CGPoint(x: transform.position.x, y: transform.position.y + Tuning.shotOffsetY),
-                velocity: CGVector(dx: 0, dy: 200),
-                bulletType: .amulet,
-                ownedByPlayer: true,
-                physics: PhysicsConfig(speed: 200, damage: 1),
-                visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
-                behavior: BehaviorConfig()
-            )
-            
-        case 1: // Power 8-15
-            // Rank 1: Center + 2 side homing bullets
-            spawnBasicHomingPattern(transform: transform, game: game)
-            
-        case 2: // Power 16-31
-            // Rank 2: Center + wider spread
-            spawnBasicHomingPattern(transform: transform, game: game)
-            // Add slight angle spread to center
-            game.entities.spawnBullet(
-                position: CGPoint(x: transform.position.x, y: transform.position.y + Tuning.shotOffsetY),
-                velocity: CGVector(dx: 0, dy: 200),
-                bulletType: .amulet,
-                ownedByPlayer: true,
-                physics: PhysicsConfig(speed: 200, damage: 1),
-                visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
-                behavior: BehaviorConfig()
-            )
-            
-        case 3...4: // Power 32-63
-            // Rank 3-4: More bullets, wider spread
-            spawnBasicHomingPattern(transform: transform, game: game)
-            // Additional angled shots
-            game.entities.spawnBullet(
-                position: CGPoint(x: transform.position.x - 8, y: transform.position.y + Tuning.shotOffsetY),
-                velocity: CGVector(dx: -30, dy: 190),
-                bulletType: .amulet,
-                ownedByPlayer: true,
-                physics: PhysicsConfig(speed: 190, damage: 1),
-                visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
-                behavior: BehaviorConfig()
-            )
-            game.entities.spawnBullet(
-                position: CGPoint(x: transform.position.x + 8, y: transform.position.y + Tuning.shotOffsetY),
-                velocity: CGVector(dx: 30, dy: 190),
-                bulletType: .amulet,
-                ownedByPlayer: true,
-                physics: PhysicsConfig(speed: 190, damage: 1),
-                visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
-                behavior: BehaviorConfig()
-            )
-            
-        case 5...6: // Power 64-95
-            // Rank 5-6: Even more bullets
-            spawnBasicHomingPattern(transform: transform, game: game)
-            // Wide spread pattern
-            for offset in [-12, -6, 0, 6, 12] {
-                let offsetFloat = CGFloat(offset)
-                game.entities.spawnBullet(
-                    position: CGPoint(x: transform.position.x + offsetFloat, y: transform.position.y + Tuning.shotOffsetY),
-                    velocity: CGVector(dx: offsetFloat * 2, dy: 200 - abs(offsetFloat) * 2),
-                    bulletType: .amulet,
-                    ownedByPlayer: true,
-                    physics: PhysicsConfig(speed: 200, damage: 1),
-                    visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
-                    behavior: BehaviorConfig()
-                )
-            }
-            
-        case 7...: // Power 96-128 (max power)
-            // Rank 7-8: Maximum firepower
-            spawnBasicHomingPattern(transform: transform, game: game)
-            // Maximum spread pattern
-            for offset in [-16, -12, -8, -4, 0, 4, 8, 12, 16] {
-                let angle = Double(offset) * 0.05 // Slight angle based on offset
-                game.entities.spawnBullet(
-                    position: CGPoint(x: transform.position.x + CGFloat(offset), y: transform.position.y + Tuning.shotOffsetY),
-                    velocity: CGVector(dx: CGFloat(sin(angle) * 200), dy: CGFloat(cos(angle) * 200)),
-                    bulletType: offset == 0 ? .amulet : .homingAmulet,
-                    ownedByPlayer: true,
-                    physics: PhysicsConfig(speed: 200, damage: 1),
-                    visual: VisualConfig(size: .small, shape: .circle, color: offset == 0 ? .red : .blue, hasTrail: false, trailLength: 3),
-                    behavior: BehaviorConfig()
-                )
-            }
-            
+        case 0:
+            spawnRank0Pattern(transform: transform, game: game)
+        case 1:
+            spawnRank1Pattern(transform: transform, game: game)
+        case 2:
+            spawnRank2Pattern(transform: transform, game: game)
+        case 3...4:
+            spawnRank3Pattern(transform: transform, game: game)
+        case 5...6:
+            spawnRank5Pattern(transform: transform, game: game)
+        case 7...:
+            spawnRank7Pattern(transform: transform, game: game)
         default:
-            // Fallback to basic pattern
             spawnBasicHomingPattern(transform: transform, game: game)
         }
+    }
+    
+    // MARK: - Power Rank Bullet Patterns
+    
+    /// Rank 0: Single center bullet (Power < 8)
+    private func spawnRank0Pattern(transform: TransformComponent, game: GameFacade) {
+        spawnCenterBullet(transform: transform, game: game)
+    }
+    
+    /// Rank 1: Center + 2 side homing bullets (Power 8-15)
+    private func spawnRank1Pattern(transform: TransformComponent, game: GameFacade) {
+        spawnBasicHomingPattern(transform: transform, game: game)
+    }
+    
+    /// Rank 2: Center + wider spread (Power 16-31)
+    private func spawnRank2Pattern(transform: TransformComponent, game: GameFacade) {
+        spawnBasicHomingPattern(transform: transform, game: game)
+        spawnCenterBullet(transform: transform, game: game)
+    }
+    
+    /// Rank 3-4: More bullets, wider spread (Power 32-63)
+    private func spawnRank3Pattern(transform: TransformComponent, game: GameFacade) {
+        spawnBasicHomingPattern(transform: transform, game: game)
+        for offset in BulletPattern.rank3Offsets {
+            spawnAngledBullet(transform: transform, offset: offset, game: game)
+        }
+    }
+    
+    /// Rank 5-6: Even more bullets (Power 64-95)
+    private func spawnRank5Pattern(transform: TransformComponent, game: GameFacade) {
+        spawnBasicHomingPattern(transform: transform, game: game)
+        for offset in BulletPattern.rank5Offsets {
+            spawnSpreadBullet(transform: transform, offset: offset, game: game)
+        }
+    }
+    
+    /// Rank 7-8: Maximum firepower (Power 96-128)
+    private func spawnRank7Pattern(transform: TransformComponent, game: GameFacade) {
+        spawnBasicHomingPattern(transform: transform, game: game)
+        for offset in BulletPattern.rank7Offsets {
+            spawnMaxPowerBullet(transform: transform, offset: offset, game: game)
+        }
+    }
+    
+    // MARK: - Bullet Spawning Helpers
+    
+    /// Spawn a single center bullet (straight up)
+    private func spawnCenterBullet(transform: TransformComponent, game: GameFacade) {
+        let position = CGPoint(x: transform.position.x, y: transform.position.y + Tuning.shotOffsetY)
+        let velocity = CGVector(dx: 0, dy: BulletPattern.defaultSpeed)
+        spawnPlayerBullet(position: position, velocity: velocity, bulletType: .amulet, game: game)
+    }
+    
+    /// Spawn an angled bullet (for rank 3 pattern)
+    private func spawnAngledBullet(transform: TransformComponent, offset: CGFloat, game: GameFacade) {
+        let position = CGPoint(x: transform.position.x + offset, y: transform.position.y + Tuning.shotOffsetY)
+        let velocity = CGVector(dx: offset * 3.75, dy: BulletPattern.homingSpeed) // -30/8 = 3.75
+        spawnPlayerBullet(position: position, velocity: velocity, bulletType: .amulet, game: game)
+    }
+    
+    /// Spawn a spread bullet (for rank 5 pattern)
+    private func spawnSpreadBullet(transform: TransformComponent, offset: CGFloat, game: GameFacade) {
+        let position = CGPoint(x: transform.position.x + offset, y: transform.position.y + Tuning.shotOffsetY)
+        let velocity = CGVector(dx: offset * 2, dy: BulletPattern.defaultSpeed - abs(offset) * 2)
+        spawnPlayerBullet(position: position, velocity: velocity, bulletType: .amulet, game: game)
+    }
+    
+    /// Spawn a max power bullet (for rank 7 pattern)
+    private func spawnMaxPowerBullet(transform: TransformComponent, offset: CGFloat, game: GameFacade) {
+        let position = CGPoint(x: transform.position.x + offset, y: transform.position.y + Tuning.shotOffsetY)
+        let angle = Double(offset) * BulletPattern.maxPowerAngleMultiplier
+        let velocity = CGVector(
+            dx: CGFloat(sin(angle) * Double(BulletPattern.defaultSpeed)),
+            dy: CGFloat(cos(angle) * Double(BulletPattern.defaultSpeed))
+        )
+        let bulletType: BulletComponent.BulletType = offset == 0 ? .amulet : .homingAmulet
+        let color: BulletColor = offset == 0 ? .red : .blue
+        spawnPlayerBullet(position: position, velocity: velocity, bulletType: bulletType, color: color, game: game)
+    }
+    
+    /// Spawn a player bullet with standard configuration
+    private func spawnPlayerBullet(
+        position: CGPoint,
+        velocity: CGVector,
+        bulletType: BulletComponent.BulletType,
+        color: BulletColor = .red,
+        speed: CGFloat? = nil,
+        game: GameFacade
+    ) {
+        let bulletSpeed = speed ?? (bulletType == .homingAmulet ? BulletPattern.homingSpeed : BulletPattern.defaultSpeed)
+        game.entities.spawnBullet(
+            position: position,
+            velocity: velocity,
+            bulletType: bulletType,
+            ownedByPlayer: true,
+            physics: PhysicsConfig(speed: bulletSpeed, damage: BulletPattern.defaultDamage),
+            visual: VisualConfig(size: .small, shape: .circle, color: color, hasTrail: false, trailLength: 3),
+            behavior: BehaviorConfig()
+        )
     }
     
     /// Spawn basic homing pattern (center + 2 side homing bullets)
     private func spawnBasicHomingPattern(transform: TransformComponent, game: GameFacade) {
         // Center bullet (straight up)
-        game.entities.spawnBullet(
-            position: CGPoint(x: transform.position.x, y: transform.position.y + Tuning.shotOffsetY),
-            velocity: CGVector(dx: 0, dy: 200),
-            bulletType: .amulet,
-            ownedByPlayer: true,
-            physics: PhysicsConfig(speed: 200, damage: 1),
-            visual: VisualConfig(size: .small, shape: .circle, color: .red, hasTrail: false, trailLength: 3),
-            behavior: BehaviorConfig(homingStrength: nil, maxTurnRate: nil, delay: 0)
-        )
+        spawnCenterBullet(transform: transform, game: game)
         
         // Left homing bullet
-        game.entities.spawnBullet(
-            position: CGPoint(x: transform.position.x - Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY),
-            velocity: CGVector(dx: -50, dy: 180),
-            bulletType: .homingAmulet,
-            ownedByPlayer: true,
-            physics: PhysicsConfig(speed: 180, damage: 1),
-            visual: VisualConfig(size: .small, shape: .circle, color: .blue, hasTrail: false, trailLength: 3),
-            behavior: BehaviorConfig()
-        )
+        let leftPosition = CGPoint(x: transform.position.x - Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY)
+        let leftVelocity = CGVector(dx: -BulletPattern.sideShotVelocityX, dy: BulletPattern.sideShotVelocityY)
+        spawnPlayerBullet(position: leftPosition, velocity: leftVelocity, bulletType: .homingAmulet, color: .blue, game: game)
         
         // Right homing bullet
-        game.entities.spawnBullet(
-            position: CGPoint(x: transform.position.x + Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY),
-            velocity: CGVector(dx: 50, dy: 180),
-            bulletType: .homingAmulet,
-            ownedByPlayer: true,
-            physics: PhysicsConfig(speed: 180, damage: 1),
-            visual: VisualConfig(size: .small, shape: .circle, color: .blue, hasTrail: false, trailLength: 3),
-            behavior: BehaviorConfig()
-        )
+        let rightPosition = CGPoint(x: transform.position.x + Tuning.sideShotOffsetX, y: transform.position.y + Tuning.shotOffsetY)
+        let rightVelocity = CGVector(dx: BulletPattern.sideShotVelocityX, dy: BulletPattern.sideShotVelocityY)
+        spawnPlayerBullet(position: rightPosition, velocity: rightVelocity, bulletType: .homingAmulet, color: .blue, game: game)
     }
     
     private func handleBomb(input: InputState) {

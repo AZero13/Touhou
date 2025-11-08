@@ -24,7 +24,16 @@ final class EntityFacade {
     
     // MARK: - Boss Operations
     
-    /// Spawn a boss enemy
+    /// Spawn a boss enemy with the specified configuration
+    /// - Parameters:
+    ///   - name: Boss name identifier
+    ///   - health: Maximum health points
+    ///   - position: Spawn position in logical coordinates
+    ///   - phaseNumber: Current phase number (default: 1)
+    ///   - attackPattern: Attack pattern type (default: .tripleShot)
+    ///   - patternConfig: Configuration for the attack pattern
+    ///   - shotInterval: Time between shots in seconds (default: 1.2)
+    /// - Returns: The created boss entity
     @discardableResult
     func spawnBoss(
         name: String,
@@ -57,7 +66,14 @@ final class EntityFacade {
     
     // MARK: - Enemy Operations
     
-    /// Spawn a fairy enemy
+    /// Spawn a fairy enemy with the specified attack pattern
+    /// - Parameters:
+    ///   - position: Spawn position in logical coordinates
+    ///   - attackPattern: Attack pattern type
+    ///   - patternConfig: Configuration for the attack pattern
+    ///   - shotInterval: Time between shots in seconds (default: 2.0)
+    ///   - dropItem: Item type to drop on death (default: .power)
+    /// - Returns: The created fairy entity
     @discardableResult
     func spawnFairy(
         position: CGPoint,

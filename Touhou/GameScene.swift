@@ -106,7 +106,7 @@ class GameScene: SKScene, EventListener {
         // Update rendering after all actions and physics have been processed
         // This ensures that any position changes from actions won't be overwritten
         if let renderSystem = renderSystem {
-            renderSystem.sync(entities: GameFacade.shared.entities, scene: self)
+            renderSystem.sync(entities: GameFacade.shared.entities, scene: self, worldLayer: worldLayer, bossLayer: bossLayer, effectLayer: effectLayer)
         }
     }
     

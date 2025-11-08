@@ -42,25 +42,35 @@ class EventBus {
         let eventsToProcess = eventQueue
         eventQueue.removeAll()
         
+        // Clean up nil weak references lazily (only if needed, before processing events)
+        // Swift convention: clean up when accessing, not proactively
+        cleanupWeakReferencesIfNeeded()
+        
         for event in eventsToProcess {
             // Notify all listeners (since we register for all events)
             if let listeners = subscribers["all_events"] {
-                // Clean up weak references and notify active listeners
-                var activeListeners: [EventListener] = []
-                
+                // Iterate and notify active listeners
+                // Weak references are already cleaned up, so we can safely iterate
                 for weakListener in listeners {
+                    // This check is safe even after cleanup (defensive programming)
                     if let listener = weakListener.listener {
-                        activeListeners.append(listener)
+                        listener.handleEvent(event)
                     }
                 }
-                
-                // Update subscribers array with only active listeners
-                subscribers["all_events"] = activeListeners.map { WeakEventListener($0) }
-                
-                // Notify all active listeners
-                for listener in activeListeners {
-                    listener.handleEvent(event)
-                }
+            }
+        }
+    }
+    
+    /// Clean up nil weak references lazily (only when needed, Swift-idiomatic)
+    /// This is called once per frame before processing events to keep arrays compact
+    private func cleanupWeakReferencesIfNeeded() {
+        for (key, listeners) in subscribers {
+            // Only clean up if we detect nils (lazy cleanup - Swift convention)
+            // Use compactMap to filter nils, only update if array actually changed
+            let activeListeners = listeners.compactMap { $0.listener }
+            if activeListeners.count != listeners.count {
+                // Some references became nil, update the array
+                subscribers[key] = activeListeners.map { WeakEventListener($0) }
             }
         }
     }

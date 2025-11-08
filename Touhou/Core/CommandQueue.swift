@@ -173,6 +173,7 @@ final class CommandQueue {
     // MARK: - Entity Creation Helpers (moved from factories)
     
     private func createBulletEntity(from command: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) -> GKEntity {
+        // Create new entity (let ARC and GameplayKit handle lifecycle efficiently)
         let entity = entityManager.createEntity()
         
         // Apply TH06-style defaults for player homing amulets

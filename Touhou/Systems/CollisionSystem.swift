@@ -13,6 +13,13 @@ final class CollisionSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     
+    // MARK: - Cached Entity Queries
+    
+    /// Cached entity arrays (refreshed each update to avoid stale data)
+    private var cachedBullets: [GKEntity] = []
+    private var cachedEnemies: [GKEntity] = []
+    private var cachedPlayer: GKEntity?
+    
     // MARK: - Constants
     
     /// Default collision radii for different entity types
@@ -35,10 +42,13 @@ final class CollisionSystem: GameSystem {
             return
         }
         
-        // Get all bullets and all enemies separately
-        let bullets = entityManager.getEntities(with: BulletComponent.self)
-        let enemies = entityManager.getEntities(with: EnemyComponent.self)
-        guard let player = entityManager.getPlayerEntity() else { return }
+        // Cache entity queries once per update (entities may change during frame, but collision checks are atomic)
+        // Refresh cache each update to ensure we have current entities
+        refreshEntityCache()
+        
+        guard let player = cachedPlayer else { return }
+        let bullets = cachedBullets
+        let enemies = cachedEnemies
         
         // Check player bullets vs enemies
         for bullet in bullets {
@@ -235,5 +245,14 @@ final class CollisionSystem: GameSystem {
         
         // Consider graze when within graze ring but outside collision
         return distance < (playerGraze + bulletRadius) && distance >= (playerRadius + bulletRadius)
+    }
+    
+    // MARK: - Cache Management
+    
+    /// Refresh cached entity queries (called once per update)
+    private func refreshEntityCache() {
+        cachedBullets = entityManager.getEntities(with: BulletComponent.self)
+        cachedEnemies = entityManager.getEntities(with: EnemyComponent.self)
+        cachedPlayer = entityManager.getPlayerEntity()
     }
 }

@@ -17,15 +17,18 @@ final class RenderSystem {
     private var logicalHeight: CGFloat { GameFacade.playArea.height }
     
     /// Sync entities with their visual representations
-    func sync(entities: EntityFacade, scene: SKScene) {
+    /// - Parameters:
+    ///   - entities: Entity facade to get all entities from
+    ///   - scene: The SpriteKit scene to render to
+    ///   - worldLayer: Direct reference to world layer (optimized, avoids string lookup)
+    ///   - bossLayer: Direct reference to boss layer
+    ///   - effectLayer: Direct reference to effect layer
+    func sync(entities: EntityFacade, scene: SKScene, worldLayer: SKNode, bossLayer: SKNode, effectLayer: SKNode) {
         let allEntities = entities.getAllEntities()
         
         // Calculate scale factors
         let scaleX = scene.size.width / logicalWidth
         let scaleY = scene.size.height / logicalHeight
-        
-        // Get world layer (game entities)
-        let worldLayer = scene.childNode(withName: "worldLayer")
         
         // Update all entities with RenderComponent
         for entity in allEntities {
@@ -34,7 +37,7 @@ final class RenderSystem {
                 
                 // Ensure node is in scene (SpriteKit tree management)
                 if node.parent == nil {
-                    worldLayer?.addChild(node) ?? scene.addChild(node)  // Add to worldLayer if it exists
+                    worldLayer.addChild(node)
                 }
 
                 // Update position from TransformComponent
@@ -66,16 +69,15 @@ final class RenderSystem {
         // EntityManager handles component removal when entities are destroyed
         
         // Boss health bar overlay (top of screen)
-        let bossLayer = scene.childNode(withName: "bossLayer")
         if let boss = allEntities.first(where: { $0.component(ofType: BossComponent.self) != nil }) {
             // Show boss layer when boss exists
-            bossLayer?.isHidden = false
+            bossLayer.isHidden = false
             let barWidth = scene.size.width * 0.8
             let barHeight: CGFloat = 12
             let origin = CGPoint(x: (scene.size.width - barWidth) / 2, y: scene.size.height - 30)
             let bgName = "bossHealthBarBG"
             let fillName = "bossHealthBarFill"
-            var bg = bossLayer?.childNode(withName: bgName) as? SKShapeNode
+            var bg = bossLayer.childNode(withName: bgName) as? SKShapeNode
             if bg == nil {
                 let rect = CGRect(x: origin.x, y: origin.y, width: barWidth, height: barHeight)
                 bg = SKShapeNode(rect: rect, cornerRadius: 4)
@@ -84,10 +86,10 @@ final class RenderSystem {
                 bg?.fillColor = .clear
                 bg?.zPosition = 301
                 if let bgToAdd = bg {
-                    bossLayer?.addChild(bgToAdd) ?? scene.addChild(bgToAdd)
+                    bossLayer.addChild(bgToAdd)
                 }
             }
-            var fill = bossLayer?.childNode(withName: fillName) as? SKShapeNode
+            var fill = bossLayer.childNode(withName: fillName) as? SKShapeNode
             // Get health percentage from HealthComponent
             let pct: CGFloat = {
                 if let hc = boss.component(ofType: HealthComponent.self) {
@@ -104,7 +106,7 @@ final class RenderSystem {
                 fill?.fillColor = .systemPink
                 fill?.zPosition = 300
                 if let fillToAdd = fill {
-                    bossLayer?.addChild(fillToAdd) ?? scene.addChild(fillToAdd)
+                    bossLayer.addChild(fillToAdd)
                 }
             } else {
                 let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
@@ -112,10 +114,10 @@ final class RenderSystem {
             }
         } else {
             // Hide boss layer when no boss
-            bossLayer?.isHidden = true
+            bossLayer.isHidden = true
             // Clean up health bar nodes
-            bossLayer?.childNode(withName: "bossHealthBarBG")?.removeFromParent()
-            bossLayer?.childNode(withName: "bossHealthBarFill")?.removeFromParent()
+            bossLayer.childNode(withName: "bossHealthBarBG")?.removeFromParent()
+            bossLayer.childNode(withName: "bossHealthBarFill")?.removeFromParent()
         }
     }
     

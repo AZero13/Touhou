@@ -9,30 +9,21 @@ import Foundation
 import GameplayKit
 import CoreGraphics
 
-// MARK: - Enums
-
-/// Types of collectible items
 enum ItemType: String, CaseIterable {
     case power = "power"
     case point = "point"
     case bomb = "bomb"
     case life = "life"
-    case pointBullet = "pointBullet"  // Special item from bullet-to-point conversion
+    case pointBullet = "pointBullet"
 }
 
-// MARK: - Component
-
-/// ItemComponent - handles item state, movement, and collection
-/// TH06-style physics: items accelerate upward until reaching max speed, then fall at that speed
 final class ItemComponent: GKComponent {
     var itemType: ItemType
     var value: Int
     var isAttractedToPlayer: Bool
     
-    // TH06-style physics: items accelerate upward, then fall
-    // Scaled up from TH06 values (-2.2 → 3.0, 0.03/frame) for visibility
-    private let maxDownwardVelocity: CGFloat = -100   // Cap velocity (negative = down in SpriteKit)
-    private let accelerationRate: CGFloat = -30      // Acceleration per second (negative = toward down)
+    private let maxDownwardVelocity: CGFloat = -100
+    private let accelerationRate: CGFloat = -30
     
     init(itemType: ItemType, value: Int, isAttractedToPlayer: Bool = false) {
         self.itemType = itemType
@@ -45,19 +36,15 @@ final class ItemComponent: GKComponent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - GameplayKit Update
-    
     override func update(deltaTime: TimeInterval) {
         guard let entity = entity,
               let transform = entity.component(ofType: TransformComponent.self) else { return }
         
-        // If attracted, override physics to move toward player each frame
-        // TH06: Items move at 8.0 units/frame toward player (480 units/second at 60fps)
         if isAttractedToPlayer,
-           let player = GameFacade.shared.entities.getPlayer(),
+           let player = GameFacade.shared.entities.player,
            let playerTransform = player.component(ofType: TransformComponent.self) {
             let target = playerTransform.position
-            let speed: CGFloat = 480  // TH06: 8.0 units/frame * 60fps = 480 units/second
+            let speed: CGFloat = 480
             let desired = MathUtility.velocity(from: transform.position, to: target, speed: speed)
             transform.velocity = desired
             transform.position.x += transform.velocity.dx * deltaTime
@@ -83,7 +70,7 @@ final class ItemComponent: GKComponent {
         }
         
         // Check collection with player
-        guard let player = GameFacade.shared.entities.getPlayer(),
+        guard let player = GameFacade.shared.entities.player,
               let playerTransform = player.component(ofType: TransformComponent.self),
               let playerComp = player.component(ofType: PlayerComponent.self) else { return }
         
@@ -117,14 +104,13 @@ final class ItemComponent: GKComponent {
             if playerPower >= 128 {
                 // At full power: use TH06 power item score table
                 // TH06 table: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 51200]
-                let powerItemScores: [Int] = [
+                let powerItemScores = [
                     10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
                     200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000,
                     3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 51200
                 ]
-                // Score is based on current count (before incrementing)
-                let index = min(powerItemCount, powerItemScores.count - 1)
-                return powerItemScores[index]
+                // Use safe subscript to prevent out-of-bounds access
+                return powerItemScores[safe: powerItemCount] ?? 51200
             }
             return 10
         case .point:

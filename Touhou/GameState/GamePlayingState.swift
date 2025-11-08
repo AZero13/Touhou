@@ -22,7 +22,7 @@ class GamePlayingState: GKState {
     }
     
     override func update(deltaTime seconds: TimeInterval) {
-        let input = InputManager.shared.getCurrentInput()
+        let input = InputManager.shared.currentInput
         
         // Check for pause input (Escape key edge detection)
         if input.pause.justPressed {

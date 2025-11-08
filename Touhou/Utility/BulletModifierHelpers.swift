@@ -75,6 +75,7 @@ enum BulletSelector {
     case groupId(Int)
     case patternId(Int)
     
+    @inlinable
     func matches(bullet: BulletComponent) -> Bool {
         switch self {
         case .all:

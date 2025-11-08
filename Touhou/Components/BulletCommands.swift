@@ -9,7 +9,6 @@ import Foundation
 import CoreGraphics
 import GameplayKit
 
-// MARK: - Physics Configuration
 struct PhysicsConfig {
     let speed: CGFloat
     let damage: Int
@@ -20,7 +19,6 @@ struct PhysicsConfig {
     }
 }
 
-// MARK: - Visual Configuration
 struct VisualConfig {
     let size: BulletSize
     let shape: BulletShape
@@ -38,12 +36,10 @@ struct VisualConfig {
     }
 }
 
-// MARK: - Behavior Configuration
 struct BehaviorConfig {
     let homingStrength: CGFloat?
     let maxTurnRate: CGFloat?
     let delay: TimeInterval
-    // TH06-style discrete retargeting
     let retargetInterval: TimeInterval?
     let maxRetargets: Int?
     let rotationOffset: CGFloat
@@ -59,17 +55,13 @@ struct BehaviorConfig {
     }
 }
 
-// MARK: - Bullet Spawn Command
 struct BulletSpawnCommand {
     let position: CGPoint
     let velocity: CGVector
     let bulletType: BulletComponent.BulletType
-    // Identification for scripting/selection
     let groupId: Int?
     let patternId: Int?
     let tags: Set<String>
-    
-    // Configuration objects
     let physics: PhysicsConfig
     let visual: VisualConfig
     let behavior: BehaviorConfig
@@ -91,13 +83,10 @@ struct BulletSpawnCommand {
     }
 }
 
-// MARK: - Pattern Configuration
 struct PatternConfig {
     let physics: PhysicsConfig
     let visual: VisualConfig
     let behavior: BehaviorConfig
-    
-    // Pattern-specific properties
     let bulletCount: Int
     let spread: CGFloat
     let spiralSpeed: CGFloat

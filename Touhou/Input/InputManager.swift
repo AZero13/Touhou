@@ -9,12 +9,10 @@ import Foundation
 import AppKit
 import GameController
 
-/// InputManager - handles both keyboard and gamepad input
 @MainActor
 class InputManager {
     static let shared = InputManager()
     
-    private var currentInput = InputState()
     private var keyboardState: Set<UInt16> = []
     
     private init() {
@@ -22,7 +20,6 @@ class InputManager {
         setupControllerMonitoring()
     }
     
-    // MARK: - Keyboard Setup
     private func setupKeyboardMonitoring() {
         NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
             self?.handleKeyboardEvent(event)
@@ -41,7 +38,6 @@ class InputManager {
         }
     }
     
-    // MARK: - Controller Setup
     private func setupControllerMonitoring() {
         NotificationCenter.default.addObserver(
             self,
@@ -66,27 +62,19 @@ class InputManager {
         print("Controller disconnected")
     }
     
-    // MARK: - Input Processing
     func update() {
         var input = InputState()
-        
-        // Process keyboard input
         processKeyboardInput(&input)
-        
-        // Process controller input (if available)
         processControllerInput(&input)
-        
-        // Update button states with edge detection (use previous frame's state)
-        input.shoot = ButtonState.update(currentPressed: input.shoot.isPressed, previousState: currentInput.shoot)
-        input.bomb = ButtonState.update(currentPressed: input.bomb.isPressed, previousState: currentInput.bomb)
-        input.pause = ButtonState.update(currentPressed: input.pause.isPressed, previousState: currentInput.pause)
-        input.enter = ButtonState.update(currentPressed: input.enter.isPressed, previousState: currentInput.enter)
-        input.up = ButtonState.update(currentPressed: input.up.isPressed, previousState: currentInput.up)
-        input.down = ButtonState.update(currentPressed: input.down.isPressed, previousState: currentInput.down)
-        // Focus doesn't need edge detection, it's a hold button
+        input.shoot = ButtonState.update(currentPressed: input.shoot.isPressed, previousState: _currentInput.shoot)
+        input.bomb = ButtonState.update(currentPressed: input.bomb.isPressed, previousState: _currentInput.bomb)
+        input.pause = ButtonState.update(currentPressed: input.pause.isPressed, previousState: _currentInput.pause)
+        input.enter = ButtonState.update(currentPressed: input.enter.isPressed, previousState: _currentInput.enter)
+        input.up = ButtonState.update(currentPressed: input.up.isPressed, previousState: _currentInput.up)
+        input.down = ButtonState.update(currentPressed: input.down.isPressed, previousState: _currentInput.down)
         input.focus = ButtonState(isPressed: input.focus.isPressed, justPressed: false)
         
-        currentInput = input
+        _currentInput = input
     }
     
     private func processKeyboardInput(_ input: inout InputState) {
@@ -139,14 +127,12 @@ class InputManager {
         }
     }
     
-    // MARK: - Public Interface
-    func getCurrentInput() -> InputState {
-        return currentInput
+    var currentInput: InputState {
+        _currentInput
     }
+    private var _currentInput = InputState()
     
-    // MARK: - Cleanup
     deinit {
-        // Remove NotificationCenter observers to prevent crashes if notifications are posted after deallocation
         NotificationCenter.default.removeObserver(self)
     }
 }

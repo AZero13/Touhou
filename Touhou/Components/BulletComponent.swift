@@ -10,15 +10,12 @@ import CoreGraphics
 import GameplayKit
 import AppKit
 
-// MARK: - Enums
-
-/// Bullet visual properties
 enum BulletSize: String, CaseIterable {
-    case tiny = "tiny"      // 2px radius
-    case small = "small"    // 3px radius  
-    case medium = "medium"  // 5px radius
-    case large = "large"    // 8px radius
-    case huge = "huge"      // 12px radius
+    case tiny = "tiny"
+    case small = "small"
+    case medium = "medium"
+    case large = "large"
+    case huge = "huge"
     
     var radius: CGFloat {
         switch self {
@@ -62,9 +59,6 @@ enum BulletColor: String, CaseIterable {
     }
 }
 
-// MARK: - Component
-
-/// BulletComponent - handles bullet state, movement, and physics
 final class BulletComponent: GKComponent {
     var ownedByPlayer: Bool
     enum BulletType: Equatable {
@@ -76,23 +70,19 @@ final class BulletComponent: GKComponent {
     }
     var bulletType: BulletType
     var damage: Int
-    var homingStrength: CGFloat? // 0.0 to 1.0 for homing bullets (Reimu's shots)
-    var maxTurnRate: CGFloat? // radians per second for smooth homing
-    // TH06-style discrete retargeting parameters
+    var homingStrength: CGFloat?
+    var maxTurnRate: CGFloat?
     var retargetInterval: TimeInterval?
     var maxRetargets: Int?
     var rotationOffset: CGFloat
-    // Internal state for retargeting
     var retargetTimer: TimeInterval = 0
     var retargetedCount: Int = 0
     
-    // Visual properties
     var size: BulletSize
     var shape: BulletShape
     var color: BulletColor
     var hasTrail: Bool
-    var trailLength: Int // Number of trail segments
-    // Identification for scripting/selectors
+    var trailLength: Int
     var groupId: Int?
     var patternId: Int?
     var tags: Set<String>
@@ -123,35 +113,28 @@ final class BulletComponent: GKComponent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - GameplayKit Update
-    
     override func update(deltaTime: TimeInterval) {
         guard let entity = entity,
               let transform = entity.component(ofType: TransformComponent.self) else { return }
         
-        // Apply motion modifiers (freeze/time scale, speed scaling, acceleration)
         let mods = entity.component(ofType: BulletMotionModifiersComponent.self)
         let timeScale: CGFloat = mods?.timeScale ?? 1.0
         let speedScale: CGFloat = mods?.speedScale ?? 1.0
         if timeScale <= 0 { return }
         
-        // Acceleration
         if let a = mods?.acceleration, (a.dx != 0 || a.dy != 0) {
             transform.velocity.dx += a.dx * deltaTime
             transform.velocity.dy += a.dy * deltaTime
         }
         
-        // Angle lock (preserve facing while allowing speed changes)
         if let angle = mods?.angleLock {
             let speed = MathUtility.magnitude(transform.velocity)
             transform.velocity = MathUtility.velocity(angle: angle, speed: speed)
         }
         
-        // Update position based on effective velocity
         transform.position.x += transform.velocity.dx * deltaTime * timeScale * speedScale
         transform.position.y += transform.velocity.dy * deltaTime * timeScale * speedScale
         
-        // Mark bullets that are out of bounds for destruction
         let playArea = GameFacade.playArea
         if transform.position.x < playArea.minX || transform.position.x > playArea.maxX ||
            transform.position.y < playArea.minY || transform.position.y > playArea.maxY {

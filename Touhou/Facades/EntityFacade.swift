@@ -9,8 +9,6 @@ import Foundation
 import GameplayKit
 import CoreGraphics
 
-/// EntityFacade - Simplified API for entity creation and manipulation
-/// Hides complexity of EntityManager, components, and coordinate systems
 final class EntityFacade {
     private let entityManager: EntityManager
     private let commandQueue: CommandQueue
@@ -22,18 +20,6 @@ final class EntityFacade {
         self.eventBus = eventBus
     }
     
-    // MARK: - Boss Operations
-    
-    /// Spawn a boss enemy with the specified configuration
-    /// - Parameters:
-    ///   - name: Boss name identifier
-    ///   - health: Maximum health points
-    ///   - position: Spawn position in logical coordinates
-    ///   - phaseNumber: Current phase number (default: 1)
-    ///   - attackPattern: Attack pattern type (default: .tripleShot)
-    ///   - patternConfig: Configuration for the attack pattern
-    ///   - shotInterval: Time between shots in seconds (default: 1.2)
-    /// - Returns: The created boss entity
     @discardableResult
     func spawnBoss(
         name: String,
@@ -49,31 +35,18 @@ final class EntityFacade {
         entity.addComponent(EnemyComponent(
             enemyType: .custom("boss_\(name)"),
             scoreValue: 5000,
-            dropItem: nil,  // Bosses don't drop items (only convert bullets to points)
+            dropItem: nil,
             attackPattern: attackPattern,
             patternConfig: patternConfig,
             shotInterval: shotInterval
         ))
         entity.addComponent(TransformComponent(position: position, velocity: .zero))
-        entity.addComponent(HealthComponent(current: health, max: health))
+        entity.addComponent(HealthComponent(health: health, maxHealth: health))
         entity.addComponent(HitboxComponent(enemyHitbox: 16))
-        
-        // Register with component systems after entity is fully set up
         GameFacade.shared.registerEntity(entity)
-        
         return entity
     }
     
-    // MARK: - Enemy Operations
-    
-    /// Spawn a fairy enemy with the specified attack pattern
-    /// - Parameters:
-    ///   - position: Spawn position in logical coordinates
-    ///   - attackPattern: Attack pattern type
-    ///   - patternConfig: Configuration for the attack pattern
-    ///   - shotInterval: Time between shots in seconds (default: 2.0)
-    ///   - dropItem: Item type to drop on death (default: .power)
-    /// - Returns: The created fairy entity
     @discardableResult
     func spawnFairy(
         position: CGPoint,
@@ -93,17 +66,11 @@ final class EntityFacade {
         ))
         entity.addComponent(TransformComponent(position: position, velocity: CGVector(dx: 0, dy: -50)))
         entity.addComponent(HitboxComponent(enemyHitbox: 12))
-        entity.addComponent(HealthComponent(current: 1, max: 1))
-        
-        // Register with component systems after entity is fully set up
+        entity.addComponent(HealthComponent(health: 1, maxHealth: 1))
         GameFacade.shared.registerEntity(entity)
-        
         return entity
     }
     
-    // MARK: - Bullet Operations
-    
-    /// Spawn a bullet (uses command queue for deferred execution)
     func spawnBullet(
         position: CGPoint,
         velocity: CGVector,
@@ -124,40 +91,28 @@ final class EntityFacade {
         commandQueue.enqueue(.spawnBullet(cmd, ownedByPlayer: ownedByPlayer))
     }
     
-    // MARK: - Item Operations
-    
-    /// Spawn an item
     func spawnItem(type: ItemType, at position: CGPoint, velocity: CGVector = .zero) {
         commandQueue.enqueue(.spawnItem(type: type, position: position, velocity: velocity))
     }
     
-    // MARK: - Entity Destruction
-    
-    /// Destroy an entity
     func destroy(_ entity: GKEntity) {
         commandQueue.enqueue(.destroyEntity(entity))
     }
     
-    /// Destroy all bullets (optionally filtered)
     func destroyAllBullets(where filter: ((BulletComponent) -> Bool)? = nil) {
         CommandQueue.despawnAllBullets(entityManager: entityManager, selector: filter)
     }
     
-    // MARK: - Entity Queries
-    
-    /// Find the player entity
-    func getPlayer() -> GKEntity? {
-        return entityManager.getPlayerEntity()
+    var player: GKEntity? {
+        entityManager.getPlayerEntity()
     }
     
-    /// Get all entities of a specific type
     func getEntities<T: GKComponent>(with componentType: T.Type) -> [GKEntity] {
-        return entityManager.getEntities(with: componentType)
+        entityManager.getEntities(with: componentType)
     }
     
-    /// Get all entities
     func getAllEntities() -> [GKEntity] {
-        return entityManager.getAllEntities()
+        entityManager.getAllEntities()
     }
 }
 

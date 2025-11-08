@@ -32,7 +32,7 @@ class GamePausedState: GKState {
     }
     
     override func update(deltaTime seconds: TimeInterval) {
-        let input = InputManager.shared.getCurrentInput()
+        let input = InputManager.shared.currentInput
         
         // Handle pause menu navigation with discrete key presses
         if input.up.justPressed {

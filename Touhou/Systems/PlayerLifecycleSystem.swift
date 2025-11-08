@@ -105,7 +105,7 @@ final class PlayerLifecycleSystem: GameSystem {
         
         // Add HealthComponent to track invulnerability (player doesn't have health, but needs invulnerability state)
         // TH06: Player is invulnerable for a period after spawning/respawning
-        entity.addComponent(HealthComponent(current: 1, max: 1, invulnerabilityTimer: 2.0))
+        entity.addComponent(HealthComponent(health: 1, maxHealth: 1, invulnerabilityTimer: 2.0))
         
         // Register with component systems after entity is fully set up
         GameFacade.shared.registerEntity(entity)

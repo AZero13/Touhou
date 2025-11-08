@@ -38,7 +38,7 @@ final class CollisionSystem: GameSystem {
     
     func update(deltaTime: TimeInterval) {
         // Skip all collision/graze checks when time is frozen
-        if GameFacade.shared.isFrozen() {
+        if GameFacade.shared.isTimeFrozen {
             return
         }
         

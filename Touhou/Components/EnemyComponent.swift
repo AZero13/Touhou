@@ -65,7 +65,7 @@ final class EnemyComponent: GKComponent {
         }
         
         // Handle shooting (same pattern as PlayerComponent)
-        if !GameFacade.shared.isFrozen() {
+        if !GameFacade.shared.isTimeFrozen {
             handleShooting(currentTime: CACurrentMediaTime())
         }
     }
@@ -79,7 +79,7 @@ final class EnemyComponent: GKComponent {
             lastShotTime = currentTime
             
             // Get player position for aimed shots
-            let playerPosition = GameFacade.shared.entities.getPlayer()?.component(ofType: TransformComponent.self)?.position
+            let playerPosition = GameFacade.shared.entities.player?.component(ofType: TransformComponent.self)?.position
             let commands = getBulletCommands(from: transform.position, targetPosition: playerPosition)
             
             // Spawn bullets via command queue

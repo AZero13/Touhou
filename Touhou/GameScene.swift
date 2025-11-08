@@ -67,7 +67,7 @@ class GameScene: SKScene, EventListener {
         
         // Only start a new run if we're in NotStarted state (i.e., app just launched)
         // Don't reset if we're transitioning between stages (scene is recreated but game continues)
-        if GameFacade.shared.isInNotStartedState() {
+        if GameFacade.shared.isInNotStartedState {
             GameFacade.shared.startNewRun()
         }
     }

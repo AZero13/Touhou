@@ -72,7 +72,7 @@ final class EnemySystem: GameSystem {
             let remainingEnemies = entityManager.getEntities(with: EnemyComponent.self)
             if remainingEnemies.isEmpty {
                 stageCompleteDispatched = true
-                let currentStage = GameFacade.shared.getCurrentStage()
+                let currentStage = GameFacade.shared.currentStage
                 let nextId = currentStage >= GameFacade.maxStage ? (GameFacade.maxStage + 1) : (currentStage + 1)
                 let totalScore = entityManager.getPlayerComponent()?.score ?? 0
                 print("Boss defeated! Transitioning from stage \(currentStage) to stage \(nextId)")

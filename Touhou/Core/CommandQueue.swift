@@ -9,7 +9,6 @@ import Foundation
 import CoreGraphics
 import GameplayKit
 
-/// A small, typed command queue to buffer world mutations between system updates
 @MainActor
 final class CommandQueue {
     enum Command {
@@ -33,17 +32,14 @@ final class CommandQueue {
         queue.removeAll()
     }
     
-    /// Apply all queued commands immediately
     func process(entityManager: EntityManager, eventBus: EventBus) {
-        guard !queue.isEmpty else { return }
+        if queue.isEmpty { return }
         for command in queue {
             switch command {
-            case let .spawnBullet(cmd, ownedByPlayer) where GameFacade.shared.isFrozen():
-                // Handle frozen state: apply freeze modifier immediately after spawning
+            case let .spawnBullet(cmd, ownedByPlayer) where GameFacade.shared.isTimeFrozen:
                 let entity = spawnBullet(cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
                 applyFreezeModifier(to: entity)
             case let .spawnBullet(cmd, ownedByPlayer):
-                // Normal bullet spawn
                 spawnBullet(cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
             case let .destroyEntity(entity):
                 entityManager.markForDestruction(entity)
@@ -64,32 +60,22 @@ final class CommandQueue {
         queue.removeAll()
     }
     
-    // MARK: - Helpers
-    
-    /// Despawn all bullets, optionally filtered by selector
     static func despawnAllBullets(entityManager: EntityManager, selector: ((BulletComponent) -> Bool)? = nil) {
         let bullets = entityManager.getEntities(with: BulletComponent.self)
         for bulletEntity in bullets {
             guard let bulletComp = bulletEntity.component(ofType: BulletComponent.self) else { continue }
-            if let selector = selector {
-                if !selector(bulletComp) { continue }
-            }
+            if let selector = selector, !selector(bulletComp) { continue }
             GameFacade.shared.entities.destroy(bulletEntity)
         }
     }
     
-    /// Spawn a bullet entity from a command
-    /// - Returns: The created entity (for further processing if needed)
     @discardableResult
     private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) -> GKEntity {
-        let entity = createBulletEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
-        return entity
+        createBulletEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
     }
     
-    /// Apply freeze modifier to a bullet entity (sets timeScale to 0.0)
     private func applyFreezeModifier(to entity: GKEntity) {
-        let mods = entity.component(ofType: BulletMotionModifiersComponent.self)
-            ?? BulletMotionModifiersComponent()
+        let mods = entity.component(ofType: BulletMotionModifiersComponent.self) ?? BulletMotionModifiersComponent()
         if entity.component(ofType: BulletMotionModifiersComponent.self) == nil {
             entity.addComponent(mods)
         }
@@ -100,8 +86,6 @@ final class CommandQueue {
         let entity = entityManager.createEntity()
         entity.addComponent(ItemComponent(itemType: type, value: 0))
         entity.addComponent(TransformComponent(position: position, velocity: velocity))
-        
-        // Register with component systems
         GameFacade.shared.registerEntity(entity)
     }
 
@@ -124,52 +108,34 @@ final class CommandQueue {
         if player.lives <= 0 {
             eventBus.fire(GameOverEvent(finalScore: player.score))
         } else if delta < 0 {
-            // TH06: Player takes damage - set invulnerability timer
-            // TH06 uses 360 frames of invulnerability after taking damage (6 seconds at 60fps)
             if let playerHealth = playerEntity.component(ofType: HealthComponent.self) {
                 playerHealth.invulnerabilityTimer = 6.0
             }
-            
-            // TH06: Power loss on death
-            // If power <= 16: drop to 0, else drop by 16
             if player.power <= 16 {
                 player.power = 0
             } else {
                 player.power -= 16
             }
             eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
-            
-            // Reset power item count for score (TH06 behavior)
             player.powerItemCountForScore = 0
-            
-            // respawn on life loss - reset bombs to 3
             player.bombs = 3
             eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
-            // Fire respawn event - PlayerLifecycleSystem will handle position reset
             eventBus.fire(PlayerRespawnedEvent(entity: playerEntity))
         }
     }
     
     private func adjustBombs(delta: Int, entityManager: EntityManager, eventBus: EventBus) {
         guard let player = entityManager.getPlayerComponent() else { return }
-        player.bombs = max(0, min(player.bombs + delta, 8))
+        player.bombs += delta
         eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
     }
     
     private func adjustPower(delta: Int, entityManager: EntityManager, eventBus: EventBus) {
         guard let player = entityManager.getPlayerComponent() else { return }
-        let oldPower = player.power
-        player.power = max(0, min(player.power + delta, 128))
-        
-        // TH06: Reset powerItemCountForScore when power increases (crossing thresholds)
-        if delta > 0 && oldPower < 128 && player.power >= 128 {
-            // Reaching full power - reset counter
-            player.powerItemCountForScore = 0
-        } else if delta > 0 {
-            // Power increased but not at full power - reset counter (TH06 behavior)
+        player.power += delta
+        if delta > 0 {
             player.powerItemCountForScore = 0
         }
-        
         eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
     }
     
@@ -179,16 +145,8 @@ final class CommandQueue {
         eventBus.fire(ScoreChangedEvent(newTotal: player.score))
     }
     
-    // MARK: - Entity Creation Helpers (moved from factories)
-    
     private func createBulletEntity(from command: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) -> GKEntity {
-        // Create new entity (let ARC and GameplayKit handle lifecycle efficiently)
         let entity = entityManager.createEntity()
-        
-        // Apply TH06-style defaults for player homing amulets
-        let isPlayerHomingAmulet = ownedByPlayer && command.bulletType == .homingAmulet
-        let defaultRetargetInterval: TimeInterval? = isPlayerHomingAmulet ? 0.066 : nil
-        let defaultMaxRetargets: Int? = isPlayerHomingAmulet ? nil : nil
         
         let bullet = BulletComponent(
             ownedByPlayer: ownedByPlayer,
@@ -202,17 +160,20 @@ final class CommandQueue {
         )
         bullet.homingStrength = command.behavior.homingStrength
         bullet.maxTurnRate = command.behavior.maxTurnRate
-        bullet.retargetInterval = command.behavior.retargetInterval ?? defaultRetargetInterval
-        bullet.maxRetargets = command.behavior.maxRetargets ?? defaultMaxRetargets
-        bullet.rotationOffset = (command.behavior.rotationOffset != 0 ? command.behavior.rotationOffset : 0)
+        
+        if ownedByPlayer && command.bulletType == .homingAmulet {
+            bullet.retargetInterval = command.behavior.retargetInterval ?? 0.066
+        } else {
+            bullet.retargetInterval = command.behavior.retargetInterval
+        }
+        bullet.maxRetargets = command.behavior.maxRetargets
+        bullet.rotationOffset = command.behavior.rotationOffset
         bullet.groupId = command.groupId
         bullet.patternId = command.patternId
         bullet.tags = command.tags
         
         entity.addComponent(bullet)
         entity.addComponent(TransformComponent(position: command.position, velocity: command.velocity))
-        
-        // Register with component systems
         GameFacade.shared.registerEntity(entity)
         
         return entity

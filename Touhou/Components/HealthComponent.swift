@@ -8,15 +8,22 @@
 import Foundation
 import GameplayKit
 
-/// HealthComponent - handles entity health and invulnerability
 final class HealthComponent: GKComponent {
-    var current: Int
-    var max: Int
+    private var _health: Int
+    
+    var health: Int {
+        get { _health }
+        set {
+            _health = max(0, min(newValue, maxHealth))
+        }
+    }
+    
+    let maxHealth: Int
     var invulnerabilityTimer: TimeInterval = 0
     
-    init(current: Int, max: Int, invulnerabilityTimer: TimeInterval = 0) {
-        self.current = current
-        self.max = max
+    init(health: Int, maxHealth: Int, invulnerabilityTimer: TimeInterval = 0) {
+        self._health = max(0, min(health, maxHealth))
+        self.maxHealth = maxHealth
         self.invulnerabilityTimer = invulnerabilityTimer
         super.init()
     }
@@ -25,20 +32,13 @@ final class HealthComponent: GKComponent {
         fatalError("init(coder:) has not been implemented")
     }
     
+    @inlinable
     var isAlive: Bool {
-        return current > 0
+        health > 0
     }
     
+    @inlinable
     var isInvulnerable: Bool {
-        return invulnerabilityTimer > 0
-    }
-    
-    var health: Int {
-        get { current }
-        set { current = newValue }
-    }
-    
-    var maxHealth: Int {
-        return max
+        invulnerabilityTimer > 0
     }
 }

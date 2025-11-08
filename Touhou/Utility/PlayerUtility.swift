@@ -13,8 +13,7 @@ import GameplayKit
 enum PlayerUtility {
     /// Get player position, or nil if player doesn't exist
     static func getPosition(entityManager: EntityManager) -> CGPoint? {
-        let players = entityManager.getEntities(with: PlayerComponent.self)
-        return players.first?.component(ofType: TransformComponent.self)?.position
+        return entityManager.getPlayerEntity()?.component(ofType: TransformComponent.self)?.position
     }
     
     /// Calculate angle from given position to player (in radians, 0 = right, π/2 = down)

@@ -85,4 +85,24 @@ class EntityManager {
             }
         }
     }
+    
+    // MARK: - Convenience Helpers
+    
+    /// Get the player entity (there should only be one)
+    func getPlayerEntity() -> GKEntity? {
+        return getEntities(with: PlayerComponent.self).first
+    }
+    
+    /// Get the player component directly (optimized lookup - avoids redundant component lookup)
+    func getPlayerComponent() -> PlayerComponent? {
+        // Direct search to avoid redundant lookup:
+        // getEntities() already calls component(ofType:) to filter, so we'd be calling it twice
+        // This directly finds and returns the component in one pass
+        for entity in entities {
+            if let playerComponent = entity.component(ofType: PlayerComponent.self) {
+                return playerComponent
+            }
+        }
+        return nil
+    }
 }

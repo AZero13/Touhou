@@ -131,7 +131,7 @@ final class EntityFacade {
     
     /// Find the player entity
     func getPlayer() -> GKEntity? {
-        return entityManager.getEntities(with: PlayerComponent.self).first
+        return entityManager.getPlayerEntity()
     }
     
     /// Get all entities of a specific type

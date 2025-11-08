@@ -19,12 +19,7 @@ final class ScoreSystem: GameSystem {
         self.entityManager = entityManager
         self.eventBus = eventBus
         // Initialize session high score from current player score (likely 0)
-        if let player = entityManager.getEntities(with: PlayerComponent.self).first,
-           let playerComp = player.component(ofType: PlayerComponent.self) {
-            self.highScore = playerComp.score
-        } else {
-            self.highScore = 0
-        }
+        self.highScore = entityManager.getPlayerComponent()?.score ?? 0
     }
     
     func update(deltaTime: TimeInterval) {
@@ -37,14 +32,12 @@ final class ScoreSystem: GameSystem {
             GameFacade.shared.combat.adjustScore(amount: e.scoreValue)
         } else if let g = event as? GrazeEvent {
             // Increment graze count for pointBullet value calculation
-            if let player = entityManager.getEntities(with: PlayerComponent.self).first,
-               let playerComp = player.component(ofType: PlayerComponent.self) {
+            if let playerComp = entityManager.getPlayerComponent() {
                 playerComp.grazeInStage += g.grazeValue
             }
             GameFacade.shared.combat.adjustScore(amount: g.grazeValue)
         } else if let p = event as? PowerUpCollectedEvent {
-            if let player = entityManager.getEntities(with: PlayerComponent.self).first,
-               let playerComp = player.component(ofType: PlayerComponent.self) {
+            if let playerComp = entityManager.getPlayerComponent() {
                 switch p.itemType {
                 case .point:
                     GameFacade.shared.combat.adjustScore(amount: p.value)
@@ -91,12 +84,7 @@ final class ScoreSystem: GameSystem {
         } else if let st = event as? StageStartedEvent {
             // Reset run high score only at the beginning of a new run (stage 1)
             if st.stageId == 1 {
-                if let player = entityManager.getEntities(with: PlayerComponent.self).first,
-                   let playerComp = player.component(ofType: PlayerComponent.self) {
-                    self.highScore = playerComp.score
-                } else {
-                    self.highScore = 0
-                }
+                self.highScore = entityManager.getPlayerComponent()?.score ?? 0
                 eventBus.fire(HighScoreChangedEvent(newHighScore: highScore))
             }
         } else if event is GameOverEvent {

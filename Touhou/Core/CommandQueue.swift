@@ -64,12 +64,12 @@ final class CommandQueue {
     /// Despawn all bullets, optionally filtered by selector
     static func despawnAllBullets(entityManager: EntityManager, selector: ((BulletComponent) -> Bool)? = nil) {
         let bullets = entityManager.getEntities(with: BulletComponent.self)
-        for bullet in bullets {
-            guard let bulletComp = bullet.component(ofType: BulletComponent.self) else { continue }
+        for bulletEntity in bullets {
+            guard let bulletComp = bulletEntity.component(ofType: BulletComponent.self) else { continue }
             if let selector = selector {
                 if !selector(bulletComp) { continue }
             }
-            GameFacade.shared.entities.destroy(bullet)
+            GameFacade.shared.entities.destroy(bulletEntity)
         }
     }
     
@@ -108,7 +108,7 @@ final class CommandQueue {
     }
     
     private func adjustLives(delta: Int, entityManager: EntityManager, eventBus: EventBus) {
-        guard let playerEntity = entityManager.getEntities(with: PlayerComponent.self).first,
+        guard let playerEntity = entityManager.getPlayerEntity(),
               let player = playerEntity.component(ofType: PlayerComponent.self) else { return }
         player.lives += delta
         eventBus.fire(LivesChangedEvent(newTotal: player.lives))
@@ -142,13 +142,13 @@ final class CommandQueue {
     }
     
     private func adjustBombs(delta: Int, entityManager: EntityManager, eventBus: EventBus) {
-        guard let player = entityManager.getEntities(with: PlayerComponent.self).first?.component(ofType: PlayerComponent.self) else { return }
+        guard let player = entityManager.getPlayerComponent() else { return }
         player.bombs = max(0, min(player.bombs + delta, 8))
         eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
     }
     
     private func adjustPower(delta: Int, entityManager: EntityManager, eventBus: EventBus) {
-        guard let player = entityManager.getEntities(with: PlayerComponent.self).first?.component(ofType: PlayerComponent.self) else { return }
+        guard let player = entityManager.getPlayerComponent() else { return }
         let oldPower = player.power
         player.power = max(0, min(player.power + delta, 128))
         
@@ -165,7 +165,7 @@ final class CommandQueue {
     }
     
     private func adjustScore(amount: Int, entityManager: EntityManager, eventBus: EventBus) {
-        guard let player = entityManager.getEntities(with: PlayerComponent.self).first?.component(ofType: PlayerComponent.self) else { return }
+        guard let player = entityManager.getPlayerComponent() else { return }
         player.score += amount
         eventBus.fire(ScoreChangedEvent(newTotal: player.score))
     }

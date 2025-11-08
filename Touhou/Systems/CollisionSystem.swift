@@ -27,7 +27,7 @@ final class CollisionSystem: GameSystem {
         // Get all bullets and all enemies separately
         let bullets = entityManager.getEntities(with: BulletComponent.self)
         let enemies = entityManager.getEntities(with: EnemyComponent.self)
-        let players = entityManager.getEntities(with: PlayerComponent.self)
+        guard let player = entityManager.getPlayerEntity() else { return }
         
         // Check player bullets vs enemies
         for bullet in bullets {
@@ -46,13 +46,11 @@ final class CollisionSystem: GameSystem {
             guard let bulletComp = bullet.component(ofType: BulletComponent.self),
                   !bulletComp.ownedByPlayer else { continue }
             
-            for player in players {
-                    if checkCollision(entityA: bullet, entityB: player) {
-                    handleCollision(entityA: bullet, entityB: player)
-                    } else if checkGraze(bullet: bullet, player: player) {
-                        // Graze detected (no collision). Award graze via event
-                        eventBus.fire(GrazeEvent(bulletEntity: bullet, grazeValue: 1))
-                }
+            if checkCollision(entityA: bullet, entityB: player) {
+                handleCollision(entityA: bullet, entityB: player)
+            } else if checkGraze(bullet: bullet, player: player) {
+                // Graze detected (no collision). Award graze via event
+                eventBus.fire(GrazeEvent(bulletEntity: bullet, grazeValue: 1))
             }
         }
         
@@ -63,10 +61,8 @@ final class CollisionSystem: GameSystem {
                 continue
             }
             
-            for player in players {
-                if checkCollision(entityA: enemy, entityB: player) {
-                    handleEnemyTouchPlayer(enemy: enemy, player: player)
-                }
+            if checkCollision(entityA: enemy, entityB: player) {
+                handleEnemyTouchPlayer(enemy: enemy, player: player)
             }
         }
 

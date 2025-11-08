@@ -24,14 +24,13 @@ final class PowerSystem: GameSystem {
     
     func update(deltaTime: TimeInterval) {
         // Check for full power mode (128) - auto-attract items when player is in top area
-        if let player = entityManager.getEntities(with: PlayerComponent.self).first,
-           let playerComp = player.component(ofType: PlayerComponent.self),
-           let playerTransform = player.component(ofType: TransformComponent.self),
-           playerComp.power >= 128,
-           playerTransform.position.y < 128.0 {
-            // TH06: At full power and player in top area, auto-attract all items
-            eventBus.fire(AttractItemsEvent(itemTypes: [.power, .point, .pointBullet, .bomb, .life]))
-        }
+        guard let playerEntity = entityManager.getPlayerEntity(),
+              let playerComp = playerEntity.component(ofType: PlayerComponent.self),
+              let playerTransform = playerEntity.component(ofType: TransformComponent.self),
+              playerComp.power >= 128,
+              playerTransform.position.y < 128.0 else { return }
+        // TH06: At full power and player in top area, auto-attract all items
+        eventBus.fire(AttractItemsEvent(itemTypes: [.power, .point, .pointBullet, .bomb, .life]))
     }
     
     func handleEvent(_ event: GameEvent) {

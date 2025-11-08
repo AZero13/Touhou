@@ -54,12 +54,12 @@ class ViewController: NSViewController, EventListener {
     private func presentWinScene(totalScore: Int) {
         let scene = WinScene(totalScore: totalScore) { [weak self] in
             GameFacade.shared.startNewRun()
-            let fade = SKTransition.fade(withDuration: 1.0)
+            let fade = SKTransition.fade(withDuration: 0.5)
             self?.presentGameplayScene(transition: fade)
         }
         scene.scaleMode = .aspectFill
         scene.size = GameplayView.bounds.size
-        GameplayView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
+        GameplayView.presentScene(scene, transition: SKTransition.fade(withDuration: 0.5))
     }
     
     private func presentScoreScene(totalScore: Int, nextStageId: Int) {
@@ -69,12 +69,17 @@ class ViewController: NSViewController, EventListener {
         }
         let scene = ScoreScene(totalScore: totalScore, nextStageId: nextStageId) { [weak self] in
             GameFacade.shared.startStage(stageId: nextStageId)
-            let fade = SKTransition.fade(withDuration: 1.0)
-            self?.presentGameplayScene(transition: fade)
+            // Move in from top when leaving score scene to return to gameplay
+            let moveInDown = SKTransition.moveIn(with: .down, duration: 1.0)
+            moveInDown.pausesIncomingScene = true // Pause new gameplay scene until transition completes
+            self?.presentGameplayScene(transition: moveInDown)
         }
         scene.scaleMode = .aspectFill
         scene.size = GameplayView.bounds.size
-        GameplayView.presentScene(scene, transition: SKTransition.fade(withDuration: 1.0))
+        // Move in from bottom when going to score scene
+        let moveInUp = SKTransition.moveIn(with: .up, duration: 1.0)
+        moveInUp.pausesOutgoingScene = true // Pause outgoing gameplay scene during transition
+        GameplayView.presentScene(scene, transition: moveInUp)
     }
     
 

@@ -29,7 +29,7 @@ final class ScoreScene: SKScene {
         buildUI()
         // Auto-continue after short delay; also allow click/space to skip
         run(SKAction.sequence([
-            SKAction.wait(forDuration: 2.0),
+            SKAction.wait(forDuration: 1.0),
             SKAction.run { [weak self] in self?.onContinue() }
         ]))
     }

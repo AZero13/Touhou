@@ -301,18 +301,14 @@ class GameScene: SKScene, EventListener {
         flashOverlay.run(bombFlashAction)
     }
     
-    /// Handle stage transition: fade out scene, then notify for scene change
+    /// Handle stage transition: wait for items to be collected, then notify for scene change
     private func handleStageTransition(nextStageId: Int, totalScore: Int) {
-        // Create a cover node that fades to black over the entire scene (same approach as pause menu overlay)
-        let coverNode = SKSpriteNode(color: .black, size: size)
-        coverNode.position = CGPoint(x: size.width / 2, y: size.height / 2)
-        coverNode.alpha = 0.0
-        coverNode.zPosition = 1000  // Above everything
-        addChild(coverNode)
-        
-        let fadeOut = SKAction.fadeIn(withDuration: 3.5)
-        coverNode.run(fadeOut) {
-            GameFacade.shared.fireEvent(SceneReadyForTransitionEvent(nextStageId: nextStageId, totalScore: totalScore))
-        }
+        // Wait 1 second to allow points/items to be collected after boss defeat
+        run(SKAction.sequence([
+            SKAction.wait(forDuration: 1.0),
+            SKAction.run {
+                GameFacade.shared.fireEvent(SceneReadyForTransitionEvent(nextStageId: nextStageId, totalScore: totalScore))
+            }
+        ]))
     }
 }

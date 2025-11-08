@@ -26,16 +26,6 @@ class EntityManager {
         entitiesToDestroy.append(entity)
     }
     
-    /// Get entities marked for destruction (for systems that need to process them before destruction)
-    func getMarkedEntities() -> [GKEntity] {
-        return entitiesToDestroy
-    }
-    
-    /// Clear all marked entities (for systems that handle destruction themselves)
-    func clearMarkedEntities() {
-        entitiesToDestroy.removeAll()
-    }
-    
     /// Actually destroy marked entities
     func destroyMarkedEntities(gameFacade: GameFacade? = nil) {
         for entity in entitiesToDestroy {

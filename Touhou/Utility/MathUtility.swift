@@ -2,7 +2,7 @@
 //  MathUtility.swift
 //  Touhou
 //
-//  Created by Assistant on 11/01/25.
+//  Created by Rose on 11/01/25.
 //
 
 import Foundation

@@ -94,8 +94,8 @@ final class ScoreSystem: GameSystem {
                     200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000,
                     3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 51200
                 ]
-                let index = min(playerComp.powerItemCountForScore, powerItemScores.count - 1)
-                let actualScore = powerItemScores[index]
+                // Use safe subscript to prevent out-of-bounds access
+                let actualScore = powerItemScores[safe: playerComp.powerItemCountForScore] ?? 51200
                 GameFacade.shared.combat.adjustScore(amount: actualScore)
             } else {
                 // Not at full power: increase power by 1, base score 10

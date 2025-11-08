@@ -2,7 +2,7 @@
 //  EntityFacade.swift
 //  Touhou
 //
-//  Created by Assistant on 11/02/25.
+//  Created by Rose on 11/02/25.
 //
 
 import Foundation

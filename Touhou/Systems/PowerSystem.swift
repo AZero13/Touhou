@@ -2,7 +2,7 @@
 //  PowerSystem.swift
 //  Touhou
 //
-//  Created by Assistant on 11/07/25.
+//  Created by Rose on 11/07/25.
 //
 
 import Foundation
@@ -66,10 +66,8 @@ final class PowerSystem: GameSystem {
     
     /// Get the power threshold for a given rank
     static func getThresholdForRank(_ rank: Int) -> Int {
-        guard rank >= 0 && rank < powerThresholds.count else {
-            return powerThresholds.last ?? 128
-        }
-        return powerThresholds[rank]
+        // Use safe subscript to prevent out-of-bounds access
+        return powerThresholds[safe: rank] ?? (powerThresholds.last ?? 128)
     }
 }
 

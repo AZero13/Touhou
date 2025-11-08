@@ -134,7 +134,7 @@ struct GrazeEvent: GameEvent, @unchecked Sendable {
 struct EnemyHitEvent: GameEvent, @unchecked Sendable {
     let timestamp: TimeInterval
     let enemyEntity: GKEntity
-    let hitPosition: CGPoint  // Position where the hit occurred (bullet position)
+    let hitPosition: CGPoint
     
     init(enemyEntity: GKEntity, hitPosition: CGPoint) {
         self.timestamp = CACurrentMediaTime()

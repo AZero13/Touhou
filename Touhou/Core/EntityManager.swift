@@ -14,19 +14,30 @@ class EntityManager {
     private var entities: [GKEntity] = []
     private var entitiesToDestroy: [GKEntity] = []
     
-    /// Create a new entity
+    /// Creates a new game entity.
+    ///
+    /// - Returns: A new `GKEntity` ready for component attachment.
     func createEntity() -> GKEntity {
         let entity = GKEntity()
         entities.append(entity)
         return entity
     }
     
-    /// Mark an entity for destruction
+    /// Marks an entity for destruction at the end of the frame.
+    ///
+    /// - Parameter entity: The entity to mark for destruction.
     func markForDestruction(_ entity: GKEntity) {
         entitiesToDestroy.append(entity)
     }
     
-    /// Actually destroy marked entities
+    /// Destroys all entities marked for destruction.
+    ///
+    /// Unregisters entities from systems, removes all components, and removes them
+    /// from tracking. This should be called once per frame after all systems have
+    /// finished processing.
+    ///
+    /// - Parameter gameFacade: Optional game facade for unregistering entities.
+    ///   If `nil`, uses `GameFacade.shared`.
     func destroyMarkedEntities(gameFacade: GameFacade? = nil) {
         for entity in entitiesToDestroy {
             // Unregister from systems first (removes system-managed components from systems)
@@ -67,17 +78,25 @@ class EntityManager {
         entity.removeComponent(ofType: BulletMotionModifiersComponent.self)
     }
     
-    /// Get all entities
+    /// Gets all entities in the manager.
+    ///
+    /// - Returns: An array of all entities currently tracked.
     func getAllEntities() -> [GKEntity] {
         return entities
     }
     
-    /// Get entities with specific components
+    /// Gets entities that have the specified component type.
+    ///
+    /// - Parameter componentType: The component type to filter by.
+    /// - Returns: An array of entities that have the specified component.
     func getEntities<T: GKComponent>(with componentType: T.Type) -> [GKEntity] {
         return entities.filter { $0.component(ofType: componentType) != nil }
     }
     
-    /// Get entities with multiple component types
+    /// Gets entities that have all of the specified component types.
+    ///
+    /// - Parameter componentTypes: An array of component types that entities must have.
+    /// - Returns: An array of entities that have all specified components.
     func getEntities(with componentTypes: [GKComponent.Type]) -> [GKEntity] {
         return entities.filter { entity in
             componentTypes.allSatisfy { componentType in
@@ -88,12 +107,19 @@ class EntityManager {
     
     // MARK: - Convenience Helpers
     
-    /// Get the player entity (there should only be one)
+    /// Gets the player entity.
+    ///
+    /// - Returns: The player entity, or `nil` if no player exists.
     func getPlayerEntity() -> GKEntity? {
         return getEntities(with: PlayerComponent.self).first
     }
     
-    /// Get the player component directly (optimized lookup - avoids redundant component lookup)
+    /// Gets the player component directly.
+    ///
+    /// This is an optimized lookup that avoids redundant component queries by
+    /// directly searching for the `PlayerComponent` in a single pass.
+    ///
+    /// - Returns: The player component, or `nil` if no player exists.
     func getPlayerComponent() -> PlayerComponent? {
         // Direct search to avoid redundant lookup:
         // getEntities() already calls component(ofType:) to filter, so we'd be calling it twice

@@ -20,11 +20,8 @@ final class HealthSystem: GameSystem {
     
     func update(deltaTime: TimeInterval) {
         // Update invulnerability timers for all damageable entities
-        let damageableEntities = entityManager.getEntities(with: HealthComponent.self)
-        
-        for entity in damageableEntities {
-            guard let healthComponent = entity.component(ofType: HealthComponent.self) else { continue }
-            
+        // Use getAllComponents to directly get health components without entity iteration
+        for healthComponent in entityManager.getAllComponents(HealthComponent.self) {
             // Decrease invulnerability timer
             if healthComponent.invulnerabilityTimer > 0 {
                 healthComponent.invulnerabilityTimer -= deltaTime
@@ -33,11 +30,17 @@ final class HealthSystem: GameSystem {
     }
     
     func handleEvent(_ event: GameEvent) {
-        if let collisionEvent = event as? CollisionOccurredEvent {
+        switch event {
+        case let collisionEvent as CollisionOccurredEvent:
             handleCollisionEvent(collisionEvent)
-        } else if let died = event as? EnemyDiedEvent {
+            
+        case let died as EnemyDiedEvent:
             // Handle item drops when enemy dies
             handleEnemyDeath(died)
+            
+        default:
+            // Ignore other events
+            break
         }
     }
     

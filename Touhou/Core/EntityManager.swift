@@ -131,4 +131,15 @@ class EntityManager {
         }
         return nil
     }
+    
+    /// Gets all components of the specified type from all entities.
+    ///
+    /// This is more efficient than calling `getEntities(with:)` and then extracting
+    /// components, as it does both operations in a single pass.
+    ///
+    /// - Parameter componentType: The component type to search for.
+    /// - Returns: An array of all components of the specified type.
+    func getAllComponents<T: GKComponent>(_ componentType: T.Type) -> [T] {
+        return entities.compactMap { $0.component(ofType: componentType) }
+    }
 }

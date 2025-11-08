@@ -24,21 +24,26 @@ final class ItemAttractionSystem: GameSystem {
     }
     
     func handleEvent(_ event: GameEvent) {
-        if let died = event as? EnemyDiedEvent {
+        switch event {
+        case let died as EnemyDiedEvent:
             // When a boss dies, attract point-like items
-            let isBoss = died.entity.component(ofType: BossComponent.self) != nil
-            if isBoss {
+            // Use pattern matching: check if entity has BossComponent
+            if died.entity.component(ofType: BossComponent.self) != nil {
                 attractItems(ofTypes: [.point, .pointBullet])
             }
-        } else if let attract = event as? AttractItemsEvent {
+            
+        case let attract as AttractItemsEvent:
             attractItems(ofTypes: attract.itemTypes)
+            
+        default:
+            // Ignore other events
+            break
         }
     }
     
     private func attractItems(ofTypes types: [ItemType]) {
-        let items = entityManager.getEntities(with: ItemComponent.self)
-        for e in items {
-            guard let item = e.component(ofType: ItemComponent.self) else { continue }
+        // Use getAllComponents to directly get item components without entity iteration
+        for item in entityManager.getAllComponents(ItemComponent.self) {
             if types.contains(item.itemType) {
                 item.isAttractedToPlayer = true
             }

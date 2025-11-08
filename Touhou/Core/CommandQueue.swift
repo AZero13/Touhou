@@ -38,7 +38,12 @@ final class CommandQueue {
         guard !queue.isEmpty else { return }
         for command in queue {
             switch command {
+            case let .spawnBullet(cmd, ownedByPlayer) where GameFacade.shared.isFrozen():
+                // Handle frozen state: apply freeze modifier immediately after spawning
+                let entity = spawnBullet(cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
+                applyFreezeModifier(to: entity)
             case let .spawnBullet(cmd, ownedByPlayer):
+                // Normal bullet spawn
                 spawnBullet(cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
             case let .destroyEntity(entity):
                 entityManager.markForDestruction(entity)
@@ -73,18 +78,22 @@ final class CommandQueue {
         }
     }
     
-    private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) {
+    /// Spawn a bullet entity from a command
+    /// - Returns: The created entity (for further processing if needed)
+    @discardableResult
+    private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) -> GKEntity {
         let entity = createBulletEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
-        
-        // If time is frozen, immediately apply freeze modifier to newly spawned bullet
-        if GameFacade.shared.isFrozen() {
-            let mods = entity.component(ofType: BulletMotionModifiersComponent.self)
-                ?? BulletMotionModifiersComponent()
-            if entity.component(ofType: BulletMotionModifiersComponent.self) == nil {
-                entity.addComponent(mods)
-            }
-            mods.timeScale = 0.0
+        return entity
+    }
+    
+    /// Apply freeze modifier to a bullet entity (sets timeScale to 0.0)
+    private func applyFreezeModifier(to entity: GKEntity) {
+        let mods = entity.component(ofType: BulletMotionModifiersComponent.self)
+            ?? BulletMotionModifiersComponent()
+        if entity.component(ofType: BulletMotionModifiersComponent.self) == nil {
+            entity.addComponent(mods)
         }
+        mods.timeScale = 0.0
     }
 
     private func spawnItem(type: ItemType, position: CGPoint, velocity: CGVector, entityManager: EntityManager) {

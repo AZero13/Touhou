@@ -90,15 +90,16 @@ final class BulletHomingSystem: GameSystem {
             // Player bullets home towards enemies
             let enemies = entityManager.getEntities(with: EnemyComponent.self)
             var nearestEnemy: GKEntity?
-            var nearestDistance: CGFloat = CGFloat.greatestFiniteMagnitude
+            var nearestDistanceSq: CGFloat = CGFloat.greatestFiniteMagnitude
             
             for enemy in enemies {
                 guard let enemyTransform = enemy.component(ofType: TransformComponent.self) else { continue }
                 
-                let distance = MathUtility.distance(from: position, to: enemyTransform.position)
+                // Use distanceSquared to avoid sqrt in hot loop
+                let distanceSq = MathUtility.distanceSquared(from: position, to: enemyTransform.position)
                 
-                if distance < nearestDistance {
-                    nearestDistance = distance
+                if distanceSq < nearestDistanceSq {
+                    nearestDistanceSq = distanceSq
                     nearestEnemy = enemy
                 }
             }

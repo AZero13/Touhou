@@ -18,27 +18,49 @@ enum PlayerUtility {
     
     /// Calculate angle from given position to player (in radians, 0 = right, π/2 = down)
     /// Returns nil if player doesn't exist
+    @inlinable
+    static func angleToPlayer(from position: CGPoint, playerPosition: CGPoint) -> CGFloat {
+        let dx = playerPosition.x - position.x
+        let dy = playerPosition.y - position.y
+        return atan2(dy, dx)
+    }
+    
+    /// Calculate angle from given position to player (in radians, 0 = right, π/2 = down)
+    /// Returns nil if player doesn't exist
     static func angleToPlayer(from position: CGPoint, entityManager: EntityManager) -> CGFloat? {
         guard let playerPos = getPosition(entityManager: entityManager) else { return nil }
-        let dx = playerPos.x - position.x
-        let dy = playerPos.y - position.y
-        return atan2(dy, dx)
+        return angleToPlayer(from: position, playerPosition: playerPos)
+    }
+    
+    /// Calculate velocity vector towards player from given position with specified speed
+    /// Returns nil if player doesn't exist
+    @inlinable
+    static func velocityToPlayer(from position: CGPoint, playerPosition: CGPoint, speed: CGFloat) -> CGVector {
+        let angle = angleToPlayer(from: position, playerPosition: playerPosition)
+        return CGVector(dx: cos(angle) * speed, dy: sin(angle) * speed)
     }
     
     /// Calculate velocity vector towards player from given position with specified speed
     /// Returns nil if player doesn't exist
     static func velocityToPlayer(from position: CGPoint, speed: CGFloat, entityManager: EntityManager) -> CGVector? {
-        guard let angle = angleToPlayer(from: position, entityManager: entityManager) else { return nil }
-        return CGVector(dx: cos(angle) * speed, dy: sin(angle) * speed)
+        guard let playerPos = getPosition(entityManager: entityManager) else { return nil }
+        return velocityToPlayer(from: position, playerPosition: playerPos, speed: speed)
+    }
+    
+    /// Calculate distance from given position to player
+    /// Returns nil if player doesn't exist
+    @inlinable
+    static func distanceToPlayer(from position: CGPoint, playerPosition: CGPoint) -> CGFloat {
+        let dx = playerPosition.x - position.x
+        let dy = playerPosition.y - position.y
+        return sqrt(dx * dx + dy * dy)
     }
     
     /// Calculate distance from given position to player
     /// Returns nil if player doesn't exist
     static func distanceToPlayer(from position: CGPoint, entityManager: EntityManager) -> CGFloat? {
         guard let playerPos = getPosition(entityManager: entityManager) else { return nil }
-        let dx = playerPos.x - position.x
-        let dy = playerPos.y - position.y
-        return sqrt(dx * dx + dy * dy)
+        return distanceToPlayer(from: position, playerPosition: playerPos)
     }
 }
 

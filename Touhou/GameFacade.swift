@@ -105,7 +105,6 @@ class GameFacade {
         stateMachine.update(deltaTime: deltaTime)
         
         if stateMachine.currentState is GamePlayingState {
-            // 1. Systems update (detect collisions, update timers, etc.)
             if !_isTimeFrozen {
                 for componentSystem in componentSystems {
                     componentSystem.update(deltaTime: deltaTime)
@@ -114,16 +113,9 @@ class GameFacade {
                     system.update(deltaTime: deltaTime)
                 }
             }
-            
-            // 2. Process events (systems observe and queue commands)
-            eventBus.processEvents()
-            
-            // 3. Process commands (execute actions, fire events for notifications)
             commandQueue.process(entityManager: entityManager, eventBus: eventBus)
-        } else {
-            // Process events even when not playing (for UI updates, etc.)
-            eventBus.processEvents()
         }
+        eventBus.processEvents()
     }
     
     func restartGame() {

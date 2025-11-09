@@ -137,7 +137,7 @@ class GameFacade {
         lastUpdateTime = CACurrentMediaTime()
         stateMachine.enter(GamePlayingState.self)
         eventBus.fire(StageStartedEvent(stageId: stageId))
-        eventBus.processEvents()  // Process StageStartedEvent immediately so systems initialize before first frame
+        eventBus.processEvents() 
         print("Stage \(stageId) started")
     }
     

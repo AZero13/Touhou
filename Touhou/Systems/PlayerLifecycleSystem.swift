@@ -25,7 +25,22 @@ final class PlayerLifecycleSystem: GameSystem {
     }
     
     func update(deltaTime: TimeInterval) {
+        // Sync playerEntity reference with EntityManager
         syncPlayerEntity()
+        
+        // Safety fallback: only spawn recovery if player is missing during stable gameplay
+        // Don't spawn if we're likely in a stage transition (events haven't processed yet)
+        // Events are processed after systems update, so if StageStartedEvent just fired,
+        // we should wait for it to process rather than spawning recovery
+        if playerEntity == nil {
+            // Only spawn recovery if we've been in this stage for at least one frame
+            // This avoids spawning right after stage start when events haven't processed yet
+            // We can detect this by checking if player was missing last frame too
+            // For now, just spawn - the spawn methods check for existing player anyway
+            // But log a warning to help debug if this happens unexpectedly
+            print("Warning: Player missing during gameplay (stage \(GameFacade.shared.currentStage)), spawning as recovery")
+            spawnPlayerRecovery()
+        }
     }
     
     func handleEvent(_ event: GameEvent) {
@@ -38,6 +53,7 @@ final class PlayerLifecycleSystem: GameSystem {
             }
         case let e as StageStartedEvent:
             // Sync playerEntity reference before handling stage start
+            // This ensures we have the latest reference from EntityManager
             syncPlayerEntity()
             
             // Stage 1 = new run: spawn player if missing, reset stats
@@ -45,18 +61,23 @@ final class PlayerLifecycleSystem: GameSystem {
                 if playerEntity == nil {
                     spawnPlayer()
                 }
+                // Always reset stats on stage 1 (new run)
                 resetPlayerStats()
             } else {
-                // Subsequent stages: player should exist, just reset position
+                // Subsequent stages: player should persist from previous stage
+                // Just reset position and stage-specific stats
                 if let entity = playerEntity {
                     resetPlayerPosition(entity: entity)
                     if let player = entity.component(ofType: PlayerComponent.self) {
                         player.grazeInStage = 0
                     }
                 } else {
-                    // Player missing on non-stage-1: spawn as recovery
-                    print("Warning: Player missing on stage \(e.stageId), spawning")
+                    // Player missing on non-stage-1: this is unexpected but recoverable
+                    // Spawn player (preserves stats across stages, but player was destroyed somehow)
+                    print("Warning: Player missing on stage \(e.stageId), spawning recovery player")
                     spawnPlayer()
+                    // Don't reset stats - player should have stats from previous stage
+                    // But since entity was destroyed, we can't preserve them
                 }
             }
         default:
@@ -85,15 +106,26 @@ final class PlayerLifecycleSystem: GameSystem {
         eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
     }
     
-    /// Sync playerEntity reference with EntityManager (handles cases where player exists but reference is stale)
-    private func syncPlayerEntity() {
+    /// Sync playerEntity reference with EntityManager
+    /// - Updates reference if player exists in EntityManager
+    /// - Clears reference (sets to nil) if player doesn't exist in EntityManager
+    /// - Returns true if player exists, false if missing
+    @discardableResult
+    private func syncPlayerEntity() -> Bool {
         if let existingPlayer = entityManager.getPlayerEntity() {
+            // Player exists - update reference if it's different
             if playerEntity !== existingPlayer {
                 playerEntity = existingPlayer
             }
+            return true
+        } else {
+            // Player doesn't exist - clear reference
+            playerEntity = nil
+            return false
         }
     }
     
+    /// Spawn player with default stats (for new runs or stage 1)
     private func spawnPlayer() {
         // Check if player already exists in EntityManager (shouldn't happen)
         if let existingPlayer = entityManager.getPlayerEntity() {
@@ -113,6 +145,25 @@ final class PlayerLifecycleSystem: GameSystem {
         entity.addComponent(HealthComponent(health: 1, maxHealth: 1, invulnerabilityTimer: 2.0))
         playerEntity = entity
         GameFacade.shared.registerEntity(entity)
+    }
+    
+    /// Spawn player as recovery during gameplay
+    /// This is a safety fallback called from update() if player is missing
+    /// Note: This might be called in the same frame as StageStartedEvent, but
+    /// the duplicate check in spawnPlayer() prevents issues
+    private func spawnPlayerRecovery() {
+        // Use same spawn logic as normal spawn
+        spawnPlayer()
+        
+        // Fire events to update UI with default stats
+        // (spawnPlayer() doesn't fire events - they're fired by resetPlayerStats() for stage 1,
+        // but recovery spawn happens outside event handler context)
+        if let player = playerEntity?.component(ofType: PlayerComponent.self) {
+            eventBus.fire(LivesChangedEvent(newTotal: player.lives))
+            eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
+            eventBus.fire(ScoreChangedEvent(newTotal: player.score))
+            eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
+        }
     }
     
     private func resetPlayerPosition(entity: GKEntity) {

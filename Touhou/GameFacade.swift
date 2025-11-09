@@ -115,7 +115,6 @@ class GameFacade {
             }
             commandQueue.process(entityManager: entityManager, eventBus: eventBus)
         }
-        
         eventBus.processEvents()
     }
     
@@ -133,17 +132,17 @@ class GameFacade {
         clearTransientWorld()
         commandQueue.clear()
         _currentStage = stageId
-        eventBus.processEvents()
         lastUpdateTime = CACurrentMediaTime()
         stateMachine.enter(GamePlayingState.self)
         eventBus.fire(StageStartedEvent(stageId: stageId))
-        eventBus.processEvents() 
+        eventBus.processEvents()  // Process StageStartedEvent immediately so systems initialize before first frame
         print("Stage \(stageId) started")
     }
     
     func endStage() {
         stateMachine.enter(GameNotStartedState.self)
         eventBus.fire(StageEndedEvent(stageId: _currentStage))
+        eventBus.processEvents()
         clearTransientWorld()
         commandQueue.clear()
         print("Stage \(_currentStage) ended")

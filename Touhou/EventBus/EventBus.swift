@@ -31,6 +31,8 @@ class EventBus {
     }
     
     func processEvents() {
+        guard !eventQueue.isEmpty else { return }
+        
         let eventsToProcess = eventQueue
         eventQueue.removeAll()
         cleanupWeakReferencesIfNeeded()

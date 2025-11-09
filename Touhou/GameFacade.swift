@@ -136,6 +136,7 @@ class GameFacade {
         eventBus.processEvents()
         lastUpdateTime = CACurrentMediaTime()
         stateMachine.enter(GamePlayingState.self)
+        eventBus.fire(StageStartedEvent(stageId: stageId))
         print("Stage \(stageId) started")
     }
     

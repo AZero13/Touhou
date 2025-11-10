@@ -33,7 +33,7 @@ final class EntityFacade {
         let entity = entityManager.createEntity()
         entity.addComponent(BossComponent(name: name, phaseNumber: phaseNumber))
         entity.addComponent(EnemyComponent(
-            enemyType: .custom("boss_\(name)"),
+            enemyType: .boss,
             scoreValue: 5000,
             dropItem: nil,
             attackPattern: attackPattern,

@@ -12,7 +12,7 @@ import GameplayKit
 final class EnemyComponent: GKComponent {
     enum EnemyType: Equatable {
         case fairy
-        case custom(String)
+        case boss
     }
     var enemyType: EnemyType
     var scoreValue: Int

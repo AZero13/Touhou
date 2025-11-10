@@ -14,8 +14,10 @@ final class EnemySystem: GameSystem {
     private var eventBus: EventBus!
     private var stageTimer: TimeInterval = 0
     private var stageScript: [EnemySpawnEvent] = []
+    private var stageTimeline: StageTimeline?
     private var stageCompleteDispatched: Bool = false
     private var bossSpawned: Bool = false
+    private var timelineCompleteTime: TimeInterval? // When timeline completed
     
     func initialize(entityManager: EntityManager, eventBus: EventBus) {
         self.entityManager = entityManager
@@ -28,15 +30,35 @@ final class EnemySystem: GameSystem {
     func update(deltaTime: TimeInterval) {
         stageTimer += deltaTime
         
-        // Check for enemies to spawn based on stage script
-        spawnEnemiesFromScript()
+        // Use timeline if available, otherwise use script
+        if let timeline = stageTimeline {
+            timeline.update(deltaTime: deltaTime)
+        } else {
+            // Check for enemies to spawn based on stage script
+            spawnEnemiesFromScript()
+        }
         
         // Update enemy movement and shooting
         updateEnemyMovement(deltaTime: deltaTime)
         
-        // If all scripted enemies have spawned and none remain, spawn boss once
-        // Also check that we actually have a script (empty scripts shouldn't trigger boss)
-        if !stageScript.isEmpty && stageScript.allSatisfy({ $0.hasSpawned }) && !bossSpawned {
+        // Check if timeline is complete
+        if let timeline = stageTimeline, timeline.isComplete, timelineCompleteTime == nil {
+            timelineCompleteTime = stageTimer
+        }
+        
+        // Spawn boss 60 seconds (1 minute) after timeline completes
+        let shouldSpawnBoss: Bool
+        if stageTimeline != nil {
+            if let completeTime = timelineCompleteTime {
+                shouldSpawnBoss = (stageTimer - completeTime) >= 60.0 // 1 minute delay
+            } else {
+                shouldSpawnBoss = false
+            }
+        } else {
+            shouldSpawnBoss = !stageScript.isEmpty && stageScript.allSatisfy({ $0.hasSpawned })
+        }
+        
+        if shouldSpawnBoss && !bossSpawned {
             // Despawn any remaining regular enemies and all bullets before boss appears
             let enemies = entityManager.getEntities(with: EnemyComponent.self)
             for enemy in enemies {
@@ -87,6 +109,8 @@ final class EnemySystem: GameSystem {
             stageTimer = 0
             stageCompleteDispatched = false
             bossSpawned = false
+            stageTimeline = nil
+            timelineCompleteTime = nil
             loadStageScript(stageId: s.stageId)
         }
     }
@@ -96,9 +120,17 @@ final class EnemySystem: GameSystem {
     private func loadStageScript(stageId: Int) {
         switch stageId {
         case 1:
-            stageScript = makeStage1Script()
+            // Use timeline for stage 1 (defined in StageTimelineDefinitions)
+            stageTimeline = StageTimelineDefinitions.createStage1Timeline()
+            stageTimeline?.initialize(entityManager: entityManager, eventBus: eventBus)
+            stageTimeline?.start()
+            stageScript = [] // Empty script - timeline handles spawning
         default:
-            stageScript = makeDefaultStageScript(stageId: stageId)
+            // Use timeline for default stages too
+            stageTimeline = StageTimelineDefinitions.createDefaultStageTimeline(stageId: stageId)
+            stageTimeline?.initialize(entityManager: entityManager, eventBus: eventBus)
+            stageTimeline?.start()
+            stageScript = [] // Empty script - timeline handles spawning
         }
     }
     
@@ -143,7 +175,9 @@ final class EnemySystem: GameSystem {
                 attackPattern: pattern,
                 patternConfig: patternConfig
             )
-        default:
+        case .boss:
+            // Bosses are spawned separately by EnemySystem when timeline completes
+            // This case exists for exhaustiveness but shouldn't be used in scripts
             break
         }
     }

@@ -202,15 +202,10 @@ final class CollisionSystem: GameSystem {
     
     private func handleEnemyTouchPlayer(enemy: GKEntity, player: GKEntity) {
         // TH06: Only damage player if they're vulnerable (not invulnerable/dead/spawning)
-        // Check if player has HealthComponent (tracks invulnerability)
-        if let playerHealth = player.component(ofType: HealthComponent.self) {
-            // Player is invulnerable - don't take damage from enemy touch
-            if playerHealth.isInvulnerable {
-                return
-            }
+        if player.component(ofType: HealthComponent.self)?.isInvulnerable == true {
+            return
         }
         
-        // Player is vulnerable - fire collision event
         let hitPosition = enemy.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
         
         eventBus.fire(CollisionOccurredEvent(

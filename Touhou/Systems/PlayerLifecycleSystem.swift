@@ -33,11 +33,11 @@ final class PlayerLifecycleSystem: GameSystem {
     func handleEvent(_ event: GameEvent) {
         switch event {
         case let e as PlayerRespawnedEvent:
-            // Player respawned (e.g., after losing a life) - reset position and set invulnerability
+            // Player respawned (e.g., after losing a life) - reset position
+            // Note: Invulnerability timer is already set in CommandQueue.adjustLives() (6.0s for respawn)
+            // Don't override it here - only reset position
+            // Players don't have health, only lives
             resetPlayerPosition(entity: e.entity)
-            if let playerHealth = e.entity.component(ofType: HealthComponent.self) {
-                playerHealth.invulnerabilityTimer = 2.0
-            }
         case let e as StageStartedEvent:
             // Sync playerEntity reference before handling stage start
             // This ensures we have the latest reference from EntityManager
@@ -47,6 +47,10 @@ final class PlayerLifecycleSystem: GameSystem {
             if e.stageId == 1 {
                 if playerEntity == nil {
                     spawnPlayer()
+                } else {
+                    // Player exists - reset position and invulnerability for new run
+                    resetPlayerPosition(entity: playerEntity!)
+                    playerEntity!.component(ofType: HealthComponent.self)?.invulnerabilityTimer = 2.0
                 }
                 // Always reset stats on stage 1 (new run)
                 resetPlayerStats()

@@ -64,8 +64,9 @@ final class CommandQueue {
         let bullets = entityManager.getEntities(with: BulletComponent.self)
         for bulletEntity in bullets {
             guard let bulletComp = bulletEntity.component(ofType: BulletComponent.self) else { continue }
-            if let selector = selector, !selector(bulletComp) { continue }
-            GameFacade.shared.entities.destroy(bulletEntity)
+            if selector == nil || selector!(bulletComp) {
+                GameFacade.shared.entities.destroy(bulletEntity)
+            }
         }
     }
     
@@ -75,11 +76,13 @@ final class CommandQueue {
     }
     
     private func applyFreezeModifier(to entity: GKEntity) {
-        let mods = entity.component(ofType: BulletMotionModifiersComponent.self) ?? BulletMotionModifiersComponent()
-        if entity.component(ofType: BulletMotionModifiersComponent.self) == nil {
+        if let mods = entity.component(ofType: BulletMotionModifiersComponent.self) {
+            mods.timeScale = 0.0
+        } else {
+            let mods = BulletMotionModifiersComponent()
+            mods.timeScale = 0.0
             entity.addComponent(mods)
         }
-        mods.timeScale = 0.0
     }
 
     private func spawnItem(type: ItemType, position: CGPoint, velocity: CGVector, entityManager: EntityManager) {
@@ -108,9 +111,7 @@ final class CommandQueue {
         if player.lives <= 0 {
             eventBus.fire(GameOverEvent(finalScore: player.score))
         } else if delta < 0 {
-            if let playerHealth = playerEntity.component(ofType: HealthComponent.self) {
-                playerHealth.invulnerabilityTimer = 6.0
-            }
+            playerEntity.component(ofType: HealthComponent.self)?.invulnerabilityTimer = 6.0
             if player.power <= 16 {
                 player.power = 0
             } else {

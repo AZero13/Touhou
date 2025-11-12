@@ -232,13 +232,13 @@ class GameScene: SKScene, EventListener {
     // MARK: - Time Bonus Timer UI
     
     private func createTimeBonusTimer() {
-        let label = SKLabelNode(text: "TIME 00.00")
+        let label = SKLabelNode(text: "TIME 00")
         label.fontName = "Menlo-Bold"
         label.fontSize = 16
         label.fontColor = .white
         label.horizontalAlignmentMode = .right
         label.verticalAlignmentMode = .top
-        label.position = CGPoint(x: size.width - 10, y: size.height - 10)
+        label.position = CGPoint(x: size.width - 10, y: size.height - 40)  // Below boss health bar
         label.zPosition = 1001  // Above everything
         label.isHidden = true
         uiLayer.addChild(label)
@@ -266,8 +266,8 @@ class GameScene: SKScene, EventListener {
         }
         
         let remainingTime = max(0, bossComp.timeLimit - bossComp.elapsedTime)
-        let rounded = round(remainingTime * 100) / 100
-        label.text = "TIME \(rounded)"
+        let seconds = Int(ceil(remainingTime))
+        label.text = "TIME \(seconds)"
         
         // Change color based on remaining time (red when running out)
         if remainingTime < 5.0 {

@@ -9,6 +9,7 @@
 
 import Foundation
 import CoreGraphics
+import GameplayKit
 
 /// Stage 1 timeline definitions
 enum Stage1Timeline {
@@ -81,13 +82,108 @@ enum Stage1Timeline {
             )
         }
         
-        // Example: Make enemies shoot at specific times
-        // (You can add more shooting events here)
+        // Diagonal swoop fairies that fire at the player while crossing
+        let diagonalWaveStart = startTime + TimeInterval(pairCount) * timeBetweenPairs + 1.0
+        let diagonalInterval: TimeInterval = 0.45
+        let diagonalWaveCount = 6
+        let diagonalSpawnY: CGFloat = 420
+        let horizontalSpeed: CGFloat = 90
+        let downwardSpeed: CGFloat = -30
         
-        //Add more red fairies
+        for waveIndex in 0..<diagonalWaveCount {
+            let spawnTime = diagonalWaveStart + TimeInterval(waveIndex) * diagonalInterval
+            // Left entry moving rightwards
+            builder = builder.addEnemy(
+                at: spawnTime,
+                type: .fairy,
+                position: CGPoint(x: -24, y: diagonalSpawnY),
+                velocity: CGVector(dx: horizontalSpeed, dy: downwardSpeed),
+                dropItem: .point,
+                autoShoot: true,
+                attackPattern: .aimedShot,
+                patternConfig: PatternConfig(
+                    physics: PhysicsConfig(speed: 150),
+                    visual: VisualConfig(color: .blue)
+                ),
+                shotInterval: 1.8
+            )
+            // Right entry moving leftwards
+            builder = builder.addEnemy(
+                at: spawnTime + 0.15,
+                type: .fairy,
+                position: CGPoint(x: playArea.width + 24, y: diagonalSpawnY),
+                velocity: CGVector(dx: -horizontalSpeed, dy: downwardSpeed),
+                dropItem: .power,
+                autoShoot: true,
+                attackPattern: .aimedShot,
+                patternConfig: PatternConfig(
+                    physics: PhysicsConfig(speed: 150),
+                    visual: VisualConfig(color: .pink)
+                ),
+                shotInterval: 1.8
+            )
+        }
         
+        // Trailing column of fairies that slow-push the player while shooting circle spreads
+        let trailingWaveStart = diagonalWaveStart + TimeInterval(diagonalWaveCount) * diagonalInterval + 1.0
+        let trailingOffsets: [CGFloat] = [-108, -54, 0, 54, 108]
+        
+        for (index, offset) in trailingOffsets.enumerated() {
+            let spawnTime = trailingWaveStart + TimeInterval(index) * 0.4
+            builder = builder.addEnemy(
+                at: spawnTime,
+                type: .fairy,
+                position: CGPoint(x: centerX + offset, y: 420),
+                velocity: CGVector(dx: 0, dy: -60),
+                dropItem: .point,
+                autoShoot: true,
+                attackPattern: .circleShot,
+                patternConfig: PatternConfig(
+                    physics: PhysicsConfig(speed: 110),
+                    visual: VisualConfig(color: .orange),
+                    bulletCount: 10
+                ),
+                shotInterval: 2.2
+            )
+        }
+        
+        // Midboss enters after the extra fairy waves
+        let midbossSpawnTime = trailingWaveStart + TimeInterval(trailingOffsets.count) * 0.4 + 1.5
+        builder = builder.addAction(
+            at: midbossSpawnTime,
+            action: { _, _ in
+                spawnRumiaMidboss()
+            }
+        )
         
         return builder.build()
+    }
+    
+    private static func spawnRumiaMidboss() {
+        let spawnPosition = CGPoint(x: GameFacade.playArea.midX, y: 420)
+        let rumia = GameFacade.shared.entities.spawnBoss(
+            name: "Rumia (Midboss)",
+            health: 180,
+            position: spawnPosition,
+            phaseNumber: 0,
+            attackPattern: .spiralShot,
+            patternConfig: PatternConfig(
+                physics: PhysicsConfig(speed: 120),
+                visual: VisualConfig(size: .medium, shape: .star, color: .purple),
+                bulletCount: 12,
+                spiralSpeed: 14
+            ),
+            shotInterval: 1.45
+        )
+        
+        if let transform = rumia.component(ofType: TransformComponent.self) {
+            transform.velocity = CGVector(dx: 0, dy: -15)
+        }
+        
+        if let enemyComponent = rumia.component(ofType: EnemyComponent.self) {
+            enemyComponent.scoreValue = 4000
+            enemyComponent.dropItem = .bomb
+        }
     }
 }
 

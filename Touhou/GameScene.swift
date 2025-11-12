@@ -266,7 +266,8 @@ class GameScene: SKScene, EventListener {
         }
         
         let remainingTime = max(0, bossComp.timeLimit - bossComp.elapsedTime)
-        label.text = String(format: "TIME %.2f", remainingTime)
+        let rounded = round(remainingTime * 100) / 100
+        label.text = "TIME \(rounded)"
         
         // Change color based on remaining time (red when running out)
         if remainingTime < 5.0 {

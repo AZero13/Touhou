@@ -17,6 +17,9 @@ class GameScene: SKScene, EventListener {
     private var closeLabel: SKLabelNode?
     private var restartLabel: SKLabelNode?
     
+    // Midboss timer UI
+    private var timeBonusLabel: SKLabelNode?
+    
     // Layers
     private var worldLayer: SKNode!      // Game entities: bullets, enemies, player, items
     private var bossLayer: SKNode!       // Boss-specific content: boss health bar, phase effects
@@ -62,6 +65,9 @@ class GameScene: SKScene, EventListener {
         // Create pause menu (initially hidden)
         createPauseMenu()
         
+        // Create time bonus timer (initially hidden)
+        createTimeBonusTimer()
+        
         // Register for game events
         GameFacade.shared.registerListener(self)
         
@@ -100,6 +106,9 @@ class GameScene: SKScene, EventListener {
     override func update(_ currentTime: TimeInterval) {
         // Update game logic
         GameFacade.shared.update(currentTime)
+        
+        // Update time bonus timer if visible
+        updateTimeBonusTimer()
     }
     
     override func didFinishUpdate() {
@@ -129,6 +138,17 @@ class GameScene: SKScene, EventListener {
             self.showFloatingScore(value: e.value, atLogical: e.position)
         case let e as EnemyDiedEvent:
             self.showEnemyDeathEffect(for: e.entity)
+            // Hide timer when boss dies
+            if e.entity.component(ofType: BossComponent.self) != nil {
+                self.hideTimeBonusTimer()
+            }
+        case let e as BossIntroStartedEvent:
+            // Show timer when midboss with time bonus spawns
+            if let bossComp = e.bossEntity.component(ofType: BossComponent.self), bossComp.hasTimeBonus {
+                self.showTimeBonusTimer()
+            }
+        case let e as TimeBonusAwardedEvent:
+            self.showTimeBonusText(bonus: e.bonusPoints, atLogical: e.position)
         case is BombActivatedEvent:
             self.showBombFlashEffect()
         case let e as StageTransitionEvent:
@@ -207,6 +227,79 @@ class GameScene: SKScene, EventListener {
             restartLabel?.fontColor = .white
             restartLabel?.fontName = "Menlo-Bold"
         }
+    }
+    
+    // MARK: - Time Bonus Timer UI
+    
+    private func createTimeBonusTimer() {
+        let label = SKLabelNode(text: "TIME 00.00")
+        label.fontName = "Menlo-Bold"
+        label.fontSize = 16
+        label.fontColor = .white
+        label.horizontalAlignmentMode = .right
+        label.verticalAlignmentMode = .top
+        label.position = CGPoint(x: size.width - 10, y: size.height - 10)
+        label.zPosition = 1001  // Above everything
+        label.isHidden = true
+        uiLayer.addChild(label)
+        self.timeBonusLabel = label
+    }
+    
+    private func showTimeBonusTimer() {
+        timeBonusLabel?.isHidden = false
+    }
+    
+    private func hideTimeBonusTimer() {
+        timeBonusLabel?.isHidden = true
+    }
+    
+    private func updateTimeBonusTimer() {
+        guard let label = timeBonusLabel, !label.isHidden else { return }
+        
+        // Find active midboss with time bonus
+        let bosses = GameFacade.shared.entities.getEntities(with: BossComponent.self)
+        guard let boss = bosses.first,
+              let bossComp = boss.component(ofType: BossComponent.self),
+              bossComp.hasTimeBonus else {
+            hideTimeBonusTimer()
+            return
+        }
+        
+        let remainingTime = max(0, bossComp.timeLimit - bossComp.elapsedTime)
+        label.text = String(format: "TIME %.2f", remainingTime)
+        
+        // Change color based on remaining time (red when running out)
+        if remainingTime < 5.0 {
+            label.fontColor = .red
+        } else if remainingTime < 10.0 {
+            label.fontColor = .yellow
+        } else {
+            label.fontColor = .white
+        }
+    }
+    
+    private func showTimeBonusText(bonus: Int, atLogical position: CGPoint) {
+        let scaleX = size.width / GameFacade.playArea.width
+        let scaleY = size.height / GameFacade.playArea.height
+        let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
+        
+        let label = SKLabelNode(text: "BONUS \(bonus)")
+        label.fontName = "Menlo-Bold"
+        label.fontSize = 28 * max(scaleX, scaleY)
+        label.fontColor = .yellow  // Yellow for bonus (like TH06)
+        label.position = scenePosition
+        label.zPosition = 350  // Above everything else
+        label.verticalAlignmentMode = .center
+        label.horizontalAlignmentMode = .center
+        
+        // Longer duration for bonus text (2 seconds)
+        let moveUp = SKAction.moveBy(x: 0, y: 50, duration: 2.0)
+        let fadeOut = SKAction.fadeOut(withDuration: 2.0)
+        let remove = SKAction.removeFromParent()
+        let bonusAction = SKAction.sequence([.group([moveUp, fadeOut]), remove])
+        
+        effectLayer.addChild(label)
+        label.run(bonusAction)
     }
 
     // MARK: - Effects

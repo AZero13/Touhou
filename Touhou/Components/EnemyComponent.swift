@@ -55,11 +55,17 @@ final class EnemyComponent: GKComponent {
         guard let entity = entity,
               let transform = entity.component(ofType: TransformComponent.self) else { return }
         
-        // Move enemy down
-        transform.position.y += transform.velocity.dy * deltaTime
+        // Update target-based movement (for bosses) or constant velocity (for fairies)
+        if transform.isMovingToTarget {
+            transform.updateTargetMovement(deltaTime: deltaTime)
+        } else {
+            // Apply constant velocity for fairies
+            transform.position.x += transform.velocity.dx * deltaTime
+            transform.position.y += transform.velocity.dy * deltaTime
+        }
         
-        // Mark enemies that go off bottom of screen for destruction
-        if transform.position.y < -50 {
+        // Mark enemies that go off bottom of screen for destruction (not bosses)
+        if enemyType == .fairy && transform.position.y < -50 {
             GameFacade.shared.entities.destroy(entity)
             return
         }

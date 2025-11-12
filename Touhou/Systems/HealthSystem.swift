@@ -60,12 +60,27 @@ final class HealthSystem: GameSystem {
     }
     
     private func handleEnemyDeath(_ event: EnemyDiedEvent, context: GameRuntimeContext) {
-        let isBoss = event.entity.component(ofType: BossComponent.self) != nil
-        
-        if isBoss {
+        if let bossComponent = event.entity.component(ofType: BossComponent.self) {
+            // Boss defeated
             BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
             eventBus.fire(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
+            
+            // Award time bonus if applicable
+            if bossComponent.hasTimeBonus && !bossComponent.isTimeExpired {
+                let bonus = bossComponent.calculateTimeBonus()
+                if bonus > 0 {
+                    if let transform = event.entity.component(ofType: TransformComponent.self) {
+                        eventBus.fire(TimeBonusAwardedEvent(
+                            bonusPoints: bonus,
+                            bossName: bossComponent.name,
+                            position: transform.position
+                        ))
+                        context.combat.addScore(bonus)
+                    }
+                }
+            }
         } else {
+            // Regular enemy defeated - drop items
             if let itemType = event.dropItem,
                let transform = event.entity.component(ofType: TransformComponent.self) {
                 context.entities.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: 40))

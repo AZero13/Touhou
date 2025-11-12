@@ -156,11 +156,85 @@ enum Stage1Timeline {
             }
         )
         
+        // Midboss movement pattern (based on TH06 Sub8)
+        builder = addMidbossMovementPattern(builder: builder, startTime: midbossSpawnTime, playArea: playArea)
+        
         return builder.build()
     }
     
+    private static func addMidbossMovementPattern(builder: TimelineBuilder, startTime: TimeInterval, playArea: CGRect) -> TimelineBuilder {
+        var updatedBuilder = builder
+        let centerX = playArea.midX
+        
+        // TH06 midboss moves between positions, pausing to shoot
+        // Movement durations are 1 second each (60 frames at 60fps)
+        let moveDuration = 1.0
+        
+        // After initial move to right (handled in spawn), continue pattern:
+        // Move to center-top after 3.5 seconds
+        updatedBuilder = updatedBuilder.addAction(
+            at: startTime + 3.5,
+            action: { entityManager, _ in
+                if let boss = entityManager.getEntities(with: BossComponent.self).first,
+                   let transform = boss.component(ofType: TransformComponent.self) {
+                    transform.moveTo(position: CGPoint(x: centerX, y: 288), duration: moveDuration)
+                }
+            }
+        )
+        
+        // Move to left side after 7 seconds
+        updatedBuilder = updatedBuilder.addAction(
+            at: startTime + 7.0,
+            action: { entityManager, _ in
+                if let boss = entityManager.getEntities(with: BossComponent.self).first,
+                   let transform = boss.component(ofType: TransformComponent.self) {
+                    transform.moveTo(position: CGPoint(x: playArea.minX + 64, y: 272), duration: moveDuration)
+                }
+            }
+        )
+        
+        // Move to center-mid after 10.5 seconds
+        updatedBuilder = updatedBuilder.addAction(
+            at: startTime + 10.5,
+            action: { entityManager, _ in
+                if let boss = entityManager.getEntities(with: BossComponent.self).first,
+                   let transform = boss.component(ofType: TransformComponent.self) {
+                    transform.moveTo(position: CGPoint(x: centerX, y: 304), duration: moveDuration)
+                }
+            }
+        )
+        
+        // Move to right side again after 14 seconds
+        updatedBuilder = updatedBuilder.addAction(
+            at: startTime + 14.0,
+            action: { entityManager, _ in
+                if let boss = entityManager.getEntities(with: BossComponent.self).first,
+                   let transform = boss.component(ofType: TransformComponent.self) {
+                    transform.moveTo(position: CGPoint(x: playArea.maxX - 64, y: 272), duration: moveDuration)
+                }
+            }
+        )
+        
+        // Exit offscreen after 17.5 seconds
+        updatedBuilder = updatedBuilder.addAction(
+            at: startTime + 17.5,
+            action: { entityManager, _ in
+                if let boss = entityManager.getEntities(with: BossComponent.self).first,
+                   let transform = boss.component(ofType: TransformComponent.self) {
+                    transform.moveTo(position: CGPoint(x: centerX, y: 450), duration: moveDuration)
+                }
+            }
+        )
+        
+        return updatedBuilder
+    }
+    
     private static func spawnRumiaMidboss() {
-        let spawnPosition = CGPoint(x: GameFacade.playArea.midX, y: 420)
+        let playArea = GameFacade.playArea
+        let centerX = playArea.midX
+        
+        // Spawn offscreen top-center like in TH06
+        let spawnPosition = CGPoint(x: centerX, y: 420)
         let rumia = GameFacade.shared.entities.spawnBoss(
             name: "Rumia (Midboss)",
             health: 180,
@@ -173,17 +247,26 @@ enum Stage1Timeline {
                 bulletCount: 12,
                 spiralSpeed: 14
             ),
-            shotInterval: 1.45
+            shotInterval: 1.45,
+            hasTimeBonus: true,
+            timeLimit: 18.0,  // 18 seconds to defeat for bonus
+            bonusPointsBase: 8000  // Max bonus: 8000 points
         )
         
-        if let transform = rumia.component(ofType: TransformComponent.self) {
-            transform.velocity = CGVector(dx: 0, dy: -15)
-        }
-        
+        // Set score and drop
         if let enemyComponent = rumia.component(ofType: EnemyComponent.self) {
             enemyComponent.scoreValue = 4000
             enemyComponent.dropItem = .bomb
         }
+        
+        // Start movement pattern: move to first position
+        if let transform = rumia.component(ofType: TransformComponent.self) {
+            // Move to right side of screen over 1 second (like ECL ins_57(60, 320, 128))
+            transform.moveTo(position: CGPoint(x: playArea.maxX - 64, y: 256), duration: 1.0)
+        }
+        
+        // Fire boss intro event to trigger timer display
+        GameFacade.shared.fireEvent(BossIntroStartedEvent(bossEntity: rumia))
     }
 }
 

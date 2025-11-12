@@ -65,7 +65,8 @@ class GameFacade {
             GKComponentSystem(componentClass: PlayerComponent.self),
             GKComponentSystem(componentClass: EnemyComponent.self),
             GKComponentSystem(componentClass: BulletComponent.self),
-            GKComponentSystem(componentClass: ItemComponent.self)
+            GKComponentSystem(componentClass: ItemComponent.self),
+            GKComponentSystem(componentClass: BossComponent.self)
         ]
         
         addCrossCuttingSystem(PlayerLifecycleSystem())

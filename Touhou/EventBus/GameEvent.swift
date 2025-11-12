@@ -319,3 +319,17 @@ struct HighScoreChangedEvent: GameEvent, Sendable {
         self.newHighScore = newHighScore
     }
 }
+
+struct TimeBonusAwardedEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    let bonusPoints: Int
+    let bossName: String
+    let position: CGPoint
+    
+    init(bonusPoints: Int, bossName: String, position: CGPoint) {
+        self.timestamp = CACurrentMediaTime()
+        self.bonusPoints = bonusPoints
+        self.bossName = bossName
+        self.position = position
+    }
+}

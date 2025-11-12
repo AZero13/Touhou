@@ -30,10 +30,19 @@ final class EntityFacade {
         phaseNumber: Int = 1,
         attackPattern: EnemyPattern = .tripleShot,
         patternConfig: PatternConfig = PatternConfig(),
-        shotInterval: TimeInterval = 1.2
+        shotInterval: TimeInterval = 1.2,
+        hasTimeBonus: Bool = false,
+        timeLimit: TimeInterval = 20.0,
+        bonusPointsBase: Int = 10000
     ) -> GKEntity {
         let entity = entityManager.createEntity()
-        entity.addComponent(BossComponent(name: name, phaseNumber: phaseNumber))
+        entity.addComponent(BossComponent(
+            name: name,
+            phaseNumber: phaseNumber,
+            hasTimeBonus: hasTimeBonus,
+            timeLimit: timeLimit,
+            bonusPointsBase: bonusPointsBase
+        ))
         entity.addComponent(EnemyComponent(
             enemyType: .boss,
             scoreValue: 5000,

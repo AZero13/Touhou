@@ -77,6 +77,7 @@ class GameFacade {
         addCrossCuttingSystem(HealthSystem())
         addCrossCuttingSystem(PowerSystem())
         addCrossCuttingSystem(ScoreSystem())
+        addCrossCuttingSystem(DialogueSystem())
         addCrossCuttingSystem(CleanupSystem())
     }
     

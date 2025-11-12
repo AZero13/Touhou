@@ -20,6 +20,14 @@ class GameScene: SKScene, EventListener {
     // Midboss timer UI
     private var timeBonusLabel: SKLabelNode?
     
+    // Dialogue UI
+    private var dialogueBox: SKNode?
+    private var dialogueSpeakerLabel: SKLabelNode?
+    private var dialogueTextLabel: SKLabelNode?
+    private var dialogueAnnotationLabel: SKLabelNode?
+    private var currentDialogue: DialogueSequence?
+    private var currentDialogueIndex: Int = 0
+    
     // Layers
     private var worldLayer: SKNode!      // Game entities: bullets, enemies, player, items
     private var bossLayer: SKNode!       // Boss-specific content: boss health bar, phase effects
@@ -68,6 +76,9 @@ class GameScene: SKScene, EventListener {
         // Create time bonus timer (initially hidden)
         createTimeBonusTimer()
         
+        // Create dialogue box (initially hidden)
+        createDialogueBox()
+        
         // Register for game events
         GameFacade.shared.registerListener(self)
         
@@ -104,7 +115,21 @@ class GameScene: SKScene, EventListener {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        // Update game logic
+        // Check for dialogue advancement (before game update)
+        if dialogueBox?.isHidden == false {
+            // Update input manually during dialogue (GameFacade.update won't be called)
+            InputManager.shared.update()
+            
+            let input = InputManager.shared.currentInput
+            if input.shoot.justPressed {
+                advanceDialogue()
+            }
+            // Don't update game logic during dialogue, but still update timer
+            updateTimeBonusTimer()
+            return
+        }
+        
+        // Update game logic (this will also update InputManager)
         GameFacade.shared.update(currentTime)
         
         // Update time bonus timer if visible
@@ -149,6 +174,8 @@ class GameScene: SKScene, EventListener {
             }
         case let e as TimeBonusAwardedEvent:
             self.showTimeBonusText(bonus: e.bonusPoints, atLogical: e.position)
+        case let e as DialogueTriggeredEvent:
+            self.startDialogue(dialogueId: e.dialogueId)
         case is BombActivatedEvent:
             self.showBombFlashEffect()
         case let e as StageTransitionEvent:
@@ -227,6 +254,153 @@ class GameScene: SKScene, EventListener {
             restartLabel?.fontColor = .white
             restartLabel?.fontName = "Menlo-Bold"
         }
+    }
+    
+    // MARK: - Dialogue UI
+    
+    private func createDialogueBox() {
+        let boxNode = SKNode()
+        boxNode.name = "dialogueBox"
+        boxNode.isHidden = true
+        boxNode.zPosition = 2000  // Above everything
+        
+        // Dark background box at bottom of screen
+        let boxHeight: CGFloat = 140
+        let background = SKSpriteNode(color: NSColor(white: 0.0, alpha: 0.85), size: CGSize(width: size.width, height: boxHeight))
+        background.position = CGPoint(x: size.width / 2, y: boxHeight / 2)
+        boxNode.addChild(background)
+        
+        // Speaker name label (top-left of box)
+        let speakerLabel = SKLabelNode(text: "REIMU")
+        speakerLabel.fontName = "Menlo-Bold"
+        speakerLabel.fontSize = 18
+        speakerLabel.fontColor = .white
+        speakerLabel.horizontalAlignmentMode = .left
+        speakerLabel.verticalAlignmentMode = .top
+        speakerLabel.position = CGPoint(x: 20, y: boxHeight - 10)
+        boxNode.addChild(speakerLabel)
+        self.dialogueSpeakerLabel = speakerLabel
+        
+        // Dialogue text label (center of box)
+        let textLabel = SKLabelNode(text: "")
+        textLabel.fontName = "Menlo"
+        textLabel.fontSize = 16
+        textLabel.fontColor = .white
+        textLabel.numberOfLines = 0
+        textLabel.preferredMaxLayoutWidth = size.width - 40
+        textLabel.horizontalAlignmentMode = .left
+        textLabel.verticalAlignmentMode = .top
+        textLabel.position = CGPoint(x: 20, y: boxHeight - 40)
+        boxNode.addChild(textLabel)
+        self.dialogueTextLabel = textLabel
+        
+        // Annotation label (bottom-right)
+        let annotationLabel = SKLabelNode(text: "")
+        annotationLabel.fontName = "Menlo-Italic"
+        annotationLabel.fontSize = 14
+        annotationLabel.fontColor = .gray
+        annotationLabel.horizontalAlignmentMode = .right
+        annotationLabel.verticalAlignmentMode = .bottom
+        annotationLabel.position = CGPoint(x: size.width - 20, y: 10)
+        boxNode.addChild(annotationLabel)
+        self.dialogueAnnotationLabel = annotationLabel
+        
+        // Prompt indicator (bottom-right corner)
+        let promptLabel = SKLabelNode(text: "Press Z to continue")
+        promptLabel.fontName = "Menlo"
+        promptLabel.fontSize = 12
+        promptLabel.fontColor = .lightGray
+        promptLabel.horizontalAlignmentMode = .right
+        promptLabel.verticalAlignmentMode = .bottom
+        promptLabel.position = CGPoint(x: size.width - 20, y: 5)
+        promptLabel.name = "promptIndicator"
+        
+        // Blinking animation for prompt
+        let fadeOut = SKAction.fadeAlpha(to: 0.3, duration: 0.5)
+        let fadeIn = SKAction.fadeAlpha(to: 1.0, duration: 0.5)
+        promptLabel.run(.repeatForever(.sequence([fadeOut, fadeIn])))
+        
+        boxNode.addChild(promptLabel)
+        
+        uiLayer.addChild(boxNode)
+        self.dialogueBox = boxNode
+    }
+    
+    private func startDialogue(dialogueId: String) {
+        guard let dialogue = DialogueData.getDialogue(id: dialogueId) else { return }
+        
+        currentDialogue = dialogue
+        currentDialogueIndex = 0
+        
+        // Show dialogue box
+        dialogueBox?.isHidden = false
+        
+        // Display first line
+        showDialogueLine(at: 0)
+    }
+    
+    private func showDialogueLine(at index: Int) {
+        guard let dialogue = currentDialogue, index < dialogue.lines.count else {
+            endDialogue()
+            return
+        }
+        
+        let line = dialogue.lines[index]
+        
+        // Update speaker name
+        switch line.speaker {
+        case .reimu:
+            dialogueSpeakerLabel?.text = "REIMU"
+            dialogueSpeakerLabel?.fontColor = .white
+        case .boss:
+            dialogueSpeakerLabel?.text = "???"
+            dialogueSpeakerLabel?.fontColor = .yellow
+            
+            // Trigger boss spawn when boss first speaks
+            if dialogue.id == "stage1_midboss" && index == 6 {
+                GameFacade.shared.fireEvent(DialogueSpawnTriggerEvent(dialogueId: "stage1_midboss", triggerName: "spawn_rumia"))
+            }
+        }
+        
+        // Update text
+        dialogueTextLabel?.text = line.text
+        
+        // Update annotation (or hide if nil)
+        if let annotation = line.annotation {
+            dialogueAnnotationLabel?.text = annotation
+            dialogueAnnotationLabel?.isHidden = false
+        } else {
+            dialogueAnnotationLabel?.isHidden = true
+        }
+    }
+    
+    private func advanceDialogue() {
+        guard currentDialogue != nil else { return }
+        
+        currentDialogueIndex += 1
+        
+        if let dialogue = currentDialogue, currentDialogueIndex < dialogue.lines.count {
+            showDialogueLine(at: currentDialogueIndex)
+        } else {
+            endDialogue()
+        }
+    }
+    
+    private func endDialogue() {
+        guard let dialogue = currentDialogue else { return }
+        
+        // Hide dialogue box
+        dialogueBox?.isHidden = true
+        
+        // Fire completion event
+        GameFacade.shared.fireEvent(DialogueCompletedEvent(dialogueId: dialogue.id))
+        
+        // Call completion handler if exists
+        dialogue.onComplete?()
+        
+        // Clear current dialogue
+        currentDialogue = nil
+        currentDialogueIndex = 0
     }
     
     // MARK: - Time Bonus Timer UI

@@ -333,3 +333,37 @@ struct TimeBonusAwardedEvent: GameEvent, Sendable {
         self.position = position
     }
 }
+
+// MARK: - Dialogue Events
+
+struct DialogueTriggeredEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    let dialogueId: String
+    
+    init(dialogueId: String) {
+        self.timestamp = CACurrentMediaTime()
+        self.dialogueId = dialogueId
+    }
+}
+
+struct DialogueCompletedEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    let dialogueId: String
+    
+    init(dialogueId: String) {
+        self.timestamp = CACurrentMediaTime()
+        self.dialogueId = dialogueId
+    }
+}
+
+struct DialogueSpawnTriggerEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    let dialogueId: String
+    let triggerName: String
+    
+    init(dialogueId: String, triggerName: String) {
+        self.timestamp = CACurrentMediaTime()
+        self.dialogueId = dialogueId
+        self.triggerName = triggerName
+    }
+}

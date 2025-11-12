@@ -124,112 +124,69 @@ enum Stage1Timeline {
             )
         }
         
-        // Trailing column of fairies that slow-push the player while shooting circle spreads
-        let trailingWaveStart = diagonalWaveStart + TimeInterval(diagonalWaveCount) * diagonalInterval + 1.0
-        let trailingOffsets: [CGFloat] = [-108, -54, 0, 54, 108]
+        // More waves matching TH06 ECL (Sub2/Sub3 alternating pattern)
+        let waveStart = diagonalWaveStart + TimeInterval(diagonalWaveCount) * diagonalInterval + 2.0
         
-        for (index, offset) in trailingOffsets.enumerated() {
-            let spawnTime = trailingWaveStart + TimeInterval(index) * 0.4
+        // Wave pattern: Sub2/Sub3 alternating from left/right with varied timing
+        let wavePositions: [(x: CGFloat, delay: TimeInterval, isLeft: Bool)] = [
+            (32, 0, true), (256, 0.3, false), (128, 0.5, true),
+            (352, 0.8, false), (24, 1.3, true), (304, 1.6, false),
+            (144, 1.9, true), (344, 2.2, false), (32, 2.5, true),
+            (240, 2.8, false), (24, 3.1, true), (304, 3.4, false),
+            (144, 3.7, true), (344, 4.0, false), (32, 4.3, true),
+            (240, 4.6, false)
+        ]
+        
+        for wave in wavePositions {
             builder = builder.addEnemy(
-                at: spawnTime,
+                at: waveStart + wave.delay,
                 type: .fairy,
-                position: CGPoint(x: centerX + offset, y: 420),
-                velocity: CGVector(dx: 0, dy: -60),
-                dropItem: .point,
+                position: CGPoint(x: wave.x, y: 420),
+                velocity: CGVector(dx: 0, dy: -50),
+                dropItem: wave.isLeft ? .point : .power,
                 autoShoot: true,
-                attackPattern: .circleShot,
+                attackPattern: .tripleShot,
                 patternConfig: PatternConfig(
-                    physics: PhysicsConfig(speed: 110),
-                    visual: VisualConfig(color: .orange),
-                    bulletCount: 10
+                    physics: PhysicsConfig(speed: 100),
+                    visual: VisualConfig(color: wave.isLeft ? .green : .cyan)
                 ),
-                shotInterval: 2.2
+                shotInterval: 2.0
             )
         }
         
-        // Midboss enters after the extra fairy waves
-        let midbossSpawnTime = trailingWaveStart + TimeInterval(trailingOffsets.count) * 0.4 + 1.5
+        // Final burst before midboss (from left and right edges)
+        let finalBurstStart = waveStart + 6.0
+        let burstPositions: [(x: CGFloat, side: Bool)] = [
+            (32, true), (64, true), (40, true), (72, true),
+            (48, true), (80, true), (56, true), (88, true),
+            (320, false), (352, false), (312, false), (344, false),
+            (304, false), (336, false), (296, false), (328, false)
+        ]
+        
+        for (index, pos) in burstPositions.enumerated() {
+            builder = builder.addEnemy(
+                at: finalBurstStart + TimeInterval(index) * 0.16,
+                type: .fairy,
+                position: CGPoint(x: pos.x, y: 420),
+                velocity: CGVector(dx: 0, dy: -80),
+                dropItem: .point,
+                autoShoot: false  // No shooting, just fast dive
+            )
+        }
+        
+        // Dialogue trigger before midboss (Rumia will spawn during dialogue when she speaks)
+        let dialogueStart = finalBurstStart + TimeInterval(burstPositions.count) * 0.16 + 1.0
         builder = builder.addAction(
-            at: midbossSpawnTime,
-            action: { _, _ in
-                spawnRumiaMidboss()
+            at: dialogueStart,
+            action: { _, eventBus in
+                eventBus.fire(DialogueTriggeredEvent(dialogueId: "stage1_midboss"))
             }
         )
-        
-        // Midboss movement pattern (based on TH06 Sub8)
-        builder = addMidbossMovementPattern(builder: builder, startTime: midbossSpawnTime, playArea: playArea)
         
         return builder.build()
     }
     
-    private static func addMidbossMovementPattern(builder: TimelineBuilder, startTime: TimeInterval, playArea: CGRect) -> TimelineBuilder {
-        var updatedBuilder = builder
-        let centerX = playArea.midX
-        
-        // TH06 midboss moves between positions, pausing to shoot
-        // Movement durations are 1 second each (60 frames at 60fps)
-        let moveDuration = 1.0
-        
-        // After initial move to right (handled in spawn), continue pattern:
-        // Move to center-top after 3.5 seconds
-        updatedBuilder = updatedBuilder.addAction(
-            at: startTime + 3.5,
-            action: { entityManager, _ in
-                if let boss = entityManager.getEntities(with: BossComponent.self).first,
-                   let transform = boss.component(ofType: TransformComponent.self) {
-                    transform.moveTo(position: CGPoint(x: centerX, y: 288), duration: moveDuration)
-                }
-            }
-        )
-        
-        // Move to left side after 7 seconds
-        updatedBuilder = updatedBuilder.addAction(
-            at: startTime + 7.0,
-            action: { entityManager, _ in
-                if let boss = entityManager.getEntities(with: BossComponent.self).first,
-                   let transform = boss.component(ofType: TransformComponent.self) {
-                    transform.moveTo(position: CGPoint(x: playArea.minX + 64, y: 272), duration: moveDuration)
-                }
-            }
-        )
-        
-        // Move to center-mid after 10.5 seconds
-        updatedBuilder = updatedBuilder.addAction(
-            at: startTime + 10.5,
-            action: { entityManager, _ in
-                if let boss = entityManager.getEntities(with: BossComponent.self).first,
-                   let transform = boss.component(ofType: TransformComponent.self) {
-                    transform.moveTo(position: CGPoint(x: centerX, y: 304), duration: moveDuration)
-                }
-            }
-        )
-        
-        // Move to right side again after 14 seconds
-        updatedBuilder = updatedBuilder.addAction(
-            at: startTime + 14.0,
-            action: { entityManager, _ in
-                if let boss = entityManager.getEntities(with: BossComponent.self).first,
-                   let transform = boss.component(ofType: TransformComponent.self) {
-                    transform.moveTo(position: CGPoint(x: playArea.maxX - 64, y: 272), duration: moveDuration)
-                }
-            }
-        )
-        
-        // Exit offscreen after 17.5 seconds
-        updatedBuilder = updatedBuilder.addAction(
-            at: startTime + 17.5,
-            action: { entityManager, _ in
-                if let boss = entityManager.getEntities(with: BossComponent.self).first,
-                   let transform = boss.component(ofType: TransformComponent.self) {
-                    transform.moveTo(position: CGPoint(x: centerX, y: 450), duration: moveDuration)
-                }
-            }
-        )
-        
-        return updatedBuilder
-    }
-    
-    private static func spawnRumiaMidboss() {
+    static func spawnRumiaMidbossNow() {
         let playArea = GameFacade.playArea
         let centerX = playArea.midX
         
@@ -263,10 +220,36 @@ enum Stage1Timeline {
         if let transform = rumia.component(ofType: TransformComponent.self) {
             // Move to right side of screen over 1 second (like ECL ins_57(60, 320, 128))
             transform.moveTo(position: CGPoint(x: playArea.maxX - 64, y: 256), duration: 1.0)
+            
+            // Schedule subsequent movements
+            scheduleMidbossMovementPattern(transform: transform, playArea: playArea)
         }
         
         // Fire boss intro event to trigger timer display
         GameFacade.shared.fireEvent(BossIntroStartedEvent(bossEntity: rumia))
+    }
+    
+    private static func scheduleMidbossMovementPattern(transform: TransformComponent, playArea: CGRect) {
+        let centerX = playArea.midX
+        let moveDuration = 1.0
+        
+        // Schedule movements via dispatch queue (non-game-loop timing)
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 3_500_000_000)  // 3.5 seconds
+            transform.moveTo(position: CGPoint(x: centerX, y: 288), duration: moveDuration)
+            
+            try? await Task.sleep(nanoseconds: 3_500_000_000)  // +3.5 = 7 seconds total
+            transform.moveTo(position: CGPoint(x: playArea.minX + 64, y: 272), duration: moveDuration)
+            
+            try? await Task.sleep(nanoseconds: 3_500_000_000)  // +3.5 = 10.5 seconds total
+            transform.moveTo(position: CGPoint(x: centerX, y: 304), duration: moveDuration)
+            
+            try? await Task.sleep(nanoseconds: 3_500_000_000)  // +3.5 = 14 seconds total
+            transform.moveTo(position: CGPoint(x: playArea.maxX - 64, y: 272), duration: moveDuration)
+            
+            try? await Task.sleep(nanoseconds: 3_500_000_000)  // +3.5 = 17.5 seconds total
+            transform.moveTo(position: CGPoint(x: centerX, y: 450), duration: moveDuration)
+        }
     }
 }
 

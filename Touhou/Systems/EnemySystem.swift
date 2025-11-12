@@ -12,6 +12,7 @@ import GameplayKit
 final class EnemySystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
+    
     private var stageTimer: TimeInterval = 0
     private var stageScript: [EnemySpawnEvent] = []
     private var stageTimeline: StageTimeline?
@@ -19,91 +20,123 @@ final class EnemySystem: GameSystem {
     private var bossSpawned: Bool = false
     private var timelineCompleteTime: TimeInterval? // When timeline completed
     
-    func initialize(entityManager: EntityManager, eventBus: EventBus) {
-        self.entityManager = entityManager
-        self.eventBus = eventBus
-        
-        // Load stage script for initial stage explicitly to avoid re-entrancy
-        loadStageScript(stageId: 1)
+    private enum Constants {
+        static let bossSpawnDelay: TimeInterval = 60.0 // 1 minute delay after timeline completes
+        static let offScreenThreshold: CGFloat = -50.0 // Y position threshold for off-screen detection
+        static let bossSpawnPosition = CGPoint(x: 192, y: 360)
+        static let bossHealth: Int = 300
+        static let bossPhaseNumber: Int = 1
     }
     
-    func update(deltaTime: TimeInterval) {
+    func initialize(context: GameRuntimeContext) {
+        self.entityManager = context.entityManager
+        self.eventBus = context.eventBus
+        
+        // Load stage script for initial stage explicitly to avoid re-entrancy
+        loadStageScript(stageId: 1, context: context)
+    }
+    
+    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
         stageTimer += deltaTime
         
-        // Use timeline if available, otherwise use script
+        // Update timeline or script-based spawning
+        updateSpawning(deltaTime: deltaTime, context: context)
+        
+        // Update enemy movement
+        updateEnemyMovement(deltaTime: deltaTime, context: context)
+        
+        // Check and handle boss spawning
+        checkAndSpawnBoss(context: context)
+        
+        // Check for stage completion
+        checkStageCompletion(context: context)
+    }
+    
+    // MARK: - Update Helpers
+    
+    private func updateSpawning(deltaTime: TimeInterval, context: GameRuntimeContext) {
         if let timeline = stageTimeline {
             timeline.update(deltaTime: deltaTime)
+            
+            // Track when timeline completes
+            if timeline.isComplete && timelineCompleteTime == nil {
+                timelineCompleteTime = stageTimer
+            }
         } else {
-            // Check for enemies to spawn based on stage script
-            spawnEnemiesFromScript()
+            spawnEnemiesFromScript(context: context)
         }
+    }
+    
+    private func checkAndSpawnBoss(context: GameRuntimeContext) {
+        guard !bossSpawned else { return }
         
-        // Update enemy movement and shooting
-        updateEnemyMovement(deltaTime: deltaTime)
-        
-        // Check if timeline is complete
-        if let timeline = stageTimeline, timeline.isComplete, timelineCompleteTime == nil {
-            timelineCompleteTime = stageTimer
-        }
-        
-        // Spawn boss 60 seconds (1 minute) after timeline completes
         let shouldSpawnBoss: Bool
         if stageTimeline != nil {
+            // Timeline-based: spawn boss after delay
             if let completeTime = timelineCompleteTime {
-                shouldSpawnBoss = (stageTimer - completeTime) >= 60.0 // 1 minute delay
+                shouldSpawnBoss = (stageTimer - completeTime) >= Constants.bossSpawnDelay
             } else {
                 shouldSpawnBoss = false
             }
         } else {
+            // Script-based: spawn when all enemies spawned
             shouldSpawnBoss = !stageScript.isEmpty && stageScript.allSatisfy({ $0.hasSpawned })
         }
         
-        if shouldSpawnBoss && !bossSpawned {
-            // Despawn any remaining regular enemies and all bullets before boss appears
-            let enemies = entityManager.getEntities(with: EnemyComponent.self)
-            for enemy in enemies {
-                // Only despawn non-boss enemies (bosses have BossComponent)
-                if enemy.component(ofType: BossComponent.self) == nil {
-                    GameFacade.shared.entities.destroy(enemy)
-                }
-            }
-            
-            // Despawn all bullets
-            BulletUtility.clearBullets(entityManager: entityManager)
-            
-            // Use facade for boss creation
-            _ = GameFacade.shared.entities.spawnBoss(
-                name: "Stage Boss",
-                health: 300,
-                position: CGPoint(x: 192, y: 360),
-                phaseNumber: 1,
-                attackPattern: .tripleShot,
-                patternConfig: PatternConfig(
-                    physics: PhysicsConfig(speed: 120),
-                    visual: VisualConfig(shape: .star, color: .purple),
-                    bulletCount: 8,
-                    spread: 80,
-                    spiralSpeed: 12
-                )
-            )
-            bossSpawned = true
+        if shouldSpawnBoss {
+            spawnBoss(context: context)
         }
+    }
+    
+    private func spawnBoss(context: GameRuntimeContext) {
+        // Despawn any remaining regular enemies before boss appears
+        clearRegularEnemies(context: context)
         
-        // After boss defeated (no enemies remain), move to score scene once
-        if bossSpawned && !stageCompleteDispatched {
-            let remainingEnemies = entityManager.getEntities(with: EnemyComponent.self)
-            if remainingEnemies.isEmpty {
-                stageCompleteDispatched = true
-                let currentStage = GameFacade.shared.currentStage
-                let nextId = currentStage >= GameFacade.maxStage ? (GameFacade.maxStage + 1) : (currentStage + 1)
-                let totalScore = entityManager.getPlayerComponent()?.score ?? 0
-                print("Boss defeated! Transitioning from stage \(currentStage) to stage \(nextId)")
-                eventBus.fire(StageTransitionEvent(nextStageId: nextId, totalScore: totalScore))
+        // Despawn all bullets
+        BulletUtility.clearBullets(entityManager: entityManager, destroyEntity: context.entities.destroy)
+        
+        // Spawn boss
+        _ = context.entities.spawnBoss(
+            name: "Stage Boss",
+            health: Constants.bossHealth,
+            position: Constants.bossSpawnPosition,
+            phaseNumber: Constants.bossPhaseNumber,
+            attackPattern: .tripleShot,
+            patternConfig: PatternConfig(
+                physics: PhysicsConfig(speed: 120),
+                visual: VisualConfig(shape: .star, color: .purple),
+                bulletCount: 8,
+                spread: 80,
+                spiralSpeed: 12
+            )
+        )
+        bossSpawned = true
+    }
+    
+    private func clearRegularEnemies(context: GameRuntimeContext) {
+        let enemies = entityManager.getEntities(with: EnemyComponent.self)
+        for enemy in enemies {
+            // Only despawn non-boss enemies (bosses have BossComponent)
+            if enemy.component(ofType: BossComponent.self) == nil {
+                context.entities.destroy(enemy)
             }
         }
     }
     
-    func handleEvent(_ event: GameEvent) {
+    private func checkStageCompletion(context: GameRuntimeContext) {
+        guard bossSpawned && !stageCompleteDispatched else { return }
+        
+        let remainingEnemies = entityManager.getEntities(with: EnemyComponent.self)
+        if remainingEnemies.isEmpty {
+            stageCompleteDispatched = true
+            let nextId = context.currentStage >= GameFacade.maxStage ? (GameFacade.maxStage + 1) : (context.currentStage + 1)
+            let totalScore = entityManager.getPlayerComponent()?.score ?? 0
+            print("Boss defeated! Transitioning from stage \(context.currentStage) to stage \(nextId)")
+            eventBus.fire(StageTransitionEvent(nextStageId: nextId, totalScore: totalScore))
+        }
+    }
+    
+    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
         if let s = event as? StageStartedEvent {
             print("EnemySystem: Stage \(s.stageId) started, resetting state")
             stageTimer = 0
@@ -111,66 +144,51 @@ final class EnemySystem: GameSystem {
             bossSpawned = false
             stageTimeline = nil
             timelineCompleteTime = nil
-            loadStageScript(stageId: s.stageId)
+            loadStageScript(stageId: s.stageId, context: context)
         }
+    }
+    
+    func handleEvent(_ event: GameEvent) {
+        // Fallback for non-GameSystem listeners (shouldn't be called)
+        fatalError("EnemySystem.handleEvent without context should not be called")
     }
     
     // MARK: - Private Methods
     
-    private func loadStageScript(stageId: Int) {
+    private func loadStageScript(stageId: Int, context: GameRuntimeContext) {
         switch stageId {
         case 1:
             // Use timeline for stage 1 (defined in StageTimelineDefinitions)
             stageTimeline = StageTimelineDefinitions.createStage1Timeline()
-            stageTimeline?.initialize(entityManager: entityManager, eventBus: eventBus)
+            stageTimeline?.initialize(entityManager: context.entityManager, eventBus: context.eventBus)
             stageTimeline?.start()
             stageScript = [] // Empty script - timeline handles spawning
         default:
             // Use timeline for default stages too
             stageTimeline = StageTimelineDefinitions.createDefaultStageTimeline(stageId: stageId)
-            stageTimeline?.initialize(entityManager: entityManager, eventBus: eventBus)
+            stageTimeline?.initialize(entityManager: context.entityManager, eventBus: context.eventBus)
             stageTimeline?.start()
             stageScript = [] // Empty script - timeline handles spawning
         }
     }
     
-    private func makeStage1Script() -> [EnemySpawnEvent] {
-        return [
-            EnemySpawnEvent(time: 1.0, type: .fairy, position: CGPoint(x: 100, y: 400), pattern: .singleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 120), visual: VisualConfig(shape: .circle, color: .red))),
-            EnemySpawnEvent(time: 2.5, type: .fairy, position: CGPoint(x: 200, y: 400), pattern: .tripleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 100), visual: VisualConfig(shape: .diamond, color: .blue), spread: 60)),
-            EnemySpawnEvent(time: 4.0, type: .fairy, position: CGPoint(x: 300, y: 400), pattern: .aimedShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 140), visual: VisualConfig(shape: .circle, color: .green))),
-            EnemySpawnEvent(time: 6.0, type: .fairy, position: CGPoint(x: 150, y: 400), pattern: .circleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 80), visual: VisualConfig(shape: .star, color: .purple), bulletCount: 12)),
-            EnemySpawnEvent(time: 7.5, type: .fairy, position: CGPoint(x: 250, y: 400), pattern: .spiralShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 90), visual: VisualConfig(shape: .square, color: .orange), bulletCount: 8, spiralSpeed: 15)),
-            EnemySpawnEvent(time: 10.0, type: .fairy, position: CGPoint(x: 192, y: 400), pattern: .aimedShot, parameters: PatternConfig(physics: PhysicsConfig(speed: 160), visual: VisualConfig(size: .large, shape: .circle, color: .yellow)))
-        ]
-    }
-    
-    private func makeDefaultStageScript(stageId: Int) -> [EnemySpawnEvent] {
-        let speed = CGFloat(120 + (stageId - 1) * 20)
-        return [
-            EnemySpawnEvent(time: 1.0, type: .fairy, position: CGPoint(x: 80, y: 400), pattern: .aimedShot, parameters: PatternConfig(physics: PhysicsConfig(speed: speed))),
-            EnemySpawnEvent(time: 2.0, type: .fairy, position: CGPoint(x: 192, y: 400), pattern: .tripleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: speed - 10))),
-            EnemySpawnEvent(time: 3.0, type: .fairy, position: CGPoint(x: 300, y: 400), pattern: .circleShot, parameters: PatternConfig(physics: PhysicsConfig(speed: speed - 20), bulletCount: 10))
-        ]
-    }
-    
-    private func spawnEnemiesFromScript() {
+    private func spawnEnemiesFromScript(context: GameRuntimeContext) {
         // Find enemies that should spawn now
         let enemiesToSpawn = stageScript.filter { spawnEvent in
             spawnEvent.time <= stageTimer && !spawnEvent.hasSpawned
         }
         
         for spawnEvent in enemiesToSpawn {
-            spawnEnemy(type: spawnEvent.type, position: spawnEvent.position, pattern: spawnEvent.pattern, patternConfig: spawnEvent.parameters)
+            spawnEnemy(type: spawnEvent.type, position: spawnEvent.position, pattern: spawnEvent.pattern, patternConfig: spawnEvent.parameters, context: context)
             spawnEvent.hasSpawned = true
         }
     }
     
-    private func spawnEnemy(type: EnemyComponent.EnemyType, position: CGPoint, pattern: EnemyPattern, patternConfig: PatternConfig) {
+    private func spawnEnemy(type: EnemyComponent.EnemyType, position: CGPoint, pattern: EnemyPattern, patternConfig: PatternConfig, context: GameRuntimeContext) {
         switch type {
         case .fairy:
             // Use facade for entity creation
-            GameFacade.shared.entities.spawnFairy(
+            context.entities.spawnFairy(
                 position: position,
                 attackPattern: pattern,
                 patternConfig: patternConfig
@@ -182,7 +200,7 @@ final class EnemySystem: GameSystem {
         }
     }
     
-    private func updateEnemyMovement(deltaTime: TimeInterval) {
+    private func updateEnemyMovement(deltaTime: TimeInterval, context: GameRuntimeContext) {
         // During freeze, only bosses can move (and only bosses exist during boss fights)
         // No need to check - if freeze is active and enemies exist, they're bosses that should move
         let enemies = entityManager.getEntities(with: EnemyComponent.self)
@@ -194,8 +212,8 @@ final class EnemySystem: GameSystem {
             transform.position.y += transform.velocity.dy * deltaTime
             
             // Mark enemies that go off bottom of screen for destruction
-            if transform.position.y < -50 {
-                GameFacade.shared.entities.destroy(enemy)
+            if transform.position.y < Constants.offScreenThreshold {
+                context.entities.destroy(enemy)
             }
         }
     }

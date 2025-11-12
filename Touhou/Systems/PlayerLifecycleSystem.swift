@@ -19,18 +19,18 @@ final class PlayerLifecycleSystem: GameSystem {
         static let playerHitbox: CGFloat = 2.5
     }
     
-    func initialize(entityManager: EntityManager, eventBus: EventBus) {
-        self.entityManager = entityManager
-        self.eventBus = eventBus
+    func initialize(context: GameRuntimeContext) {
+        self.entityManager = context.entityManager
+        self.eventBus = context.eventBus
     }
     
-    func update(deltaTime: TimeInterval) {
+    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
         // Sync playerEntity reference with EntityManager
         // This keeps the local reference in sync with EntityManager's state
         syncPlayerEntity()
     }
     
-    func handleEvent(_ event: GameEvent) {
+    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
         switch event {
         case let e as PlayerRespawnedEvent:
             // Player respawned (e.g., after losing a life) - reset position
@@ -74,6 +74,11 @@ final class PlayerLifecycleSystem: GameSystem {
         default:
             break
         }
+    }
+    
+    func handleEvent(_ event: GameEvent) {
+        // Fallback for non-GameSystem listeners (shouldn't be called)
+        fatalError("PlayerLifecycleSystem.handleEvent without context should not be called")
     }
     
     // MARK: - Private Methods

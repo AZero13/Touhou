@@ -84,6 +84,9 @@ enum Stage1Timeline {
         // Example: Make enemies shoot at specific times
         // (You can add more shooting events here)
         
+        //Add more red fairies
+        
+        
         return builder.build()
     }
 }

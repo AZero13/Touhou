@@ -229,6 +229,6 @@ final class PlayerComponent: GKComponent {
         guard let entity = entity else { return }
         guard input.bomb.justPressed else { return }
         guard bombs > 0 else { return }
-        GameFacade.shared.combat.activateBomb(playerEntity: entity)
+        GameFacade.shared.activateBomb(playerEntity: entity)
     }
 }

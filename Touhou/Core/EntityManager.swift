@@ -23,13 +23,9 @@ class EntityManager {
         entitiesToDestroy.append(entity)
     }
     
-    func destroyMarkedEntities(gameFacade: GameFacade? = nil) {
+    func destroyMarkedEntities(unregisterEntity: (GKEntity) -> Void) {
         for entity in entitiesToDestroy {
-            if let facade = gameFacade {
-                facade.unregisterEntity(entity)
-            } else {
-                GameFacade.shared.unregisterEntity(entity)
-            }
+            unregisterEntity(entity)
             removeAllComponents(from: entity)
             if let index = entities.firstIndex(of: entity) {
                 entities.remove(at: index)
@@ -39,16 +35,24 @@ class EntityManager {
     }
     
     private func removeAllComponents(from entity: GKEntity) {
-        entity.removeComponent(ofType: RenderComponent.self)
-        entity.removeComponent(ofType: PlayerComponent.self)
-        entity.removeComponent(ofType: EnemyComponent.self)
-        entity.removeComponent(ofType: BulletComponent.self)
-        entity.removeComponent(ofType: ItemComponent.self)
-        entity.removeComponent(ofType: TransformComponent.self)
-        entity.removeComponent(ofType: HealthComponent.self)
-        entity.removeComponent(ofType: HitboxComponent.self)
-        entity.removeComponent(ofType: BossComponent.self)
-        entity.removeComponent(ofType: BulletMotionModifiersComponent.self)
+        // Remove all components by iterating over entity's component system
+        // This is more maintainable than manually listing each component type
+        let componentTypes: [GKComponent.Type] = [
+            RenderComponent.self,
+            PlayerComponent.self,
+            EnemyComponent.self,
+            BulletComponent.self,
+            ItemComponent.self,
+            TransformComponent.self,
+            HealthComponent.self,
+            HitboxComponent.self,
+            BossComponent.self,
+            BulletMotionModifiersComponent.self
+        ]
+        
+        for componentType in componentTypes {
+            entity.removeComponent(ofType: componentType)
+        }
     }
     
     func getAllEntities() -> [GKEntity] {

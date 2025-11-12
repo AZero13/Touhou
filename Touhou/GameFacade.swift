@@ -20,7 +20,7 @@ class GameFacade {
     private let commandQueue = CommandQueue()
     
     private(set) lazy var entities: EntityFacade = {
-        EntityFacade(entityManager: entityManager, commandQueue: commandQueue, eventBus: eventBus)
+        EntityFacade(entityManager: entityManager, commandQueue: commandQueue, eventBus: eventBus, registerEntity: registerEntity)
     }()
     
     private(set) lazy var combat: CombatFacade = {
@@ -80,9 +80,22 @@ class GameFacade {
     }
     
     private func addCrossCuttingSystem(_ system: GameSystem) {
-        system.initialize(entityManager: entityManager, eventBus: eventBus)
+        let context = createRuntimeContext()
+        system.initialize(context: context)
         eventBus.register(listener: system)
         crossCuttingSystems.append(system)
+    }
+    
+    private func createRuntimeContext() -> GameRuntimeContext {
+        GameRuntimeContext(
+            entityManager: entityManager,
+            eventBus: eventBus,
+            entities: entities,
+            combat: combat,
+            isTimeFrozen: _isTimeFrozen,
+            currentStage: _currentStage,
+            unregisterEntity: unregisterEntity
+        )
     }
     
     func registerEntity(_ entity: GKEntity) {
@@ -105,17 +118,29 @@ class GameFacade {
         stateMachine.update(deltaTime: deltaTime)
         
         if stateMachine.currentState is GamePlayingState {
+            let context = createRuntimeContext()
+            
             if !_isTimeFrozen {
+                // Phase 1: Component systems (player, enemies, bullets, items)
                 for componentSystem in componentSystems {
                     componentSystem.update(deltaTime: deltaTime)
                 }
+                
+                // Phase 2: Cross-cutting systems
                 for system in crossCuttingSystems {
-                    system.update(deltaTime: deltaTime)
+                    system.update(deltaTime: deltaTime, context: context)
                 }
             }
-            commandQueue.process(entityManager: entityManager, eventBus: eventBus)
+            
+            // Phase 3: Process command queue
+            commandQueue.process(
+                entityManager: entityManager,
+                eventBus: eventBus,
+                isTimeFrozen: _isTimeFrozen,
+                registerEntity: registerEntity
+            )
         }
-        eventBus.processEvents()
+        eventBus.processEvents(context: createRuntimeContext())
     }
     
     func restartGame() {
@@ -135,14 +160,14 @@ class GameFacade {
         lastUpdateTime = CACurrentMediaTime()
         stateMachine.enter(GamePlayingState.self)
         eventBus.fire(StageStartedEvent(stageId: stageId))
-        eventBus.processEvents()  // Process StageStartedEvent immediately so systems initialize before first frame
+        eventBus.processEvents(context: createRuntimeContext())  // Process StageStartedEvent immediately so systems initialize before first frame
         print("Stage \(stageId) started")
     }
     
     func endStage() {
         stateMachine.enter(GameNotStartedState.self)
         eventBus.fire(StageEndedEvent(stageId: _currentStage))
-        eventBus.processEvents()
+        eventBus.processEvents(context: createRuntimeContext())
         clearTransientWorld()
         commandQueue.clear()
         print("Stage \(_currentStage) ended")
@@ -158,7 +183,7 @@ class GameFacade {
                 entityManager.markForDestruction(entity)
             }
         }
-        entityManager.destroyMarkedEntities()
+        entityManager.destroyMarkedEntities(unregisterEntity: unregisterEntity)
     }
     
     func registerListener(_ listener: EventListener) {
@@ -171,5 +196,11 @@ class GameFacade {
     
     func fireEvent(_ event: GameEvent) {
         eventBus.fire(event)
+    }
+    
+    /// Activate bomb with proper context
+    func activateBomb(playerEntity: GKEntity) {
+        let context = createRuntimeContext()
+        combat.activateBomb(playerEntity: playerEntity, context: context)
     }
 }

@@ -12,12 +12,12 @@ final class HealthSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     
-    func initialize(entityManager: EntityManager, eventBus: EventBus) {
-        self.entityManager = entityManager
-        self.eventBus = eventBus
+    func initialize(context: GameRuntimeContext) {
+        self.entityManager = context.entityManager
+        self.eventBus = context.eventBus
     }
     
-    func update(deltaTime: TimeInterval) {
+    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
         for healthComponent in entityManager.getAllComponents(HealthComponent.self) {
             if healthComponent.invulnerabilityTimer > 0 {
                 healthComponent.invulnerabilityTimer -= deltaTime
@@ -25,45 +25,50 @@ final class HealthSystem: GameSystem {
         }
     }
     
-    func handleEvent(_ event: GameEvent) {
+    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
         switch event {
         case let collisionEvent as CollisionOccurredEvent:
-            handleCollisionEvent(collisionEvent)
+            handleCollisionEvent(collisionEvent, context: context)
         case let died as EnemyDiedEvent:
-            handleEnemyDeath(died)
+            handleEnemyDeath(died, context: context)
         default:
             break
         }
     }
     
-    private func handleCollisionEvent(_ event: CollisionOccurredEvent) {
+    func handleEvent(_ event: GameEvent) {
+        // Fallback for non-GameSystem listeners (shouldn't be called)
+        fatalError("HealthSystem.handleEvent without context should not be called")
+    }
+    
+    private func handleCollisionEvent(_ event: CollisionOccurredEvent, context: GameRuntimeContext) {
         switch event.collisionType {
         case .playerBulletHitEnemy:
-            handleEnemyHit(event.entityB, hitPosition: event.hitPosition)
+            handleEnemyHit(event.entityB, hitPosition: event.hitPosition, context: context)
         case .enemyBulletHitPlayer, .enemyTouchPlayer:
-            handlePlayerHit(event.entityB)
+            handlePlayerHit(event.entityB, context: context)
         }
     }
     
-    private func handleEnemyHit(_ enemyEntity: GKEntity, hitPosition: CGPoint) {
+    private func handleEnemyHit(_ enemyEntity: GKEntity, hitPosition: CGPoint, context: GameRuntimeContext) {
         eventBus.fire(EnemyHitEvent(enemyEntity: enemyEntity, hitPosition: hitPosition))
-        GameFacade.shared.combat.damage(enemyEntity, amount: 1)
+        context.combat.damage(enemyEntity, amount: 1)
     }
     
-    private func handlePlayerHit(_ playerEntity: GKEntity) {
-        GameFacade.shared.combat.adjustLives(delta: -1)
+    private func handlePlayerHit(_ playerEntity: GKEntity, context: GameRuntimeContext) {
+        context.combat.loseLife()
     }
     
-    private func handleEnemyDeath(_ event: EnemyDiedEvent) {
+    private func handleEnemyDeath(_ event: EnemyDiedEvent, context: GameRuntimeContext) {
         let isBoss = event.entity.component(ofType: BossComponent.self) != nil
         
         if isBoss {
-            BulletUtility.convertBulletsToPoints(entityManager: entityManager)
+            BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
             eventBus.fire(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
         } else {
             if let itemType = event.dropItem,
                let transform = event.entity.component(ofType: TransformComponent.self) {
-                GameFacade.shared.entities.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: 40))
+                context.entities.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: 40))
             }
         }
     }

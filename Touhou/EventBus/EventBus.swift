@@ -30,7 +30,7 @@ class EventBus {
         eventQueue.append(event)
     }
     
-    func processEvents() {
+    func processEvents(context: GameRuntimeContext? = nil) {
         guard !eventQueue.isEmpty else { return }
         
         let eventsToProcess = eventQueue
@@ -41,7 +41,11 @@ class EventBus {
             if let listeners = subscribers["all_events"] {
                 for weakListener in listeners {
                     if let listener = weakListener.listener {
-                        listener.handleEvent(event)
+                        if let system = listener as? GameSystem, let ctx = context {
+                            system.handleEvent(event, context: ctx)
+                        } else {
+                            listener.handleEvent(event)
+                        }
                     }
                 }
             }

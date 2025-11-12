@@ -12,30 +12,30 @@ import GameplayKit
 /// Eliminates duplication and provides consistent API for bullet operations
 enum BulletUtility {
     /// Clear all bullets matching selector (uses CommandQueue)
-    static func clearBullets(entityManager: EntityManager, selector: BulletSelector = .all) {
-        CommandQueue.despawnAllBullets(entityManager: entityManager) { bullet in
+    static func clearBullets(entityManager: EntityManager, destroyEntity: (GKEntity) -> Void, selector: BulletSelector = .all) {
+        CommandQueue.despawnAllBullets(entityManager: entityManager, destroyEntity: destroyEntity) { bullet in
             selector.matches(bullet: bullet)
         }
     }
     
     /// Clear all enemy bullets
-    static func clearEnemyBullets(entityManager: EntityManager) {
-        clearBullets(entityManager: entityManager, selector: .enemy)
+    static func clearEnemyBullets(entityManager: EntityManager, destroyEntity: (GKEntity) -> Void) {
+        clearBullets(entityManager: entityManager, destroyEntity: destroyEntity, selector: .enemy)
     }
     
     /// Clear all player bullets
-    static func clearPlayerBullets(entityManager: EntityManager) {
-        clearBullets(entityManager: entityManager, selector: .player)
+    static func clearPlayerBullets(entityManager: EntityManager, destroyEntity: (GKEntity) -> Void) {
+        clearBullets(entityManager: entityManager, destroyEntity: destroyEntity, selector: .player)
     }
     
     /// Clear bullets with specific tags
-    static func clearBulletsWithTags(entityManager: EntityManager, tags: Set<String>) {
-        clearBullets(entityManager: entityManager, selector: .tags(tags))
+    static func clearBulletsWithTags(entityManager: EntityManager, destroyEntity: (GKEntity) -> Void, tags: Set<String>) {
+        clearBullets(entityManager: entityManager, destroyEntity: destroyEntity, selector: .tags(tags))
     }
     
     /// Clear bullets with specific group ID
-    static func clearBulletsWithGroupId(entityManager: EntityManager, groupId: Int) {
-        clearBullets(entityManager: entityManager, selector: .groupId(groupId))
+    static func clearBulletsWithGroupId(entityManager: EntityManager, destroyEntity: (GKEntity) -> Void, groupId: Int) {
+        clearBullets(entityManager: entityManager, destroyEntity: destroyEntity, selector: .groupId(groupId))
     }
     
     /// Get all bullet entities matching selector
@@ -53,14 +53,14 @@ enum BulletUtility {
     }
     
     /// Convert all enemy bullets to point items (TH06 boss death/phase transition style)
-    static func convertBulletsToPoints(entityManager: EntityManager) {
+    static func convertBulletsToPoints(entityManager: EntityManager, context: GameRuntimeContext) {
         let enemyBullets = getBullets(entityManager: entityManager, selector: .enemy)
         
         for bullet in enemyBullets {
             guard let transform = bullet.component(ofType: TransformComponent.self) else { continue }
             
             // Spawn a pointBullet item at bullet position
-            GameFacade.shared.entities.spawnItem(type: .pointBullet, at: transform.position, velocity: .zero)
+            context.entities.spawnItem(type: .pointBullet, at: transform.position, velocity: .zero)
             
             // Destroy the bullet
             entityManager.markForDestruction(bullet)

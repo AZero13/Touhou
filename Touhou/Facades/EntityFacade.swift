@@ -13,11 +13,13 @@ final class EntityFacade {
     private let entityManager: EntityManager
     private let commandQueue: CommandQueue
     private let eventBus: EventBus
+    private let registerEntity: (GKEntity) -> Void
     
-    init(entityManager: EntityManager, commandQueue: CommandQueue, eventBus: EventBus) {
+    init(entityManager: EntityManager, commandQueue: CommandQueue, eventBus: EventBus, registerEntity: @escaping (GKEntity) -> Void) {
         self.entityManager = entityManager
         self.commandQueue = commandQueue
         self.eventBus = eventBus
+        self.registerEntity = registerEntity
     }
     
     @discardableResult
@@ -43,7 +45,7 @@ final class EntityFacade {
         entity.addComponent(TransformComponent(position: position, velocity: .zero))
         entity.addComponent(HealthComponent(health: health, maxHealth: health))
         entity.addComponent(HitboxComponent(enemyHitbox: 16))
-        GameFacade.shared.registerEntity(entity)
+        registerEntity(entity)
         return entity
     }
     
@@ -67,7 +69,7 @@ final class EntityFacade {
         entity.addComponent(TransformComponent(position: position, velocity: CGVector(dx: 0, dy: -50)))
         entity.addComponent(HitboxComponent(enemyHitbox: 12))
         entity.addComponent(HealthComponent(health: 1, maxHealth: 1))
-        GameFacade.shared.registerEntity(entity)
+        registerEntity(entity)
         return entity
     }
     
@@ -100,7 +102,7 @@ final class EntityFacade {
     }
     
     func destroyAllBullets(where filter: ((BulletComponent) -> Bool)? = nil) {
-        CommandQueue.despawnAllBullets(entityManager: entityManager, selector: filter)
+        CommandQueue.despawnAllBullets(entityManager: entityManager, destroyEntity: destroy, selector: filter)
     }
     
     var player: GKEntity? {

@@ -27,12 +27,12 @@ final class BulletModifierSystem: GameSystem {
     private var timer: TimeInterval = 0
     private var isActive: Bool = false
     
-    func initialize(entityManager: EntityManager, eventBus: EventBus) {
-        self.entityManager = entityManager
-        self.eventBus = eventBus
+    func initialize(context: GameRuntimeContext) {
+        self.entityManager = context.entityManager
+        self.eventBus = context.eventBus
     }
     
-    func update(deltaTime: TimeInterval) {
+    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
         guard isActive else { return }
         
         timer += deltaTime
@@ -66,13 +66,18 @@ final class BulletModifierSystem: GameSystem {
         }
     }
     
-    func handleEvent(_ event: GameEvent) {
+    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
         // Reset on stage start
         if event is StageStartedEvent {
             scheduledChanges.removeAll()
             timer = 0
             isActive = false
         }
+    }
+    
+    func handleEvent(_ event: GameEvent) {
+        // Fallback for non-GameSystem listeners (shouldn't be called)
+        fatalError("BulletModifierSystem.handleEvent without context should not be called")
     }
     
     // MARK: - Public API

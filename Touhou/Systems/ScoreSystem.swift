@@ -14,26 +14,26 @@ final class ScoreSystem: GameSystem {
     private var highScore: Int = 0
     private let highScoreStore = UserDefaultsHighScoreStore()
     
-    func initialize(entityManager: EntityManager, eventBus: EventBus) {
-        self.entityManager = entityManager
-        self.eventBus = eventBus
+    func initialize(context: GameRuntimeContext) {
+        self.entityManager = context.entityManager
+        self.eventBus = context.eventBus
         self.highScore = entityManager.getPlayerComponent()?.score ?? 0
     }
     
-    func update(deltaTime: TimeInterval) {
+    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
     }
     
-    func handleEvent(_ event: GameEvent) {
+    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
         switch event {
         case let e as EnemyDiedEvent:
-            GameFacade.shared.combat.adjustScore(amount: e.scoreValue)
+            context.combat.addScore(e.scoreValue)
         case let g as GrazeEvent:
             if let playerComp = entityManager.getPlayerComponent() {
                 playerComp.grazeInStage += g.grazeValue
             }
-            GameFacade.shared.combat.adjustScore(amount: g.grazeValue)
+            context.combat.addScore(g.grazeValue)
         case let p as PowerUpCollectedEvent:
-            handlePowerUpCollection(p)
+            handlePowerUpCollection(p, context: context)
         case let s as ScoreChangedEvent:
             if s.newTotal > highScore {
                 highScore = s.newTotal
@@ -55,12 +55,17 @@ final class ScoreSystem: GameSystem {
         }
     }
     
-    private func handlePowerUpCollection(_ p: PowerUpCollectedEvent) {
+    func handleEvent(_ event: GameEvent) {
+        // Fallback for non-GameSystem listeners (shouldn't be called)
+        fatalError("ScoreSystem.handleEvent without context should not be called")
+    }
+    
+    private func handlePowerUpCollection(_ p: PowerUpCollectedEvent, context: GameRuntimeContext) {
         guard let playerComp = entityManager.getPlayerComponent() else { return }
         
         switch p.itemType {
         case .point:
-            GameFacade.shared.combat.adjustScore(amount: p.value)
+            context.combat.addScore(p.value)
         case .power:
             if playerComp.power >= 128 {
                 playerComp.powerItemCountForScore += 1
@@ -73,19 +78,19 @@ final class ScoreSystem: GameSystem {
                     3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 51200
                 ]
                 let actualScore = powerItemScores[safe: playerComp.powerItemCountForScore] ?? 51200
-                GameFacade.shared.combat.adjustScore(amount: actualScore)
+                context.combat.addScore(actualScore)
             } else {
-                GameFacade.shared.combat.adjustPower(delta: 1)
-                GameFacade.shared.combat.adjustScore(amount: p.value)
+                context.combat.gainPower(1)
+                context.combat.addScore(p.value)
             }
         case .pointBullet:
-            GameFacade.shared.combat.adjustScore(amount: p.value)
+            context.combat.addScore(p.value)
         case .bomb:
             if playerComp.bombs < 8 {
-                GameFacade.shared.combat.adjustBombs(delta: 1)
+                context.combat.gainBombs(1)
             }
         case .life:
-            GameFacade.shared.combat.adjustLives(delta: 1)
+            context.combat.gainLives(1)
         }
     }
     

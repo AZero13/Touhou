@@ -28,28 +28,40 @@ final class CombatFacade {
         healthComp.health = min(healthComp.maxHealth, healthComp.health + amount)
     }
     
-    func adjustLives(delta: Int) {
-        commandQueue.enqueue(.adjustLives(delta: delta))
+    func gainLives(_ amount: Int) {
+        commandQueue.enqueue(.adjustLives(delta: amount))
     }
     
-    func adjustBombs(delta: Int) {
-        commandQueue.enqueue(.adjustBombs(delta: delta))
+    func loseLife() {
+        commandQueue.enqueue(.adjustLives(delta: -1))
     }
     
-    func adjustPower(delta: Int) {
-        commandQueue.enqueue(.adjustPower(delta: delta))
+    func gainBombs(_ amount: Int) {
+        commandQueue.enqueue(.adjustBombs(delta: amount))
     }
     
-    func adjustScore(amount: Int) {
+    func loseBomb() {
+        commandQueue.enqueue(.adjustBombs(delta: -1))
+    }
+    
+    func gainPower(_ amount: Int) {
+        commandQueue.enqueue(.adjustPower(delta: amount))
+    }
+    
+    func losePower(_ amount: Int) {
+        commandQueue.enqueue(.adjustPower(delta: -amount))
+    }
+    
+    func addScore(_ amount: Int) {
         commandQueue.enqueue(.adjustScore(amount: amount))
     }
     
-    func activateBomb(playerEntity: GKEntity) {
+    func activateBomb(playerEntity: GKEntity, context: GameRuntimeContext) {
         if let playerHealth = playerEntity.component(ofType: HealthComponent.self) {
             playerHealth.invulnerabilityTimer = 6.0
         }
         
-        BulletUtility.convertBulletsToPoints(entityManager: entityManager)
+        BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
         eventBus.fire(AttractItemsEvent(itemTypes: [.pointBullet]))
         
         let enemies = entityManager.getEntities(with: EnemyComponent.self)
@@ -58,7 +70,7 @@ final class CombatFacade {
         }
         
         eventBus.fire(BombActivatedEvent(playerEntity: playerEntity))
-        adjustBombs(delta: -1)
+        loseBomb()
     }
     
     func spawnEnemyBullet(_ command: BulletSpawnCommand) {

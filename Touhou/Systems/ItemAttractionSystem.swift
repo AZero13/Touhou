@@ -13,15 +13,15 @@ final class ItemAttractionSystem: GameSystem {
     private var entityManager: EntityManager!
     private var eventBus: EventBus!
     
-    func initialize(entityManager: EntityManager, eventBus: EventBus) {
-        self.entityManager = entityManager
-        self.eventBus = eventBus
+    func initialize(context: GameRuntimeContext) {
+        self.entityManager = context.entityManager
+        self.eventBus = context.eventBus
     }
     
-    func update(deltaTime: TimeInterval) {
+    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
     }
     
-    func handleEvent(_ event: GameEvent) {
+    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
         switch event {
         case let died as EnemyDiedEvent:
             if died.entity.component(ofType: BossComponent.self) != nil {
@@ -32,6 +32,11 @@ final class ItemAttractionSystem: GameSystem {
         default:
             break
         }
+    }
+    
+    func handleEvent(_ event: GameEvent) {
+        // Fallback for non-GameSystem listeners (shouldn't be called)
+        fatalError("ItemAttractionSystem.handleEvent without context should not be called")
     }
     
     private func attractItems(ofTypes types: [ItemType]) {

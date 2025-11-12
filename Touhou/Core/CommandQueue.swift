@@ -32,19 +32,19 @@ final class CommandQueue {
         queue.removeAll()
     }
     
-    func process(entityManager: EntityManager, eventBus: EventBus) {
+    func process(entityManager: EntityManager, eventBus: EventBus, isTimeFrozen: Bool, registerEntity: (GKEntity) -> Void) {
         if queue.isEmpty { return }
         for command in queue {
             switch command {
-            case let .spawnBullet(cmd, ownedByPlayer) where GameFacade.shared.isTimeFrozen:
-                let entity = spawnBullet(cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
+            case let .spawnBullet(cmd, ownedByPlayer) where isTimeFrozen:
+                let entity = spawnBullet(cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager, registerEntity: registerEntity)
                 applyFreezeModifier(to: entity)
             case let .spawnBullet(cmd, ownedByPlayer):
-                spawnBullet(cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
+                spawnBullet(cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager, registerEntity: registerEntity)
             case let .destroyEntity(entity):
                 entityManager.markForDestruction(entity)
             case let .spawnItem(type, position, velocity):
-                spawnItem(type: type, position: position, velocity: velocity, entityManager: entityManager)
+                spawnItem(type: type, position: position, velocity: velocity, entityManager: entityManager, registerEntity: registerEntity)
             case let .applyDamage(entity, amount):
                 applyDamage(entity: entity, amount: amount, entityManager: entityManager, eventBus: eventBus)
             case let .adjustLives(delta):
@@ -60,19 +60,19 @@ final class CommandQueue {
         queue.removeAll()
     }
     
-    static func despawnAllBullets(entityManager: EntityManager, selector: ((BulletComponent) -> Bool)? = nil) {
+    static func despawnAllBullets(entityManager: EntityManager, destroyEntity: (GKEntity) -> Void, selector: ((BulletComponent) -> Bool)? = nil) {
         let bullets = entityManager.getEntities(with: BulletComponent.self)
         for bulletEntity in bullets {
             guard let bulletComp = bulletEntity.component(ofType: BulletComponent.self) else { continue }
             if selector == nil || selector!(bulletComp) {
-                GameFacade.shared.entities.destroy(bulletEntity)
+                destroyEntity(bulletEntity)
             }
         }
     }
     
     @discardableResult
-    private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) -> GKEntity {
-        createBulletEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager)
+    private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager, registerEntity: (GKEntity) -> Void) -> GKEntity {
+        createBulletEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager, registerEntity: registerEntity)
     }
     
     private func applyFreezeModifier(to entity: GKEntity) {
@@ -85,11 +85,11 @@ final class CommandQueue {
         }
     }
 
-    private func spawnItem(type: ItemType, position: CGPoint, velocity: CGVector, entityManager: EntityManager) {
+    private func spawnItem(type: ItemType, position: CGPoint, velocity: CGVector, entityManager: EntityManager, registerEntity: (GKEntity) -> Void) {
         let entity = entityManager.createEntity()
         entity.addComponent(ItemComponent(itemType: type, value: 0))
         entity.addComponent(TransformComponent(position: position, velocity: velocity))
-        GameFacade.shared.registerEntity(entity)
+        registerEntity(entity)
     }
 
     private func applyDamage(entity: GKEntity, amount: Int, entityManager: EntityManager, eventBus: EventBus) {
@@ -146,7 +146,7 @@ final class CommandQueue {
         eventBus.fire(ScoreChangedEvent(newTotal: player.score))
     }
     
-    private func createBulletEntity(from command: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager) -> GKEntity {
+    private func createBulletEntity(from command: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager, registerEntity: (GKEntity) -> Void) -> GKEntity {
         let entity = entityManager.createEntity()
         
         let bullet = BulletComponent(
@@ -175,7 +175,7 @@ final class CommandQueue {
         
         entity.addComponent(bullet)
         entity.addComponent(TransformComponent(position: command.position, velocity: command.velocity))
-        GameFacade.shared.registerEntity(entity)
+        registerEntity(entity)
         
         return entity
     }

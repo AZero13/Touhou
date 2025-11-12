@@ -31,14 +31,14 @@ final class CollisionSystem: GameSystem {
         static let generic: CGFloat = 5.0
     }
     
-    func initialize(entityManager: EntityManager, eventBus: EventBus) {
-        self.entityManager = entityManager
-        self.eventBus = eventBus
+    func initialize(context: GameRuntimeContext) {
+        self.entityManager = context.entityManager
+        self.eventBus = context.eventBus
     }
     
-    func update(deltaTime: TimeInterval) {
+    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
         // Skip all collision/graze checks when time is frozen
-        if GameFacade.shared.isTimeFrozen {
+        if context.isTimeFrozen {
             return
         }
         
@@ -90,8 +90,13 @@ final class CollisionSystem: GameSystem {
         
     }
     
+    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
+        // No events to handle
+    }
+    
     func handleEvent(_ event: GameEvent) {
-        // Handle events as needed
+        // Fallback for non-GameSystem listeners (shouldn't be called)
+        fatalError("CollisionSystem.handleEvent without context should not be called")
     }
     
     // MARK: - Private Methods

@@ -14,12 +14,12 @@ final class PowerSystem: GameSystem {
     
     static let powerThresholds: [Int] = [8, 16, 32, 48, 64, 80, 96, 128]
     
-    func initialize(entityManager: EntityManager, eventBus: EventBus) {
-        self.entityManager = entityManager
-        self.eventBus = eventBus
+    func initialize(context: GameRuntimeContext) {
+        self.entityManager = context.entityManager
+        self.eventBus = context.eventBus
     }
     
-    func update(deltaTime: TimeInterval) {
+    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
         guard let playerEntity = entityManager.getPlayerEntity(),
               let playerComp = playerEntity.component(ofType: PlayerComponent.self),
               let playerTransform = playerEntity.component(ofType: TransformComponent.self),
@@ -28,15 +28,20 @@ final class PowerSystem: GameSystem {
         eventBus.fire(AttractItemsEvent(itemTypes: [.power, .point, .pointBullet, .bomb, .life]))
     }
     
-    func handleEvent(_ event: GameEvent) {
+    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
         if let powerEvent = event as? PowerLevelChangedEvent {
-            handlePowerChanged(newPower: powerEvent.newTotal)
+            handlePowerChanged(newPower: powerEvent.newTotal, context: context)
         }
     }
     
-    private func handlePowerChanged(newPower: Int) {
+    func handleEvent(_ event: GameEvent) {
+        // Fallback for non-GameSystem listeners (shouldn't be called)
+        fatalError("PowerSystem.handleEvent without context should not be called")
+    }
+    
+    private func handlePowerChanged(newPower: Int, context: GameRuntimeContext) {
         if newPower >= 128 {
-            BulletUtility.convertBulletsToPoints(entityManager: entityManager)
+            BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
             eventBus.fire(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
         }
     }
@@ -56,4 +61,5 @@ final class PowerSystem: GameSystem {
         powerThresholds[safe: rank] ?? (powerThresholds.last ?? 128)
     }
 }
+
 

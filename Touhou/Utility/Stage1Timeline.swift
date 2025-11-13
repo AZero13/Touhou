@@ -187,7 +187,12 @@ enum Stage1Timeline {
         return builder.build()
     }
     
-    static func spawnRumiaMidbossNow() {
+    /// Public method for DialogueSystem to trigger midboss spawn
+    static func triggerMidbossSpawn() {
+        spawnRumiaMidbossNow()
+    }
+    
+    private static func spawnRumiaMidbossNow() {
         let playArea = GameFacade.playArea
         let centerX = playArea.midX
         

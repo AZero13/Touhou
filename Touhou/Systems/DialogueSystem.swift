@@ -36,11 +36,15 @@ final class DialogueSystem: GameSystem {
     private func handleDialogueTrigger(_ trigger: DialogueSpawnTriggerEvent, context: GameRuntimeContext) {
         print("DialogueSystem: Received spawn trigger - dialogueId: \(trigger.dialogueId), triggerName: \(trigger.triggerName)")
         
-        // Handle stage 1 boss spawn (after dialogue)
+        // Handle stage 1 stage boss spawn (after dialogue)
         if trigger.dialogueId == "stage1_boss" && trigger.triggerName == "spawn_stage_boss" {
-            print("DialogueSystem: Triggering stage boss spawn via EnemySystem")
-            // Fire an event that EnemySystem can handle to spawn the stage boss
+            print("DialogueSystem: Triggering stage boss spawn")
             context.eventBus.fire(SpawnStageBossEvent())
+        }
+        // Handle stage 1 midboss spawn (if we ever want dialogue before midboss)
+        else if trigger.dialogueId == "stage1_midboss" && trigger.triggerName == "spawn_rumia" {
+            print("DialogueSystem: Triggering midboss spawn")
+            Stage1Timeline.triggerMidbossSpawn()
         }
     }
 }

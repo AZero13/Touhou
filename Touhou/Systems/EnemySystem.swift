@@ -17,14 +17,11 @@ final class EnemySystem: GameSystem {
     private var stageScript: [EnemySpawnEvent] = []
     private var stageTimeline: StageTimeline?
     private var stageCompleteDispatched: Bool = false
-    private var bossSpawned: Bool = false
-    private var dialogueTriggered: Bool = false  // Track if dialogue has been triggered (separate from boss spawn)
-    private var midbossDefeated: Bool = false
+    private var bossSpawned: Bool = false  // True when stage boss entity has appeared
+    private var dialogueTriggered: Bool = false  // True when dialogue has been triggered
     private var timelineCompleteTime: TimeInterval? // When timeline completed
-    private var midbossDefeatedTime: TimeInterval? // When midboss was defeated
     
     private enum Constants {
-        static let bossSpawnDelay: TimeInterval = 60.0 // 1 minute delay after timeline completes
         static let offScreenThreshold: CGFloat = -50.0 // Y position threshold for off-screen detection
         static let bossSpawnPosition = CGPoint(x: 192, y: 360)
         static let bossHealth: Int = 300
@@ -64,7 +61,7 @@ final class EnemySystem: GameSystem {
             // Track when timeline completes
             if timeline.isComplete && timelineCompleteTime == nil {
                 timelineCompleteTime = stageTimer
-                print("EnemySystem: Timeline complete at time \(stageTimer)")
+                print("EnemySystem: ✓ Timeline complete at time \(stageTimer), stage \(context.currentStage)")
             }
         } else {
             spawnEnemiesFromScript(context: context)
@@ -86,21 +83,24 @@ final class EnemySystem: GameSystem {
             // Check if we should trigger dialogue (timeline complete + no bosses active)
             if let completeTime = timelineCompleteTime {
                 let timeSinceComplete = stageTimer - completeTime
+                print("EnemySystem: Stage 1 check - timeSinceComplete: \(timeSinceComplete), dialogueTriggered: \(dialogueTriggered)")
                 // Trigger dialogue 2 seconds after timeline completes
                 if timeSinceComplete >= 2.0 && !dialogueTriggered {
-                    print("EnemySystem: Triggering stage 1 boss dialogue")
+                    print("EnemySystem: ✓ Triggering stage 1 boss dialogue NOW")
                     eventBus.fire(DialogueTriggeredEvent(dialogueId: "stage1_boss"))
                     dialogueTriggered = true  // Prevent re-triggering dialogue
                 }
+            } else {
+                print("EnemySystem: Stage 1 - waiting for timeline to complete (timelineCompleteTime is nil)")
             }
             return
         }
         
-        // Other stages: time-based boss spawn
+        // Other stages: time-based boss spawn (60 seconds after timeline completes)
         let shouldSpawnBoss: Bool
         if stageTimeline != nil {
             if let completeTime = timelineCompleteTime {
-                shouldSpawnBoss = (stageTimer - completeTime) >= Constants.bossSpawnDelay
+                shouldSpawnBoss = (stageTimer - completeTime) >= 60.0  // 1 minute delay
             } else {
                 shouldSpawnBoss = false
             }
@@ -149,22 +149,37 @@ final class EnemySystem: GameSystem {
     }
     
     private func checkStageCompletion(context: GameRuntimeContext) {
-        guard bossSpawned && !stageCompleteDispatched else { return }
+        guard !stageCompleteDispatched else { return }
         
-        let remainingEnemies = entityManager.getEntities(with: EnemyComponent.self)
-        if remainingEnemies.isEmpty {
-            stageCompleteDispatched = true
-            
-            // Stage 1: trigger victory dialogue after boss defeated
-            if context.currentStage == 1 {
-                print("EnemySystem: Stage boss defeated, triggering victory dialogue")
-                eventBus.fire(DialogueTriggeredEvent(dialogueId: "stage1_victory"))
-            } else {
-                // Other stages: transition immediately
-                let nextId = context.currentStage >= GameFacade.maxStage ? (GameFacade.maxStage + 1) : (context.currentStage + 1)
-                let totalScore = entityManager.getPlayerComponent()?.score ?? 0
-                print("Boss defeated! Transitioning from stage \(context.currentStage) to stage \(nextId)")
-                eventBus.fire(StageTransitionEvent(nextStageId: nextId, totalScore: totalScore))
+        // Check if stage boss (phase 1+) currently exists
+        let stageBosses = entityManager.getEntities(with: BossComponent.self).filter { entity in
+            entity.component(ofType: BossComponent.self)?.phaseNumber ?? 0 >= 1
+        }
+        
+        // If stage boss exists but bossSpawned isn't true yet, mark it
+        // This tracks that an actual boss entity has appeared
+        if !stageBosses.isEmpty && !bossSpawned {
+            print("EnemySystem: Stage boss entity detected, marking bossSpawned = true")
+            bossSpawned = true
+        }
+        
+        // Only trigger completion if boss WAS spawned and is NOW defeated
+        if bossSpawned && stageBosses.isEmpty {
+            let remainingEnemies = entityManager.getEntities(with: EnemyComponent.self)
+            if remainingEnemies.isEmpty {
+                stageCompleteDispatched = true
+                
+                // Stage 1: trigger victory dialogue after boss defeated
+                if context.currentStage == 1 {
+                    print("EnemySystem: Stage boss defeated, triggering victory dialogue")
+                    eventBus.fire(DialogueTriggeredEvent(dialogueId: "stage1_victory"))
+                } else {
+                    // Other stages: transition immediately
+                    let nextId = context.currentStage >= GameFacade.maxStage ? (GameFacade.maxStage + 1) : (context.currentStage + 1)
+                    let totalScore = entityManager.getPlayerComponent()?.score ?? 0
+                    print("Boss defeated! Transitioning from stage \(context.currentStage) to stage \(nextId)")
+                    eventBus.fire(StageTransitionEvent(nextStageId: nextId, totalScore: totalScore))
+                }
             }
         }
     }
@@ -176,16 +191,12 @@ final class EnemySystem: GameSystem {
             stageCompleteDispatched = false
             bossSpawned = false
             dialogueTriggered = false
-            midbossDefeated = false
             stageTimeline = nil
             timelineCompleteTime = nil
-            midbossDefeatedTime = nil
             loadStageScript(stageId: s.stageId, context: context)
         } else if event is SpawnStageBossEvent {
             print("EnemySystem: SpawnStageBossEvent received, spawning stage boss immediately")
-            if !bossSpawned {
-                spawnBoss(context: context)
-            }
+            spawnBoss(context: context)
         }
     }
     

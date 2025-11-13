@@ -54,7 +54,6 @@ final class StageTimeline {
     private var currentStepIndex: Int = 0
     private var timer: TimeInterval = 0
     private var isActive: Bool = false
-    private var isPaused: Bool = false
     private var entityManager: EntityManager?
     private var eventBus: EventBus?
     
@@ -74,7 +73,6 @@ final class StageTimeline {
         timer = 0
         currentStepIndex = 0
         isActive = true
-        isPaused = false
     }
     
     /// Stop the timeline
@@ -117,11 +115,6 @@ final class StageTimeline {
     /// Check if timeline is complete
     var isComplete: Bool {
         return !isActive && currentStepIndex >= steps.count
-    }
-    
-    /// Check if timeline is paused (used by EnemySystem)
-    var isTimelinePaused: Bool {
-        return isPaused
     }
     
     // MARK: - Private Methods

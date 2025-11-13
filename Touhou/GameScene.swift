@@ -124,7 +124,11 @@ class GameScene: SKScene, EventListener {
             if input.shoot.justPressed {
                 advanceDialogue()
             }
-            // Don't update game logic during dialogue, but still update timer
+            
+            // Process events during dialogue (for spawn triggers, etc.)
+            GameFacade.shared.processEvents()
+            
+            // Update timer
             updateTimeBonusTimer()
             return
         }
@@ -169,8 +173,12 @@ class GameScene: SKScene, EventListener {
             }
         case let e as BossIntroStartedEvent:
             // Show timer when midboss with time bonus spawns
-            if let bossComp = e.bossEntity.component(ofType: BossComponent.self), bossComp.hasTimeBonus {
-                self.showTimeBonusTimer()
+            if let bossComp = e.bossEntity.component(ofType: BossComponent.self) {
+                print("GameScene: BossIntroStartedEvent received, hasTimeBonus: \(bossComp.hasTimeBonus)")
+                if bossComp.hasTimeBonus {
+                    print("GameScene: Showing time bonus timer")
+                    self.showTimeBonusTimer()
+                }
             }
         case let e as TimeBonusAwardedEvent:
             self.showTimeBonusText(bonus: e.bonusPoints, atLogical: e.position)
@@ -327,7 +335,11 @@ class GameScene: SKScene, EventListener {
     }
     
     private func startDialogue(dialogueId: String) {
-        guard let dialogue = DialogueData.getDialogue(id: dialogueId) else { return }
+        print("GameScene: Starting dialogue - \(dialogueId)")
+        guard let dialogue = DialogueData.getDialogue(id: dialogueId) else {
+            print("GameScene: ERROR - Dialogue '\(dialogueId)' not found!")
+            return
+        }
         
         currentDialogue = dialogue
         currentDialogueIndex = 0
@@ -356,9 +368,10 @@ class GameScene: SKScene, EventListener {
             dialogueSpeakerLabel?.text = "???"
             dialogueSpeakerLabel?.fontColor = .yellow
             
-            // Trigger boss spawn when boss first speaks
-            if dialogue.id == "stage1_midboss" && index == 6 {
-                GameFacade.shared.fireEvent(DialogueSpawnTriggerEvent(dialogueId: "stage1_midboss", triggerName: "spawn_rumia"))
+            // Trigger boss spawn when boss first speaks (stage boss dialogue)
+            if dialogue.id == "stage1_boss" && index == 6 {
+                print("GameScene: Boss first speaks (line \(index)), firing spawn trigger")
+                GameFacade.shared.fireEvent(DialogueSpawnTriggerEvent(dialogueId: "stage1_boss", triggerName: "spawn_stage_boss"))
             }
         }
         

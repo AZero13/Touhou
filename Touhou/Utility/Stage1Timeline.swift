@@ -154,18 +154,28 @@ enum Stage1Timeline {
             )
         }
         
-        // Final burst before midboss (from left and right edges)
-        let finalBurstStart = waveStart + 6.0
-        let burstPositions: [(x: CGFloat, side: Bool)] = [
+        // Midboss spawns
+        let midbossSpawnTime = waveStart + 6.0
+        builder = builder.addAction(
+            at: midbossSpawnTime,
+            action: { _, _ in
+                print("Stage1Timeline: Spawning midboss")
+                Stage1Timeline.spawnRumiaMidbossNow()
+            }
+        )
+        
+        // More waves after midboss (continues while midboss is active)
+        let postMidbossWaveStart = midbossSpawnTime + 8.0
+        let finalBurstPositions: [(x: CGFloat, side: Bool)] = [
             (32, true), (64, true), (40, true), (72, true),
             (48, true), (80, true), (56, true), (88, true),
             (320, false), (352, false), (312, false), (344, false),
             (304, false), (336, false), (296, false), (328, false)
         ]
         
-        for (index, pos) in burstPositions.enumerated() {
+        for (index, pos) in finalBurstPositions.enumerated() {
             builder = builder.addEnemy(
-                at: finalBurstStart + TimeInterval(index) * 0.16,
+                at: postMidbossWaveStart + TimeInterval(index) * 0.16,
                 type: .fairy,
                 position: CGPoint(x: pos.x, y: 420),
                 velocity: CGVector(dx: 0, dy: -80),
@@ -173,15 +183,6 @@ enum Stage1Timeline {
                 autoShoot: false  // No shooting, just fast dive
             )
         }
-        
-        // Dialogue trigger before midboss (Rumia will spawn during dialogue when she speaks)
-        let dialogueStart = finalBurstStart + TimeInterval(burstPositions.count) * 0.16 + 1.0
-        builder = builder.addAction(
-            at: dialogueStart,
-            action: { _, eventBus in
-                eventBus.fire(DialogueTriggeredEvent(dialogueId: "stage1_midboss"))
-            }
-        )
         
         return builder.build()
     }
@@ -226,7 +227,9 @@ enum Stage1Timeline {
         }
         
         // Fire boss intro event to trigger timer display
+        print("Stage1Timeline: Firing BossIntroStartedEvent for Rumia")
         GameFacade.shared.fireEvent(BossIntroStartedEvent(bossEntity: rumia))
+        print("Stage1Timeline: Rumia spawned with hasTimeBonus: \(rumia.component(ofType: BossComponent.self)?.hasTimeBonus ?? false)")
     }
     
     private static func scheduleMidbossMovementPattern(transform: TransformComponent, playArea: CGRect) {

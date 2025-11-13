@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GameplayKit
 
 enum DialogueSpeaker {
     case reimu
@@ -40,14 +41,16 @@ struct DialogueSequence {
 enum DialogueData {
     static func getDialogue(id: String) -> DialogueSequence? {
         switch id {
-        case "stage1_midboss":
-            return createStage1MidbossDialogue()
+        case "stage1_boss":
+            return createStage1BossDialogue()
+        case "stage1_victory":
+            return createStage1VictoryDialogue()
         default:
             return nil
         }
     }
     
-    private static func createStage1MidbossDialogue() -> DialogueSequence {
+    private static func createStage1BossDialogue() -> DialogueSequence {
         let lines: [DialogueLine] = [
             DialogueLine(speaker: .reimu, text: "It's been a while since my last job."),
             DialogueLine(speaker: .reimu, text: "It sure feels great out."),
@@ -60,7 +63,22 @@ enum DialogueData {
             DialogueLine(speaker: .reimu, text: "Um,\nwho are you?")
         ]
         
-        return DialogueSequence(id: "stage1_midboss", lines: lines)
+        return DialogueSequence(id: "stage1_boss", lines: lines)
+    }
+    
+    private static func createStage1VictoryDialogue() -> DialogueSequence {
+        let lines: [DialogueLine] = [
+            DialogueLine(speaker: .reimu, text: "That was easier than I thought."),
+            DialogueLine(speaker: .reimu, text: "I wonder if there are more ahead...")
+        ]
+        
+        // After victory dialogue, transition to next stage
+        return DialogueSequence(id: "stage1_victory", lines: lines, onComplete: {
+            let totalScore = GameFacade.shared.entities.player?.component(ofType: PlayerComponent.self)?.score ?? 0
+            let nextId = 2
+            print("DialogueData: Victory dialogue complete, transitioning to stage \(nextId)")
+            GameFacade.shared.fireEvent(StageTransitionEvent(nextStageId: nextId, totalScore: totalScore))
+        })
     }
 }
 

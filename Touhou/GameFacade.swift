@@ -200,6 +200,11 @@ class GameFacade {
         eventBus.fire(event)
     }
     
+    /// Process queued events (useful during dialogue or special states)
+    func processEvents() {
+        eventBus.processEvents(context: createRuntimeContext())
+    }
+    
     /// Activate bomb with proper context
     func activateBomb(playerEntity: GKEntity) {
         let context = createRuntimeContext()

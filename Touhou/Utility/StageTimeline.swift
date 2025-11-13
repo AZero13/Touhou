@@ -54,6 +54,7 @@ final class StageTimeline {
     private var currentStepIndex: Int = 0
     private var timer: TimeInterval = 0
     private var isActive: Bool = false
+    private var isPaused: Bool = false
     private var entityManager: EntityManager?
     private var eventBus: EventBus?
     
@@ -73,6 +74,7 @@ final class StageTimeline {
         timer = 0
         currentStepIndex = 0
         isActive = true
+        isPaused = false
     }
     
     /// Stop the timeline
@@ -84,13 +86,22 @@ final class StageTimeline {
     func update(deltaTime: TimeInterval) {
         guard isActive, let entityManager = entityManager, let eventBus = eventBus else { return }
         
+        // Always advance time (like TH06)
         timer += deltaTime
+        
+        // Check if boss is present (TH06 blocks spawns during boss fights)
+        let bossPresent = !entityManager.getEntities(with: BossComponent.self).isEmpty
         
         // Process all steps that are due
         while currentStepIndex < steps.count {
             let step = steps[currentStepIndex]
             if timer >= step.time {
-                executeEvent(step.event, entityManager: entityManager, eventBus: eventBus)
+                // Execute event, but skip enemy spawns if boss is present (like TH06)
+                if case .spawnEnemy = step.event, bossPresent {
+                    print("StageTimeline: Skipping enemy spawn (boss present)")
+                } else {
+                    executeEvent(step.event, entityManager: entityManager, eventBus: eventBus)
+                }
                 currentStepIndex += 1
             } else {
                 break
@@ -106,6 +117,11 @@ final class StageTimeline {
     /// Check if timeline is complete
     var isComplete: Bool {
         return !isActive && currentStepIndex >= steps.count
+    }
+    
+    /// Check if timeline is paused (used by EnemySystem)
+    var isTimelinePaused: Bool {
+        return isPaused
     }
     
     // MARK: - Private Methods

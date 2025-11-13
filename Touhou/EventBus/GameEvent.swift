@@ -367,3 +367,11 @@ struct DialogueSpawnTriggerEvent: GameEvent, Sendable {
         self.triggerName = triggerName
     }
 }
+
+struct SpawnStageBossEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    
+    init() {
+        self.timestamp = CACurrentMediaTime()
+    }
+}

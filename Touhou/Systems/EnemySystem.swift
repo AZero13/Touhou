@@ -22,7 +22,8 @@ final class EnemySystem: GameSystem {
     private var timelineCompleteTime: TimeInterval? // When timeline completed
     
     private enum Constants {
-        static let offScreenThreshold: CGFloat = -50.0 // Y position threshold for off-screen detection
+        static let offScreenBottomThreshold: CGFloat = -50.0 // Y position for off-screen (below)
+        static let offScreenTopThreshold: CGFloat = 480.0 // Y position for off-screen (above)
         static let bossSpawnPosition = CGPoint(x: 192, y: 360)
         static let bossHealth: Int = 300
         static let bossPhaseNumber: Int = 1
@@ -263,8 +264,18 @@ final class EnemySystem: GameSystem {
             // Move enemy down
             transform.position.y += transform.velocity.dy * deltaTime
             
-            // Mark enemies that go off bottom of screen for destruction
-            if transform.position.y < Constants.offScreenThreshold {
+            // Mark enemies that go offscreen for destruction
+            let isBoss = enemy.component(ofType: BossComponent.self) != nil
+            
+            // Entities spawn at top (y ~420) and exit bottom (y < -50)
+            // Bosses can also exit top when fleeing (y > 480)
+            let offscreenBottom = transform.position.y < Constants.offScreenBottomThreshold
+            let offscreenTop = isBoss && transform.position.y > Constants.offScreenTopThreshold
+            
+            if offscreenBottom || offscreenTop {
+                if isBoss {
+                    print("EnemySystem: Boss went offscreen (y: \(transform.position.y)), despawning")
+                }
                 context.entities.destroy(enemy)
             }
         }

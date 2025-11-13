@@ -167,9 +167,10 @@ class GameScene: SKScene, EventListener {
             self.showFloatingScore(value: e.value, atLogical: e.position)
         case let e as EnemyDiedEvent:
             self.showEnemyDeathEffect(for: e.entity)
-            // Hide timer when boss dies
+            // Hide boss UI when any boss dies or despawns
             if e.entity.component(ofType: BossComponent.self) != nil {
                 self.hideTimeBonusTimer()
+                self.hideBossBar()
             }
         case let e as BossIntroStartedEvent:
             // Show timer when midboss with time bonus spawns
@@ -440,6 +441,10 @@ class GameScene: SKScene, EventListener {
     
     private func hideTimeBonusTimer() {
         timeBonusLabel?.isHidden = true
+    }
+    
+    private func hideBossBar() {
+        bossLayer.isHidden = true
     }
     
     private func updateTimeBonusTimer() {

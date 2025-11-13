@@ -275,6 +275,8 @@ final class EnemySystem: GameSystem {
             if offscreenBottom || offscreenTop {
                 if isBoss {
                     print("EnemySystem: Boss went offscreen (y: \(transform.position.y)), despawning")
+                    // Fire event so UI can clean up (boss bar, timer)
+                    eventBus.fire(BossFledEvent(bossEntity: enemy))
                 }
                 context.entities.destroy(enemy)
             }

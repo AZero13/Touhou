@@ -128,16 +128,16 @@ class GameScene: SKScene, EventListener {
             // Process events during dialogue (for spawn triggers, etc.)
             GameFacade.shared.processEvents()
             
-            // Update timer
-            updateTimeBonusTimer()
+            // Update boss UI (bar and timer)
+            updateBossUI()
             return
         }
         
         // Update game logic (this will also update InputManager)
         GameFacade.shared.update(currentTime)
         
-        // Update time bonus timer if visible
-        updateTimeBonusTimer()
+        // Update boss UI (bar and timer)
+        updateBossUI()
     }
     
     override func didFinishUpdate() {
@@ -167,20 +167,12 @@ class GameScene: SKScene, EventListener {
             self.showFloatingScore(value: e.value, atLogical: e.position)
         case let e as EnemyDiedEvent:
             self.showEnemyDeathEffect(for: e.entity)
-            // Hide boss UI when any boss dies or despawns
-            if e.entity.component(ofType: BossComponent.self) != nil {
-                self.hideTimeBonusTimer()
-                self.hideBossBar()
-            }
-        case let e as BossIntroStartedEvent:
-            // Show timer when midboss with time bonus spawns
-            if let bossComp = e.bossEntity.component(ofType: BossComponent.self) {
-                print("GameScene: BossIntroStartedEvent received, hasTimeBonus: \(bossComp.hasTimeBonus)")
-                if bossComp.hasTimeBonus {
-                    print("GameScene: Showing time bonus timer")
-                    self.showTimeBonusTimer()
-                }
-            }
+        case is BossFledEvent:
+            // Boss escaped (no death effect)
+            break
+        case is BossIntroStartedEvent:
+            // Boss UI will be shown automatically by updateBossUI()
+            break
         case let e as TimeBonusAwardedEvent:
             self.showTimeBonusText(bonus: e.bonusPoints, atLogical: e.position)
         case let e as TimeBonusFailedEvent:
@@ -435,41 +427,40 @@ class GameScene: SKScene, EventListener {
         self.timeBonusLabel = label
     }
     
-    private func showTimeBonusTimer() {
-        timeBonusLabel?.isHidden = false
-    }
     
-    private func hideTimeBonusTimer() {
-        timeBonusLabel?.isHidden = true
-    }
-    
-    private func hideBossBar() {
-        bossLayer.isHidden = true
-    }
-    
-    private func updateTimeBonusTimer() {
-        guard let label = timeBonusLabel, !label.isHidden else { return }
-        
-        // Find active midboss with time bonus
+    /// Update boss UI (bar and timer) based on current game state
+    /// This is the single source of truth for boss UI visibility
+    private func updateBossUI() {
         let bosses = GameFacade.shared.entities.getEntities(with: BossComponent.self)
+        
+        // No bosses? Hide all boss UI
         guard let boss = bosses.first,
-              let bossComp = boss.component(ofType: BossComponent.self),
-              bossComp.hasTimeBonus else {
-            hideTimeBonusTimer()
+              let bossComp = boss.component(ofType: BossComponent.self) else {
+            bossLayer.isHidden = true
+            timeBonusLabel?.isHidden = true
             return
         }
         
-        let remainingTime = max(0, bossComp.timeLimit - bossComp.elapsedTime)
-        let seconds = Int(ceil(remainingTime))
-        label.text = "TIME \(seconds)"
+        // Boss exists - show boss bar
+        bossLayer.isHidden = false
         
-        // Change color based on remaining time (red when running out)
-        if remainingTime < 5.0 {
-            label.fontColor = .red
-        } else if remainingTime < 10.0 {
-            label.fontColor = .yellow
+        // Update timer if boss has time bonus
+        if bossComp.hasTimeBonus {
+            timeBonusLabel?.isHidden = false
+            let remainingTime = max(0, bossComp.timeLimit - bossComp.elapsedTime)
+            let seconds = Int(ceil(remainingTime))
+            timeBonusLabel?.text = "TIME \(seconds)"
+            
+            // Change color based on remaining time (red when running out)
+            if remainingTime < 5.0 {
+                timeBonusLabel?.fontColor = .red
+            } else if remainingTime < 10.0 {
+                timeBonusLabel?.fontColor = .yellow
+            } else {
+                timeBonusLabel?.fontColor = .white
+            }
         } else {
-            label.fontColor = .white
+            timeBonusLabel?.isHidden = true
         }
     }
     

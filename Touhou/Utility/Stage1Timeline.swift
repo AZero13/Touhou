@@ -164,8 +164,9 @@ enum Stage1Timeline {
             }
         )
         
-        // More waves after midboss (continues while midboss is active)
-        let postMidbossWaveStart = midbossSpawnTime + 8.0
+        // More waves AFTER midboss (TH06 spawns these after midboss is defeated/leaves)
+        // Timeline continues advancing, but spawns are blocked while boss is present
+        let postMidbossWaveStart = midbossSpawnTime + 22.0  // After midboss timeout
         let finalBurstPositions: [(x: CGFloat, side: Bool)] = [
             (32, true), (64, true), (40, true), (72, true),
             (48, true), (80, true), (56, true), (88, true),
@@ -175,12 +176,12 @@ enum Stage1Timeline {
         
         for (index, pos) in finalBurstPositions.enumerated() {
             builder = builder.addEnemy(
-                at: postMidbossWaveStart + TimeInterval(index) * 0.16,
+                at: postMidbossWaveStart + TimeInterval(index) * 0.25,
                 type: .fairy,
                 position: CGPoint(x: pos.x, y: 420),
-                velocity: CGVector(dx: 0, dy: -80),
+                velocity: CGVector(dx: 0, dy: -60),
                 dropItem: .point,
-                autoShoot: false  // No shooting, just fast dive
+                autoShoot: false
             )
         }
         

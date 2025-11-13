@@ -96,7 +96,8 @@ final class StageTimeline {
             if timer >= step.time {
                 // Execute event, but skip enemy spawns if boss is present (like TH06)
                 if case .spawnEnemy = step.event, bossPresent {
-                    print("StageTimeline: Skipping enemy spawn (boss present)")
+                    // Skip spawn but still advance (like TH06)
+                    // print("StageTimeline: Skipping enemy spawn at \(step.time) (boss present)")
                 } else {
                     executeEvent(step.event, entityManager: entityManager, eventBus: eventBus)
                 }
@@ -108,6 +109,7 @@ final class StageTimeline {
         
         // Timeline complete when all steps processed
         if currentStepIndex >= steps.count {
+            print("StageTimeline: ✓ All \(steps.count) steps complete, marking timeline complete")
             isActive = false
         }
     }

@@ -182,6 +182,8 @@ class GameScene: SKScene, EventListener {
             }
         case let e as TimeBonusAwardedEvent:
             self.showTimeBonusText(bonus: e.bonusPoints, atLogical: e.position)
+        case let e as TimeBonusFailedEvent:
+            self.showFailedText(atLogical: e.position)
         case let e as DialogueTriggeredEvent:
             self.startDialogue(dialogueId: e.dialogueId)
         case is BombActivatedEvent:
@@ -488,6 +490,30 @@ class GameScene: SKScene, EventListener {
         
         effectLayer.addChild(label)
         label.run(bonusAction)
+    }
+    
+    private func showFailedText(atLogical position: CGPoint) {
+        let scaleX = size.width / GameFacade.playArea.width
+        let scaleY = size.height / GameFacade.playArea.height
+        let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
+        
+        let label = SKLabelNode(text: "FAILED")
+        label.fontName = "Menlo-Bold"
+        label.fontSize = 28 * max(scaleX, scaleY)
+        label.fontColor = .red  // Red for failed
+        label.position = scenePosition
+        label.zPosition = 350  // Above everything else
+        label.verticalAlignmentMode = .center
+        label.horizontalAlignmentMode = .center
+        
+        // Fade out over 2 seconds
+        let moveUp = SKAction.moveBy(x: 0, y: 50, duration: 2.0)
+        let fadeOut = SKAction.fadeOut(withDuration: 2.0)
+        let remove = SKAction.removeFromParent()
+        let failAction = SKAction.sequence([.group([moveUp, fadeOut]), remove])
+        
+        effectLayer.addChild(label)
+        label.run(failAction)
     }
 
     // MARK: - Effects

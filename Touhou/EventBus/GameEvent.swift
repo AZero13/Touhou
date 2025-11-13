@@ -375,3 +375,15 @@ struct SpawnStageBossEvent: GameEvent, Sendable {
         self.timestamp = CACurrentMediaTime()
     }
 }
+
+struct TimeBonusFailedEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    let bossName: String
+    let position: CGPoint
+    
+    init(bossName: String, position: CGPoint) {
+        self.timestamp = CACurrentMediaTime()
+        self.bossName = bossName
+        self.position = position
+    }
+}

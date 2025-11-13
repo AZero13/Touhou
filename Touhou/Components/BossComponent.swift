@@ -49,7 +49,33 @@ final class BossComponent: GKComponent {
     override func update(deltaTime: TimeInterval) {
         if hasTimeBonus {
             elapsedTime += deltaTime
+            
+            // When time expires, trigger escape
+            if isTimeExpired && entity != nil {
+                handleTimeExpired()
+            }
         }
+    }
+    
+    private func handleTimeExpired() {
+        guard let entity = entity else { return }
+        
+        // Make midboss leave offscreen
+        if let transform = entity.component(ofType: TransformComponent.self) {
+            let exitPosition = CGPoint(x: GameFacade.playArea.midX, y: 500)
+            transform.moveTo(position: exitPosition, duration: 1.5)
+        }
+        
+        // Fire event for "FAILED" text
+        if let transform = entity.component(ofType: TransformComponent.self) {
+            GameFacade.shared.fireEvent(TimeBonusFailedEvent(
+                bossName: name,
+                position: transform.position
+            ))
+        }
+        
+        // Mark as no longer having time bonus (prevent repeated triggers)
+        hasTimeBonus = false
     }
 }
 

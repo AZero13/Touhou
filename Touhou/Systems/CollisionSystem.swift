@@ -26,7 +26,7 @@ final class CollisionSystem: GameSystem {
     private enum CollisionRadius {
         static let player: CGFloat = 8.0
         static let bullet: CGFloat = 3.0
-        static let enemy: CGFloat = 12.0
+        static let enemy: CGFloat = 9.0
         static let item: CGFloat = 6.0
         static let generic: CGFloat = 5.0
     }

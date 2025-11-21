@@ -10,6 +10,7 @@ import CoreGraphics
 import GameplayKit
 
 enum PlayerUtility {
+    @inlinable
     static func getPosition(entityManager: EntityManager) -> CGPoint? {
         entityManager.getPlayerEntity()?.component(ofType: TransformComponent.self)?.position
     }
@@ -19,6 +20,7 @@ enum PlayerUtility {
         atan2(playerPosition.y - position.y, playerPosition.x - position.x)
     }
     
+    @inlinable
     static func angleToPlayer(from position: CGPoint, entityManager: EntityManager) -> CGFloat? {
         guard let playerPos = getPosition(entityManager: entityManager) else { return nil }
         return angleToPlayer(from: position, playerPosition: playerPos)
@@ -30,6 +32,7 @@ enum PlayerUtility {
         return CGVector(dx: cos(angle) * speed, dy: sin(angle) * speed)
     }
     
+    @inlinable
     static func velocityToPlayer(from position: CGPoint, speed: CGFloat, entityManager: EntityManager) -> CGVector? {
         guard let playerPos = getPosition(entityManager: entityManager) else { return nil }
         return velocityToPlayer(from: position, playerPosition: playerPos, speed: speed)
@@ -42,6 +45,7 @@ enum PlayerUtility {
         return sqrt(dx * dx + dy * dy)
     }
     
+    @inlinable
     static func distanceToPlayer(from position: CGPoint, entityManager: EntityManager) -> CGFloat? {
         guard let playerPos = getPosition(entityManager: entityManager) else { return nil }
         return distanceToPlayer(from: position, playerPosition: playerPos)

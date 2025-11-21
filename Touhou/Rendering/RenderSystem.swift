@@ -16,6 +16,11 @@ final class RenderSystem {
     private var logicalWidth: CGFloat { GameFacade.playArea.width }
     private var logicalHeight: CGFloat { GameFacade.playArea.height }
     
+    private enum VisualConstants {
+        static let fairyRadius: CGFloat = 9
+        static let bossRadius: CGFloat = 16
+    }
+    
     /// Sync entities with their visual representations
     /// - Parameters:
     ///   - entities: Entity facade to get all entities from
@@ -127,6 +132,8 @@ final class RenderSystem {
         // Determine entity type and create appropriate node
         if entity.component(ofType: PlayerComponent.self) != nil {
             return createPlayerNode(for: entity)
+        } else if entity.component(ofType: BossComponent.self) != nil {
+            return createBossNode()
         } else if let bullet = entity.component(ofType: BulletComponent.self) {
             return createBulletNode(for: bullet)
         } else if entity.component(ofType: EnemyComponent.self) != nil {
@@ -203,10 +210,18 @@ final class RenderSystem {
     }
     
     private func createEnemyNode() -> SKNode {
-        let circle = SKShapeNode(circleOfRadius: 12)
+        let circle = SKShapeNode(circleOfRadius: VisualConstants.fairyRadius)
         circle.fillColor = .yellow
         circle.strokeColor = .clear
         circle.zPosition = 75
+        return circle
+    }
+    
+    private func createBossNode() -> SKNode {
+        let circle = SKShapeNode(circleOfRadius: VisualConstants.bossRadius)
+        circle.fillColor = .systemPink
+        circle.strokeColor = .clear
+        circle.zPosition = 80
         return circle
     }
     

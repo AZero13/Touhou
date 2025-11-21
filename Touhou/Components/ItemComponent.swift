@@ -119,7 +119,6 @@ final class ItemComponent: GKComponent {
             let normalizedY = itemPosition.y / playAreaHeight // 0.0 (bottom) to 1.0 (top)
             return max(100, Int(normalizedY * 1000)) // 100 to 1000
         case .pointBullet:
-            // TH06 formula: (grazeInStage / 3) * 10 + 500
             return (grazeInStage / 3) * 10 + 500
         case .bomb:
             return 0

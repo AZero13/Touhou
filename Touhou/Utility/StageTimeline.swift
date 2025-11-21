@@ -185,7 +185,7 @@ final class StageTimeline {
                 shotInterval: autoShoot ? interval : .infinity // Disable auto-shooting if false
             ))
             entity.addComponent(TransformComponent(position: position, velocity: velocity))
-            entity.addComponent(HitboxComponent(enemyHitbox: 12))
+            entity.addComponent(HitboxComponent(enemyHitbox: 9))
             entity.addComponent(HealthComponent(health: 1, maxHealth: 1))
             GameFacade.shared.registerEntity(entity)
             

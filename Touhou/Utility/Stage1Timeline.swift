@@ -19,8 +19,8 @@ enum Stage1Timeline {
     static func create() -> StageTimeline {
         let playArea = GameFacade.playArea
         let centerX = playArea.midX
-        // Fairy hitbox is 12 pixels, so spacing is 12 pixels (1 unit) apart
-        let fairySize: CGFloat = 12 // Enemy hitbox size (1 unit)
+        // Fairy hitbox is 9 pixels, so spacing is 9 pixels (1 unit) apart
+        let fairySize: CGFloat = 9 // Enemy hitbox size (1 unit)
         
         // Build timeline step by step (like ECL script with explicit calls)
         var builder = TimelineBuilder.create()
@@ -232,7 +232,6 @@ enum Stage1Timeline {
             scheduleMidbossMovementPattern(transform: transform, playArea: playArea)
         }
         
-        // Fire boss intro event to trigger timer display
         print("Stage1Timeline: Firing BossIntroStartedEvent for Rumia")
         GameFacade.shared.fireEvent(BossIntroStartedEvent(bossEntity: rumia))
         print("Stage1Timeline: Rumia spawned with hasTimeBonus: \(rumia.component(ofType: BossComponent.self)?.hasTimeBonus ?? false)")

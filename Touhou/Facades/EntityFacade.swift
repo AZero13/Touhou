@@ -53,7 +53,7 @@ final class EntityFacade {
         ))
         entity.addComponent(TransformComponent(position: position, velocity: .zero))
         entity.addComponent(HealthComponent(health: health, maxHealth: health))
-        entity.addComponent(HitboxComponent(enemyHitbox: 16))
+        entity.addComponent(HitboxComponent(enemyHitbox: 14))
         registerEntity(entity)
         return entity
     }
@@ -76,7 +76,7 @@ final class EntityFacade {
             shotInterval: shotInterval
         ))
         entity.addComponent(TransformComponent(position: position, velocity: CGVector(dx: 0, dy: -50)))
-        entity.addComponent(HitboxComponent(enemyHitbox: 12))
+        entity.addComponent(HitboxComponent(enemyHitbox: 9))
         entity.addComponent(HealthComponent(health: 1, maxHealth: 1))
         registerEntity(entity)
         return entity

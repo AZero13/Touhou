@@ -27,6 +27,7 @@ class GameScene: SKScene, EventListener {
     private var dialogueAnnotationLabel: SKLabelNode?
     private var currentDialogue: DialogueSequence?
     private var currentDialogueIndex: Int = 0
+    private var wasTimeFrozenBeforeDialogue: Bool = false
     
     // Layers
     private var worldLayer: SKNode!      // Game entities: bullets, enemies, player, items
@@ -117,16 +118,11 @@ class GameScene: SKScene, EventListener {
     override func update(_ currentTime: TimeInterval) {
         // Check for dialogue advancement (before game update)
         if dialogueBox?.isHidden == false {
-            // Update input manually during dialogue (GameFacade.update won't be called)
-            InputManager.shared.update()
-            
+            GameFacade.shared.update(currentTime)
             let input = InputManager.shared.currentInput
             if input.shoot.justPressed {
                 advanceDialogue()
             }
-            
-            // Process events during dialogue (for spawn triggers, etc.)
-            GameFacade.shared.processEvents()
             
             // Update boss UI (bar and timer)
             updateBossUI()
@@ -174,7 +170,7 @@ class GameScene: SKScene, EventListener {
             // Boss UI will be shown automatically by updateBossUI()
             break
         case let e as TimeBonusAwardedEvent:
-            self.showTimeBonusText(bonus: e.bonusPoints, atLogical: e.position)
+            self.showTimeBonusText(bonus: e.bonusPoints)
         case let e as TimeBonusFailedEvent:
             self.showFailedText(atLogical: e.position)
         case let e as DialogueTriggeredEvent:
@@ -338,6 +334,8 @@ class GameScene: SKScene, EventListener {
         
         currentDialogue = dialogue
         currentDialogueIndex = 0
+        wasTimeFrozenBeforeDialogue = GameFacade.shared.isTimeFrozen
+        GameFacade.shared.isTimeFrozen = true
         
         // Show dialogue box
         dialogueBox?.isHidden = false
@@ -399,6 +397,7 @@ class GameScene: SKScene, EventListener {
         
         // Hide dialogue box
         dialogueBox?.isHidden = true
+        GameFacade.shared.isTimeFrozen = wasTimeFrozenBeforeDialogue
         
         // Fire completion event
         GameFacade.shared.fireEvent(DialogueCompletedEvent(dialogueId: dialogue.id))
@@ -464,16 +463,15 @@ class GameScene: SKScene, EventListener {
         }
     }
     
-    private func showTimeBonusText(bonus: Int, atLogical position: CGPoint) {
-        let scaleX = size.width / GameFacade.playArea.width
-        let scaleY = size.height / GameFacade.playArea.height
-        let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
+    private func showTimeBonusText(bonus: Int) {
+        // Always show bonus text in the center of the screen
+        let centerPosition = CGPoint(x: size.width / 2, y: size.height / 2)
         
         let label = SKLabelNode(text: "BONUS \(bonus)")
         label.fontName = "Menlo-Bold"
-        label.fontSize = 28 * max(scaleX, scaleY)
+        label.fontSize = 28
         label.fontColor = .yellow  // Yellow for bonus (like TH06)
-        label.position = scenePosition
+        label.position = centerPosition
         label.zPosition = 350  // Above everything else
         label.verticalAlignmentMode = .center
         label.horizontalAlignmentMode = .center

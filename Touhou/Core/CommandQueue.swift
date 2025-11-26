@@ -98,7 +98,12 @@ final class CommandQueue {
         if !health.isAlive {
             if let enemy = entity.component(ofType: EnemyComponent.self) {
                 eventBus.fire(EnemyDiedEvent(entity: entity, scoreValue: enemy.scoreValue, dropItem: enemy.dropItem))
+                
+                // Don't mark midbosses for destruction - they flee instead
+                let isMidboss = entity.component(ofType: BossComponent.self)?.phaseNumber == 0
+                if !isMidboss {
                 entityManager.markForDestruction(entity)
+                }
             }
         }
     }

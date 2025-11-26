@@ -31,7 +31,7 @@ final class EnemySystem: GameSystem {
         static let bossHealth: Int = 300
         static let bossPhaseNumber: Int = 1
         static let bossSpawnBreakDuration: TimeInterval = 1.5
-        static let stage1DialogueDelay: TimeInterval = 2.0
+        static let preBossDialogueDelay: TimeInterval = 1.5  // Time to wait for cleanup before dialogue
     }
     
     func initialize(context: GameRuntimeContext) {
@@ -69,6 +69,11 @@ final class EnemySystem: GameSystem {
             if timeline.isComplete && timelineCompleteTime == nil {
                 timelineCompleteTime = stageTimer
                 print("EnemySystem: ✓ Timeline complete at time \(stageTimer), stage \(context.currentStage)")
+                
+                // Clear all enemies and bullets when timeline completes
+                clearRegularEnemies(context: context)
+                BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
+                print("EnemySystem: Cleared enemies and bullets for boss dialogue")
             }
         } else {
             spawnEnemiesFromScript(context: context)
@@ -87,13 +92,21 @@ final class EnemySystem: GameSystem {
         
         // Stage 1: Boss spawns via dialogue trigger (SpawnStageBossEvent), not time-based
         if context.currentStage == 1 {
-            // Check if we should trigger dialogue (timeline complete + no bosses active)
+            // Wait for cleanup to complete before triggering dialogue
             if let completeTime = timelineCompleteTime {
                 let timeSinceComplete = stageTimer - completeTime
-                print("EnemySystem: Stage 1 check - timeSinceComplete: \(timeSinceComplete), dialogueTriggered: \(dialogueTriggered)")
-                // Trigger dialogue after short pause once timeline completes
-                if timeSinceComplete >= Constants.stage1DialogueDelay && !dialogueTriggered {
-                    print("EnemySystem: ✓ Triggering stage 1 boss dialogue NOW")
+                
+                // Check if cleanup is done (enemies and bullets cleared)
+                let remainingEnemies = entityManager.getEntities(with: EnemyComponent.self)
+                    .filter { $0.component(ofType: BossComponent.self) == nil }
+                let remainingBullets = entityManager.getEntities(with: BulletComponent.self)
+                
+                // Trigger dialogue after delay and when arena is clear
+                if timeSinceComplete >= Constants.preBossDialogueDelay && 
+                   remainingEnemies.isEmpty && 
+                   remainingBullets.isEmpty && 
+                   !dialogueTriggered {
+                    print("EnemySystem: ✓ Arena cleared, triggering stage 1 boss dialogue NOW")
                     eventBus.fire(DialogueTriggeredEvent(dialogueId: "stage1_boss"))
                     dialogueTriggered = true  // Prevent re-triggering dialogue
                 }

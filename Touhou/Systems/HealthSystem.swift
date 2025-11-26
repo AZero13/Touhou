@@ -61,6 +61,14 @@ final class HealthSystem: GameSystem {
     
     private func handleEnemyDeath(_ event: EnemyDiedEvent, context: GameRuntimeContext) {
         if let bossComponent = event.entity.component(ofType: BossComponent.self) {
+            // Check if this is a midboss (phaseNumber == 0)
+            let isMidboss = bossComponent.phaseNumber == 0
+            
+            if isMidboss {
+                // Midboss defeated - make it fly away instead of despawning
+                makeMidbossFlee(entity: event.entity, bossComponent: bossComponent)
+            }
+            
             // Boss defeated
             BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
             eventBus.fire(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
@@ -86,5 +94,20 @@ final class HealthSystem: GameSystem {
                 context.entities.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: 40))
             }
         }
+    }
+    
+    private func makeMidbossFlee(entity: GKEntity, bossComponent: BossComponent) {
+        guard let transform = entity.component(ofType: TransformComponent.self),
+              let enemyComponent = entity.component(ofType: EnemyComponent.self) else { return }
+        
+        // Disable shooting
+        enemyComponent.shotInterval = .infinity
+        
+        // Make midboss fly upward to escape
+        let playArea = GameFacade.playArea
+        let escapePosition = CGPoint(x: playArea.midX, y: playArea.height + 50) // Above screen
+        transform.moveTo(position: escapePosition, duration: 1.5)
+        
+        print("HealthSystem: Midboss \(bossComponent.name) defeated, fleeing upward")
     }
 }

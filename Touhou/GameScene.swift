@@ -177,7 +177,7 @@ class GameScene: SKScene, EventListener {
         case let e as EnemyDiedEvent:
             self.showEnemyDeathEffect(for: e.entity)
         case is BossDefeatedEvent:
-            // Boss defeated - hide UI immediately (boss will flee)
+            // Boss defeated - hide health bar and timer immediately (boss will flee or vanish)
             bossLayer.isHidden = true
             timeBonusLabel?.isHidden = true
             // Remove spell card effect (spell card succeeded)
@@ -185,6 +185,7 @@ class GameScene: SKScene, EventListener {
         case is BossFledEvent:
             // Boss fled - remove spell card effect (spell card ended)
             removeSpellCardEffect()
+            // Health bar will be hidden automatically when boss entity is destroyed
             break
         case let e as BossIntroStartedEvent:
             // Create persistent spell card effect around boss
@@ -464,14 +465,15 @@ class GameScene: SKScene, EventListener {
             return
         }
         
-        // Hide UI immediately if boss is defeated (even if entity still exists while fleeing)
-        guard !bossComp.isDefeated else {
-            bossLayer.isHidden = true
+        // Hide timer if boss is defeated
+        if bossComp.isDefeated {
             timeBonusLabel?.isHidden = true
+            // Hide health bar when boss is defeated (it will flee or vanish)
+            bossLayer.isHidden = true
             return
         }
         
-        // Boss exists - show boss bar
+        // Boss exists and not defeated - show boss bar
         bossLayer.isHidden = false
         
         // Update timer if boss has time bonus

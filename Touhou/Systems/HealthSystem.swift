@@ -68,14 +68,16 @@ final class HealthSystem: GameSystem {
             // Check if this is a midboss (phaseNumber == 0)
             let isMidboss = bossComponent.phaseNumber == 0
             
-            // Make boss flee (both midboss and stage boss)
-            makeBossFlee(entity: event.entity, bossComponent: bossComponent, isMidboss: isMidboss)
+            // Midbosses flee away, stage bosses vanish immediately
+            if isMidboss {
+                makeBossFlee(entity: event.entity, bossComponent: bossComponent)
+            }
             
             // Boss defeated
             BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
             eventBus.fire(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
             
-            // Award time bonus if applicable (only once, before boss flees)
+            // Award time bonus if applicable (only once, before boss flees/vanishes)
             if bossComponent.hasTimeBonus && !bossComponent.isTimeExpired {
                 let bonus = bossComponent.calculateTimeBonus()
                 if bonus > 0 {
@@ -101,19 +103,25 @@ final class HealthSystem: GameSystem {
         }
     }
     
-    private func makeBossFlee(entity: GKEntity, bossComponent: BossComponent, isMidboss: Bool) {
+    private func makeBossFlee(entity: GKEntity, bossComponent: BossComponent) {
         guard let transform = entity.component(ofType: TransformComponent.self),
               let enemyComponent = entity.component(ofType: EnemyComponent.self) else { return }
+        
+        // Clear any ongoing movement pattern
+        bossComponent.clearMovementPattern()
+        
+        // Clear any existing target movement
+        transform.clearTargetMovement()
         
         // Disable shooting
         enemyComponent.shotInterval = .infinity
         
-        // Make boss fly upward to escape
+        // Make midboss fly upward to escape (force movement even though defeated)
         let playArea = GameFacade.playArea
         let escapePosition = CGPoint(x: playArea.midX, y: playArea.height + 50) // Above screen
-        transform.moveTo(position: escapePosition, duration: 1.5)
+        transform.moveTo(position: escapePosition, duration: 1.5, force: true)
         
-        let bossType = isMidboss ? "Midboss" : "Stage boss"
-        print("HealthSystem: \(bossType) \(bossComponent.name) defeated, fleeing upward")
+        print("HealthSystem: Midboss \(bossComponent.name) defeated, fleeing upward")
     }
+    
 }

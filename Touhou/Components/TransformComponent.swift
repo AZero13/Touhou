@@ -33,7 +33,16 @@ final class TransformComponent: GKComponent {
     }
     
     /// Move to a target position over a duration (used by bosses)
-    func moveTo(position: CGPoint, duration: TimeInterval) {
+    /// - Parameter force: If true, allows movement even if boss is defeated (for flee movement)
+    func moveTo(position: CGPoint, duration: TimeInterval, force: Bool = false) {
+        // Check if boss is defeated - if so, don't override flee movement unless forced
+        if !force {
+            if let bossComponent = entity?.component(ofType: BossComponent.self),
+               bossComponent.isDefeated {
+                return  // Don't override flee movement
+            }
+        }
+        
         self.moveStartPosition = self.position
         self.targetPosition = position
         self.movementDuration = duration
@@ -61,5 +70,13 @@ final class TransformComponent: GKComponent {
     
     var isMovingToTarget: Bool {
         return targetPosition != nil
+    }
+    
+    /// Clear any ongoing target movement (used when boss is defeated)
+    func clearTargetMovement() {
+        targetPosition = nil
+        moveStartPosition = nil
+        movementElapsed = 0
+        movementDuration = 0
     }
 }

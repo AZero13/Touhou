@@ -23,6 +23,16 @@ final class BossComponent: GKComponent {
     // Defeat state
     var isDefeated: Bool = false
     
+    // Movement pattern (for bosses with scheduled movements)
+    struct MovementStep {
+        let position: CGPoint
+        let delay: TimeInterval  // Time to wait before moving to this position
+        let duration: TimeInterval  // How long to take to reach this position
+    }
+    var movementPattern: [MovementStep] = []
+    var movementPatternStartTime: TimeInterval = 0
+    var movementPatternIndex: Int = 0
+    
     init(name: String, phaseNumber: Int = 1, hasTimeBonus: Bool = false, timeLimit: TimeInterval = 20.0, bonusPointsBase: Int = 10000) {
         self.name = name
         self.phaseNumber = phaseNumber
@@ -50,8 +60,11 @@ final class BossComponent: GKComponent {
     }
     
     override func update(deltaTime: TimeInterval) {
-        // Stop updating timer when defeated
+        // Stop updating when defeated
         guard !isDefeated else { return }
+        
+        // Update movement pattern if one exists
+        updateMovementPattern(deltaTime: deltaTime)
         
         if hasTimeBonus {
             elapsedTime += deltaTime
@@ -63,13 +76,61 @@ final class BossComponent: GKComponent {
         }
     }
     
+    private func updateMovementPattern(deltaTime: TimeInterval) {
+        guard !movementPattern.isEmpty,
+              let transform = entity?.component(ofType: TransformComponent.self),
+              movementPatternIndex < movementPattern.count else { return }
+        
+        // Calculate elapsed time since pattern started
+        let currentTime = CACurrentMediaTime()
+        if movementPatternStartTime == 0 {
+            movementPatternStartTime = currentTime
+        }
+        let patternElapsed = currentTime - movementPatternStartTime
+        
+        // Calculate cumulative delay up to current step
+        var cumulativeDelay: TimeInterval = 0
+        for i in 0..<movementPatternIndex {
+            cumulativeDelay += movementPattern[i].delay
+        }
+        
+        // Check if it's time to start moving to the next position
+        let step = movementPattern[movementPatternIndex]
+        let stepStartTime = cumulativeDelay
+        
+        if patternElapsed >= stepStartTime && !transform.isMovingToTarget {
+            // Time to start this movement
+            transform.moveTo(position: step.position, duration: step.duration)
+        }
+        
+        // Check if we should advance to next step (current movement complete + delay elapsed)
+        let stepCompleteTime = stepStartTime + step.duration
+        if patternElapsed >= stepCompleteTime && !transform.isMovingToTarget {
+            movementPatternIndex += 1
+        }
+    }
+    
+    /// Set a movement pattern for the boss
+    func setMovementPattern(_ pattern: [MovementStep]) {
+        movementPattern = pattern
+        movementPatternStartTime = CACurrentMediaTime()
+        movementPatternIndex = 0
+    }
+    
+    /// Clear movement pattern (e.g., when boss is defeated)
+    func clearMovementPattern() {
+        movementPattern = []
+        movementPatternStartTime = 0
+        movementPatternIndex = 0
+    }
+    
     private func handleTimeExpired() {
         guard let entity = entity else { return }
         
-        // Make midboss leave offscreen
+        // Make midboss leave offscreen (force movement even though time expired)
         if let transform = entity.component(ofType: TransformComponent.self) {
             let exitPosition = CGPoint(x: GameFacade.playArea.midX, y: 500)
-            transform.moveTo(position: exitPosition, duration: 1.5)
+            transform.moveTo(position: exitPosition, duration: 1.5, force: true)
         }
         
         // Fire event for "FAILED" text

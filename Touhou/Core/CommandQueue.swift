@@ -99,11 +99,13 @@ final class CommandQueue {
             if let enemy = entity.component(ofType: EnemyComponent.self) {
                 eventBus.fire(EnemyDiedEvent(entity: entity, scoreValue: enemy.scoreValue, dropItem: enemy.dropItem))
                 
-                // Don't mark midbosses for destruction - they flee instead
+                // Midbosses (phaseNumber == 0) flee away, stage bosses (phaseNumber >= 1) vanish immediately
                 let isMidboss = entity.component(ofType: BossComponent.self)?.phaseNumber == 0
                 if !isMidboss {
-                entityManager.markForDestruction(entity)
+                    // Stage bosses vanish immediately
+                    entityManager.markForDestruction(entity)
                 }
+                // Midbosses are handled in HealthSystem - they flee instead
             }
         }
     }

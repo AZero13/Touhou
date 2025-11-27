@@ -223,13 +223,22 @@ enum Stage1Timeline {
             enemyComponent.dropItem = .bomb
         }
         
-        // Start movement pattern: move to first position
-        if let transform = rumia.component(ofType: TransformComponent.self) {
+        // Set up movement pattern
+        if let transform = rumia.component(ofType: TransformComponent.self),
+           let bossComponent = rumia.component(ofType: BossComponent.self) {
             // Move to right side of screen over 1 second (like ECL ins_57(60, 320, 128))
             transform.moveTo(position: CGPoint(x: playArea.maxX - 64, y: 256), duration: 1.0)
             
-            // Schedule subsequent movements
-            scheduleMidbossMovementPattern(transform: transform, playArea: playArea)
+            // Set movement pattern (will be executed by BossComponent.update())
+            let centerX = playArea.midX
+            let pattern: [BossComponent.MovementStep] = [
+                BossComponent.MovementStep(position: CGPoint(x: centerX, y: 288), delay: 3.5, duration: 1.0),
+                BossComponent.MovementStep(position: CGPoint(x: playArea.minX + 64, y: 272), delay: 3.5, duration: 1.0),
+                BossComponent.MovementStep(position: CGPoint(x: centerX, y: 304), delay: 3.5, duration: 1.0),
+                BossComponent.MovementStep(position: CGPoint(x: playArea.maxX - 64, y: 272), delay: 3.5, duration: 1.0),
+                BossComponent.MovementStep(position: CGPoint(x: centerX, y: 450), delay: 3.5, duration: 1.0)
+            ]
+            bossComponent.setMovementPattern(pattern)
         }
         
         print("Stage1Timeline: Firing BossIntroStartedEvent for Rumia")
@@ -237,27 +246,5 @@ enum Stage1Timeline {
         print("Stage1Timeline: Rumia spawned with hasTimeBonus: \(rumia.component(ofType: BossComponent.self)?.hasTimeBonus ?? false)")
     }
     
-    private static func scheduleMidbossMovementPattern(transform: TransformComponent, playArea: CGRect) {
-        let centerX = playArea.midX
-        let moveDuration = 1.0
-        
-        // Schedule movements via dispatch queue (non-game-loop timing)
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 3_500_000_000)  // 3.5 seconds
-            transform.moveTo(position: CGPoint(x: centerX, y: 288), duration: moveDuration)
-            
-            try? await Task.sleep(nanoseconds: 3_500_000_000)  // +3.5 = 7 seconds total
-            transform.moveTo(position: CGPoint(x: playArea.minX + 64, y: 272), duration: moveDuration)
-            
-            try? await Task.sleep(nanoseconds: 3_500_000_000)  // +3.5 = 10.5 seconds total
-            transform.moveTo(position: CGPoint(x: centerX, y: 304), duration: moveDuration)
-            
-            try? await Task.sleep(nanoseconds: 3_500_000_000)  // +3.5 = 14 seconds total
-            transform.moveTo(position: CGPoint(x: playArea.maxX - 64, y: 272), duration: moveDuration)
-            
-            try? await Task.sleep(nanoseconds: 3_500_000_000)  // +3.5 = 17.5 seconds total
-            transform.moveTo(position: CGPoint(x: centerX, y: 450), duration: moveDuration)
-        }
-    }
 }
 

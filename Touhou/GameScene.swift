@@ -180,10 +180,11 @@ class GameScene: SKScene, EventListener {
             // Boss defeated - hide UI immediately (boss will flee)
             bossLayer.isHidden = true
             timeBonusLabel?.isHidden = true
-            // Remove spell card effect
+            // Remove spell card effect (spell card succeeded)
             removeSpellCardEffect()
         case is BossFledEvent:
-            // Boss escaped (no death effect)
+            // Boss fled - remove spell card effect (spell card ended)
+            removeSpellCardEffect()
             break
         case let e as BossIntroStartedEvent:
             // Create persistent spell card effect around boss
@@ -194,6 +195,8 @@ class GameScene: SKScene, EventListener {
             self.showTimeBonusText(bonus: e.bonusPoints)
         case let e as TimeBonusFailedEvent:
             self.showFailedText(atLogical: e.position)
+            // Remove spell card effect (spell card failed - time expired)
+            removeSpellCardEffect()
         case let e as DialogueTriggeredEvent:
             self.startDialogue(dialogueId: e.dialogueId)
         case is BombActivatedEvent:

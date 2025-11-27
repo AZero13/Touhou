@@ -20,6 +20,9 @@ final class BossComponent: GKComponent {
     var elapsedTime: TimeInterval = 0
     var bonusPointsBase: Int
     
+    // Defeat state
+    var isDefeated: Bool = false
+    
     init(name: String, phaseNumber: Int = 1, hasTimeBonus: Bool = false, timeLimit: TimeInterval = 20.0, bonusPointsBase: Int = 10000) {
         self.name = name
         self.phaseNumber = phaseNumber
@@ -47,6 +50,9 @@ final class BossComponent: GKComponent {
     }
     
     override func update(deltaTime: TimeInterval) {
+        // Stop updating timer when defeated
+        guard !isDefeated else { return }
+        
         if hasTimeBonus {
             elapsedTime += deltaTime
             

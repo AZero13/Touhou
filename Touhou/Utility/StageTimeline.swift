@@ -26,6 +26,20 @@ enum TimelineEvent {
         shotInterval: TimeInterval? = nil
     )
     
+    /// Spawn a boss at a position with attack pattern
+    case spawnBoss(
+        name: String,
+        health: Int,
+        position: CGPoint,
+        phaseNumber: Int,
+        attackPattern: EnemyPattern,
+        patternConfig: PatternConfig,
+        shotInterval: TimeInterval? = nil,
+        hasTimeBonus: Bool = false,
+        timeLimit: TimeInterval? = nil,
+        bonusPointsBase: Int? = nil
+    )
+    
     /// Make an enemy shoot (for enemies spawned with autoShoot: false)
     case enemyShoot(
         enemySelector: (EntityManager) -> [GKEntity], // Function to find enemies
@@ -136,6 +150,22 @@ final class StageTimeline {
                 entityManager: entityManager
             )
             
+        case .spawnBoss(let name, let health, let position, let phaseNumber, let attackPattern, let patternConfig, let shotInterval, let hasTimeBonus, let timeLimit, let bonusPointsBase):
+            spawnBoss(
+                name: name,
+                health: health,
+                position: position,
+                phaseNumber: phaseNumber,
+                attackPattern: attackPattern,
+                patternConfig: patternConfig,
+                shotInterval: shotInterval ?? 1.2,
+                hasTimeBonus: hasTimeBonus,
+                timeLimit: timeLimit,
+                bonusPointsBase: bonusPointsBase,
+                entityManager: entityManager,
+                eventBus: eventBus
+            )
+            
         case .enemyShoot(let selector, let pattern, let patternConfig):
             let enemies = selector(entityManager)
             for enemy in enemies {
@@ -190,10 +220,41 @@ final class StageTimeline {
             GameFacade.shared.registerEntity(entity)
             
         case .boss:
-            // Bosses are spawned by EnemySystem when timeline completes, not through timeline
+            // Bosses should be spawned via .spawnBoss timeline event, not .spawnEnemy
             // This case exists for exhaustiveness but shouldn't be used
             break
         }
+    }
+    
+    private func spawnBoss(
+        name: String,
+        health: Int,
+        position: CGPoint,
+        phaseNumber: Int,
+        attackPattern: EnemyPattern,
+        patternConfig: PatternConfig,
+        shotInterval: TimeInterval,
+        hasTimeBonus: Bool,
+        timeLimit: TimeInterval?,
+        bonusPointsBase: Int?,
+        entityManager: EntityManager,
+        eventBus: EventBus
+    ) {
+        let boss = GameFacade.shared.entities.spawnBoss(
+            name: name,
+            health: health,
+            position: position,
+            phaseNumber: phaseNumber,
+            attackPattern: attackPattern,
+            patternConfig: patternConfig,
+            shotInterval: shotInterval,
+            hasTimeBonus: hasTimeBonus,
+            timeLimit: timeLimit ?? 20.0,
+            bonusPointsBase: bonusPointsBase ?? 10000
+        )
+        
+        // Fire boss intro event
+        eventBus.fire(BossIntroStartedEvent(bossEntity: boss))
     }
 }
 
@@ -229,6 +290,39 @@ struct TimelineBuilder {
                 attackPattern: attackPattern,
                 patternConfig: patternConfig,
                 shotInterval: shotInterval
+            )
+        ))
+        return builder
+    }
+    
+    /// Add a boss spawn event
+    func addBoss(
+        at time: TimeInterval,
+        name: String,
+        health: Int,
+        position: CGPoint,
+        phaseNumber: Int = 1,
+        attackPattern: EnemyPattern = .tripleShot,
+        patternConfig: PatternConfig = PatternConfig(),
+        shotInterval: TimeInterval? = nil,
+        hasTimeBonus: Bool = false,
+        timeLimit: TimeInterval? = nil,
+        bonusPointsBase: Int? = nil
+    ) -> TimelineBuilder {
+        var builder = self
+        builder.steps.append(StageTimeline.Step(
+            time: time,
+            event: .spawnBoss(
+                name: name,
+                health: health,
+                position: position,
+                phaseNumber: phaseNumber,
+                attackPattern: attackPattern,
+                patternConfig: patternConfig,
+                shotInterval: shotInterval,
+                hasTimeBonus: hasTimeBonus,
+                timeLimit: timeLimit,
+                bonusPointsBase: bonusPointsBase
             )
         ))
         return builder

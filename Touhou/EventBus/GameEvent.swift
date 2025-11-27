@@ -388,6 +388,16 @@ struct TimeBonusFailedEvent: GameEvent, Sendable {
     }
 }
 
+struct BossDefeatedEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    let bossEntity: GKEntity
+    
+    init(bossEntity: GKEntity) {
+        self.timestamp = CACurrentMediaTime()
+        self.bossEntity = bossEntity
+    }
+}
+
 struct BossFledEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let bossEntity: GKEntity

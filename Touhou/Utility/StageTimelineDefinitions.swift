@@ -9,6 +9,7 @@
 
 import Foundation
 import CoreGraphics
+import GameplayKit
 
 /// Stage timeline definitions
 /// Each function creates a timeline for a specific stage
@@ -62,6 +63,35 @@ enum StageTimelineDefinitions {
                     bulletCount: 10
                 ),
                 shotInterval: 2.0
+            )
+            .addAction(
+                at: 60.0,
+                action: { entityManager, eventBus in
+                    // Clear arena before boss spawns
+                    let enemies = entityManager.getEntities(with: EnemyComponent.self)
+                    for enemy in enemies {
+                        if enemy.component(ofType: BossComponent.self) == nil {
+                            GameFacade.shared.entities.destroy(enemy)
+                        }
+                    }
+                    // Clear bullets (convertBulletsToPoints requires context, so just clear for default stage)
+                    BulletUtility.clearEnemyBullets(entityManager: entityManager, destroyEntity: GameFacade.shared.entities.destroy)
+                }
+            )
+            .addBoss(
+                at: 61.5,
+                name: "Stage Boss",
+                health: 300,
+                position: CGPoint(x: 192, y: 360),
+                phaseNumber: 1,
+                attackPattern: .tripleShot,
+                patternConfig: PatternConfig(
+                    physics: PhysicsConfig(speed: 120),
+                    visual: VisualConfig(shape: .star, color: .purple),
+                    bulletCount: 8,
+                    spread: 80,
+                    spiralSpeed: 12
+                )
             )
             .build()
     }

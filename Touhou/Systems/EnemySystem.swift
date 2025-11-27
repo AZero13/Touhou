@@ -14,7 +14,6 @@ final class EnemySystem: GameSystem {
     private var eventBus: EventBus!
     
     private var stageTimer: TimeInterval = 0
-    private var stageScript: [EnemySpawnEvent] = []
     private var stageTimeline: StageTimeline?
     private var stageCompleteDispatched: Bool = false
     private var bossSpawned: Bool = false  // True when stage boss entity has appeared
@@ -27,9 +26,6 @@ final class EnemySystem: GameSystem {
     private enum Constants {
         static let offScreenBottomThreshold: CGFloat = -50.0 // Y position for off-screen (below)
         static let offScreenTopThreshold: CGFloat = 480.0 // Y position for off-screen (above)
-        static let bossSpawnPosition = CGPoint(x: 192, y: 360)
-        static let bossHealth: Int = 300
-        static let bossPhaseNumber: Int = 1
         static let bossSpawnBreakDuration: TimeInterval = 1.5
         static let preBossDialogueDelay: TimeInterval = 1.5  // Time to wait for cleanup before dialogue
     }
@@ -45,14 +41,14 @@ final class EnemySystem: GameSystem {
     func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
         stageTimer += deltaTime
         
-        // Update timeline or script-based spawning
+        // Update timeline-based spawning
         updateSpawning(deltaTime: deltaTime, context: context)
         
         // Update enemy movement
         updateEnemyMovement(deltaTime: deltaTime, context: context)
         
-        // Check and handle boss spawning
-        checkAndSpawnBoss(context: context)
+        // Handle stage 1 boss dialogue trigger (boss spawning is handled by timeline)
+        checkAndTriggerBossDialogue(context: context)
         processBossSpawnSequence(context: context)
         
         // Check for stage completion
@@ -62,94 +58,45 @@ final class EnemySystem: GameSystem {
     // MARK: - Update Helpers
     
     private func updateSpawning(deltaTime: TimeInterval, context: GameRuntimeContext) {
-        if let timeline = stageTimeline {
-            timeline.update(deltaTime: deltaTime)
+        guard let timeline = stageTimeline else { return }
+        
+        timeline.update(deltaTime: deltaTime)
+        
+        // Track when timeline completes
+        if timeline.isComplete && timelineCompleteTime == nil {
+            timelineCompleteTime = stageTimer
+            print("EnemySystem: ✓ Timeline complete at time \(stageTimer), stage \(context.currentStage)")
             
-            // Track when timeline completes
-            if timeline.isComplete && timelineCompleteTime == nil {
-                timelineCompleteTime = stageTimer
-                print("EnemySystem: ✓ Timeline complete at time \(stageTimer), stage \(context.currentStage)")
-                
-                // Clear all enemies and bullets when timeline completes
-                clearRegularEnemies(context: context)
-                BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
-                print("EnemySystem: Cleared enemies and bullets for boss dialogue")
-            }
-        } else {
-            spawnEnemiesFromScript(context: context)
+            // Clear all enemies and bullets when timeline completes (for stage 1 dialogue)
+            clearRegularEnemies(context: context)
+            BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
+            print("EnemySystem: Cleared enemies and bullets for boss dialogue")
         }
     }
     
-    private func checkAndSpawnBoss(context: GameRuntimeContext) {
-        guard !bossSpawned else { return }
+    private func checkAndTriggerBossDialogue(context: GameRuntimeContext) {
+        // Stage 1: Trigger dialogue when timeline completes and arena is clear
+        // Boss spawning is handled by timeline, but we need to trigger dialogue first
+        guard context.currentStage == 1, !dialogueTriggered else { return }
         
-        // Don't spawn stage boss if a midboss (or any boss) is already active
-        let existingBosses = entityManager.getEntities(with: BossComponent.self)
-        if !existingBosses.isEmpty {
-            // print("EnemySystem: Stage boss spawn blocked - existing boss(es) active")
-            return
-        }
+        // Wait for cleanup to complete before triggering dialogue
+        guard let completeTime = timelineCompleteTime else { return }
         
-        // Stage 1: Boss spawns via dialogue trigger (SpawnStageBossEvent), not time-based
-        if context.currentStage == 1 {
-            // Wait for cleanup to complete before triggering dialogue
-            if let completeTime = timelineCompleteTime {
-                let timeSinceComplete = stageTimer - completeTime
-                
-                // Check if cleanup is done (enemies and bullets cleared)
-                let remainingEnemies = entityManager.getEntities(with: EnemyComponent.self)
-                    .filter { $0.component(ofType: BossComponent.self) == nil }
-                let remainingBullets = entityManager.getEntities(with: BulletComponent.self)
-                
-                // Trigger dialogue after delay and when arena is clear
-                if timeSinceComplete >= Constants.preBossDialogueDelay && 
-                   remainingEnemies.isEmpty && 
-                   remainingBullets.isEmpty && 
-                   !dialogueTriggered {
-                    print("EnemySystem: ✓ Arena cleared, triggering stage 1 boss dialogue NOW")
-                    eventBus.fire(DialogueTriggeredEvent(dialogueId: "stage1_boss"))
-                    dialogueTriggered = true  // Prevent re-triggering dialogue
-                }
-            } else {
-                print("EnemySystem: Stage 1 - waiting for timeline to complete (timelineCompleteTime is nil)")
-            }
-            return
-        }
+        let timeSinceComplete = stageTimer - completeTime
         
-        // Other stages: time-based boss spawn (60 seconds after timeline completes)
-        let shouldSpawnBoss: Bool
-        if stageTimeline != nil {
-            if let completeTime = timelineCompleteTime {
-                shouldSpawnBoss = (stageTimer - completeTime) >= 60.0  // 1 minute delay
-            } else {
-                shouldSpawnBoss = false
-            }
-        } else {
-            shouldSpawnBoss = !stageScript.isEmpty && stageScript.allSatisfy({ $0.hasSpawned })
-        }
+        // Check if cleanup is done (enemies and bullets cleared)
+        let remainingEnemies = entityManager.getEntities(with: EnemyComponent.self)
+            .filter { $0.component(ofType: BossComponent.self) == nil }
+        let remainingBullets = entityManager.getEntities(with: BulletComponent.self)
         
-        if shouldSpawnBoss {
-            beginBossArrivalSequence(context: context)
+        // Trigger dialogue after delay and when arena is clear
+        if timeSinceComplete >= Constants.preBossDialogueDelay && 
+           remainingEnemies.isEmpty && 
+           remainingBullets.isEmpty {
+            print("EnemySystem: ✓ Arena cleared, triggering stage 1 boss dialogue NOW")
+            eventBus.fire(DialogueTriggeredEvent(dialogueId: "stage1_boss"))
+            dialogueTriggered = true  // Prevent re-triggering dialogue
         }
-    }
-    
-    private func spawnBoss(context: GameRuntimeContext) {
-        // Spawn boss after arena has been cleared and break elapsed
-        _ = context.entities.spawnBoss(
-            name: "Stage Boss",
-            health: Constants.bossHealth,
-            position: Constants.bossSpawnPosition,
-            phaseNumber: Constants.bossPhaseNumber,
-            attackPattern: .tripleShot,
-            patternConfig: PatternConfig(
-                physics: PhysicsConfig(speed: 120),
-                visual: VisualConfig(shape: .star, color: .purple),
-                bulletCount: 8,
-                spread: 80,
-                spiralSpeed: 12
-            )
-        )
-        bossSpawned = true
     }
     
     private func clearRegularEnemies(context: GameRuntimeContext) {
@@ -163,6 +110,8 @@ final class EnemySystem: GameSystem {
     }
     
     private func beginBossArrivalSequence(context: GameRuntimeContext, delay: TimeInterval = Constants.bossSpawnBreakDuration) {
+        // This is called when SpawnStageBossEvent is received (stage 1 dialogue flow)
+        // Boss spawning is handled by timeline, but we need to clear arena first
         guard !bossSpawned,
               !isBossArenaClearing,
               bossSpawnDelayDeadline == nil,
@@ -195,9 +144,31 @@ final class EnemySystem: GameSystem {
             let now = ProcessInfo.processInfo.systemUptime
             if now >= deadline {
                 bossSpawnDelayDeadline = nil
-                spawnBoss(context: context)
+                // Spawn boss using unified spawning mechanism (same as timeline)
+                spawnStageBoss(context: context)
             }
         }
+    }
+    
+    private func spawnStageBoss(context: GameRuntimeContext) {
+        // Unified boss spawning - same mechanism used by timeline
+        let boss = context.entities.spawnBoss(
+            name: "Stage Boss",
+            health: 300,
+            position: CGPoint(x: 192, y: 360),
+            phaseNumber: 1,
+            attackPattern: .tripleShot,
+            patternConfig: PatternConfig(
+                physics: PhysicsConfig(speed: 120),
+                visual: VisualConfig(shape: .star, color: .purple),
+                bulletCount: 8,
+                spread: 80,
+                spiralSpeed: 12
+            )
+        )
+        bossSpawned = true
+        eventBus.fire(BossIntroStartedEvent(bossEntity: boss))
+        print("EnemySystem: Stage boss spawned via unified system")
     }
     
     private func checkStageCompletion(context: GameRuntimeContext) {
@@ -250,7 +221,8 @@ final class EnemySystem: GameSystem {
             pendingBossSpawnDelay = nil
             loadStageScript(stageId: s.stageId, context: context)
         } else if event is SpawnStageBossEvent {
-            print("EnemySystem: SpawnStageBossEvent received, scheduling stage boss spawn")
+            // Stage 1: Dialogue triggers this event, clear arena before timeline spawns boss
+            print("EnemySystem: SpawnStageBossEvent received, clearing arena for boss spawn")
             beginBossArrivalSequence(context: context)
         }
     }
@@ -269,41 +241,11 @@ final class EnemySystem: GameSystem {
             stageTimeline = StageTimelineDefinitions.createStage1Timeline()
             stageTimeline?.initialize(entityManager: context.entityManager, eventBus: context.eventBus)
             stageTimeline?.start()
-            stageScript = [] // Empty script - timeline handles spawning
         default:
             // Use timeline for default stages too
             stageTimeline = StageTimelineDefinitions.createDefaultStageTimeline(stageId: stageId)
             stageTimeline?.initialize(entityManager: context.entityManager, eventBus: context.eventBus)
             stageTimeline?.start()
-            stageScript = [] // Empty script - timeline handles spawning
-        }
-    }
-    
-    private func spawnEnemiesFromScript(context: GameRuntimeContext) {
-        // Find enemies that should spawn now
-        let enemiesToSpawn = stageScript.filter { spawnEvent in
-            spawnEvent.time <= stageTimer && !spawnEvent.hasSpawned
-        }
-        
-        for spawnEvent in enemiesToSpawn {
-            spawnEnemy(type: spawnEvent.type, position: spawnEvent.position, pattern: spawnEvent.pattern, patternConfig: spawnEvent.parameters, context: context)
-            spawnEvent.hasSpawned = true
-        }
-    }
-    
-    private func spawnEnemy(type: EnemyComponent.EnemyType, position: CGPoint, pattern: EnemyPattern, patternConfig: PatternConfig, context: GameRuntimeContext) {
-        switch type {
-        case .fairy:
-            // Use facade for entity creation
-            context.entities.spawnFairy(
-                position: position,
-                attackPattern: pattern,
-                patternConfig: patternConfig
-            )
-        case .boss:
-            // Bosses are spawned separately by EnemySystem when timeline completes
-            // This case exists for exhaustiveness but shouldn't be used in scripts
-            break
         }
     }
     
@@ -335,23 +277,5 @@ final class EnemySystem: GameSystem {
                 context.entities.destroy(enemy)
             }
         }
-    }
-}
-
-/// Enemy spawn event for stage scripting
-class EnemySpawnEvent {
-    let time: TimeInterval
-    let type: EnemyComponent.EnemyType
-    let position: CGPoint
-    let pattern: EnemyPattern
-    let parameters: PatternConfig
-    var hasSpawned: Bool = false
-    
-    init(time: TimeInterval, type: EnemyComponent.EnemyType, position: CGPoint, pattern: EnemyPattern, parameters: PatternConfig) {
-        self.time = time
-        self.type = type
-        self.position = position
-        self.pattern = pattern
-        self.parameters = parameters
     }
 }

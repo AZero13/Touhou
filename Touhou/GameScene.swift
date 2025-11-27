@@ -163,6 +163,10 @@ class GameScene: SKScene, EventListener {
             self.showFloatingScore(value: e.value, atLogical: e.position)
         case let e as EnemyDiedEvent:
             self.showEnemyDeathEffect(for: e.entity)
+        case is BossDefeatedEvent:
+            // Boss defeated - hide UI immediately (boss will flee)
+            bossLayer.isHidden = true
+            timeBonusLabel?.isHidden = true
         case is BossFledEvent:
             // Boss escaped (no death effect)
             break
@@ -435,6 +439,13 @@ class GameScene: SKScene, EventListener {
         // No bosses? Hide all boss UI
         guard let boss = bosses.first,
               let bossComp = boss.component(ofType: BossComponent.self) else {
+            bossLayer.isHidden = true
+            timeBonusLabel?.isHidden = true
+            return
+        }
+        
+        // Hide UI immediately if boss is defeated (even if entity still exists while fleeing)
+        guard !bossComp.isDefeated else {
             bossLayer.isHidden = true
             timeBonusLabel?.isHidden = true
             return

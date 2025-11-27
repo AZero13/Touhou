@@ -74,8 +74,11 @@ final class RenderSystem {
         // EntityManager handles component removal when entities are destroyed
         
         // Boss health bar overlay (top of screen)
-        if let boss = allEntities.first(where: { $0.component(ofType: BossComponent.self) != nil }) {
-            // Show boss layer when boss exists
+        if let boss = allEntities.first(where: { entity in
+            let bossComp = entity.component(ofType: BossComponent.self)
+            return bossComp != nil && !(bossComp?.isDefeated ?? false)
+        }) {
+            // Show boss layer when boss exists and is not defeated
             bossLayer.isHidden = false
             let barWidth = scene.size.width * 0.8
             let barHeight: CGFloat = 12

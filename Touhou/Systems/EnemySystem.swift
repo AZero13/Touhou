@@ -257,11 +257,19 @@ final class EnemySystem: GameSystem {
         for enemy in enemies {
             guard let transform = enemy.component(ofType: TransformComponent.self) else { continue }
             
-            // Move enemy down
-            transform.position.y += transform.velocity.dy * deltaTime
+            // Check if boss is defeated - if so, only allow target-based movement (fleeing)
+            let bossComponent = enemy.component(ofType: BossComponent.self)
+            let isDefeated = bossComponent?.isDefeated ?? false
+            
+            // Don't apply velocity-based movement if boss is defeated (fleeing uses target movement)
+            if !isDefeated {
+                // Move enemy down
+                transform.position.y += transform.velocity.dy * deltaTime
+            }
+            // If defeated, target-based movement is handled by EnemyComponent.update()
             
             // Mark enemies that go offscreen for destruction
-            let isBoss = enemy.component(ofType: BossComponent.self) != nil
+            let isBoss = bossComponent != nil
             
             // Entities spawn at top (y ~420) and exit bottom (y < -50)
             // Bosses can also exit top when fleeing (y > 480)

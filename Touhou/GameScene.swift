@@ -29,6 +29,13 @@ class GameScene: SKScene, EventListener {
     private var currentDialogueIndex: Int = 0
     private var wasTimeFrozenBeforeDialogue: Bool = false
     
+    // Spell card effect (follows boss during fight)
+    private var spellCardContainer: SKNode?
+    private var spellCardCircle: SKShapeNode?
+    private var currentBossEntity: GKEntity?
+    private var circleSpinAction: SKAction?
+    private var textSpinAction: SKAction?
+    
     // Layers
     private var worldLayer: SKNode!      // Game entities: bullets, enemies, player, items
     private var bossLayer: SKNode!       // Boss-specific content: boss health bar, phase effects
@@ -134,6 +141,9 @@ class GameScene: SKScene, EventListener {
         
         // Update boss UI (bar and timer)
         updateBossUI()
+        
+        // Update spell card effect to follow boss
+        updateSpellCardEffect()
     }
     
     override func didFinishUpdate() {
@@ -151,6 +161,9 @@ class GameScene: SKScene, EventListener {
         switch event {
         case is GamePausedEvent:
             self.showPauseMenu()
+            self.pauseSpellCardEffect()
+        case is GameResumedEvent:
+            self.resumeSpellCardEffect()
         case is PauseMenuHiddenEvent:
             self.hidePauseMenu()
         case let e as PauseMenuUpdateEvent:
@@ -167,10 +180,14 @@ class GameScene: SKScene, EventListener {
             // Boss defeated - hide UI immediately (boss will flee)
             bossLayer.isHidden = true
             timeBonusLabel?.isHidden = true
+            // Remove spell card effect
+            removeSpellCardEffect()
         case is BossFledEvent:
             // Boss escaped (no death effect)
             break
-        case is BossIntroStartedEvent:
+        case let e as BossIntroStartedEvent:
+            // Create persistent spell card effect around boss
+            createSpellCardEffect(for: e.bossEntity)
             // Boss UI will be shown automatically by updateBossUI()
             break
         case let e as TimeBonusAwardedEvent:
@@ -600,6 +617,163 @@ class GameScene: SKScene, EventListener {
         
         effectLayer.addChild(node)
         node.run(enemyDeathAction)
+    }
+    
+    /// Create persistent spell card effect around boss (pentagram, spinning circle, rotating text)
+    private func createSpellCardEffect(for bossEntity: GKEntity) {
+        // Remove any existing spell card effect
+        removeSpellCardEffect()
+        
+        currentBossEntity = bossEntity
+        
+        let scaleX = size.width / GameFacade.playArea.width
+        let scaleY = size.height / GameFacade.playArea.height
+        let scale = max(scaleX, scaleY)
+        
+        // Create container node for all spell card elements
+        let container = SKNode()
+        container.zPosition = 400  // Above everything
+        effectLayer.addChild(container)
+        spellCardContainer = container
+        
+        // Create pentagram
+        let pentagramRadius: CGFloat = 80 * scale
+        let pentagram = createPentagram(radius: pentagramRadius)
+        pentagram.strokeColor = .red
+        pentagram.fillColor = .clear
+        pentagram.lineWidth = 2.0
+        pentagram.alpha = 0.9
+        container.addChild(pentagram)
+        
+        // Create spinning circle (store reference for continuous rotation)
+        let circleRadius: CGFloat = 100 * scale
+        let circle = SKShapeNode(circleOfRadius: circleRadius)
+        circle.strokeColor = .yellow
+        circle.fillColor = .clear
+        circle.lineWidth = 2.0
+        circle.alpha = 0.8
+        container.addChild(circle)
+        spellCardCircle = circle
+        
+        // Create "SPELL CARD" text arranged in a circle, curving along the circle
+        // Repeat the text multiple times to fill the circle
+        let textRadius: CGFloat = 90 * scale
+        let textString = "SPELL CARD"
+        let repetitions = 3  // Repeat 3 times around the circle
+        let fullText = String(repeating: textString, count: repetitions)
+        let textCount = fullText.count
+        
+        var characterIndex = 0
+        let textNodes: [SKLabelNode] = fullText.compactMap { character in
+            // Calculate angle for this character (distribute evenly around circle)
+            let angle = (CGFloat(characterIndex) / CGFloat(textCount)) * 2 * .pi - .pi / 2  // Start at top
+            characterIndex += 1
+            
+            let x = cos(angle) * textRadius
+            let y = sin(angle) * textRadius
+            
+            let label = SKLabelNode(text: String(character))
+            label.fontName = "Menlo-Bold"
+            label.fontSize = 14 * scale
+            label.fontColor = .white
+            label.position = CGPoint(x: x, y: y)
+            label.verticalAlignmentMode = .center
+            label.horizontalAlignmentMode = .center
+            // Rotate to be tangent to the circle (perpendicular to radius)
+            // For text to curve along circle, rotation = angle + π/2
+            label.zRotation = angle + .pi / 2
+            return label
+        }
+        
+        for textNode in textNodes {
+            container.addChild(textNode)
+        }
+        
+        // Circle spins clockwise (continuous loop)
+        let circleSpin = SKAction.rotate(byAngle: 2 * .pi, duration: 1.0)
+        let circleSpinForever = SKAction.repeatForever(circleSpin)
+        circle.run(circleSpinForever)
+        circleSpinAction = circleSpinForever
+        
+        // Container (with text) spins counter-clockwise (opposite direction)
+        let textSpin = SKAction.rotate(byAngle: -2 * .pi, duration: 1.0)
+        let textSpinForever = SKAction.repeatForever(textSpin)
+        container.run(textSpinForever)
+        textSpinAction = textSpinForever
+    }
+    
+    /// Update spell card effect to follow boss position
+    private func updateSpellCardEffect() {
+        // Don't update when paused
+        guard !GameFacade.shared.isTimeFrozen else { return }
+        
+        guard let container = spellCardContainer,
+              let bossEntity = currentBossEntity,
+              let transform = bossEntity.component(ofType: TransformComponent.self) else {
+            return
+        }
+        
+        // Update position to follow boss
+        let scaleX = size.width / GameFacade.playArea.width
+        let scaleY = size.height / GameFacade.playArea.height
+        let scenePosition = CGPoint(x: transform.position.x * scaleX, y: transform.position.y * scaleY)
+        container.position = scenePosition
+    }
+    
+    /// Pause spell card effect animations
+    private func pauseSpellCardEffect() {
+        guard let container = spellCardContainer,
+              let circle = spellCardCircle else { return }
+        
+        // Pause all actions
+        container.isPaused = true
+        circle.isPaused = true
+    }
+    
+    /// Resume spell card effect animations
+    private func resumeSpellCardEffect() {
+        guard let container = spellCardContainer,
+              let circle = spellCardCircle else { return }
+        
+        // Resume all actions
+        container.isPaused = false
+        circle.isPaused = false
+    }
+    
+    /// Remove spell card effect when boss is defeated
+    private func removeSpellCardEffect() {
+        spellCardContainer?.removeFromParent()
+        spellCardContainer = nil
+        spellCardCircle = nil
+        currentBossEntity = nil
+        circleSpinAction = nil
+        textSpinAction = nil
+    }
+    
+    /// Create a pentagram shape
+    private func createPentagram(radius: CGFloat) -> SKShapeNode {
+        let path = CGMutablePath()
+        let points = 5
+        var vertices: [CGPoint] = []
+        
+        // Calculate pentagram vertices
+        for i in 0..<points {
+            let angle = (CGFloat(i) * 2 * .pi / CGFloat(points)) - .pi / 2  // Start at top
+            let x = cos(angle) * radius
+            let y = sin(angle) * radius
+            vertices.append(CGPoint(x: x, y: y))
+        }
+        
+        // Draw pentagram: connect every other point
+        path.move(to: vertices[0])
+        path.addLine(to: vertices[2])
+        path.addLine(to: vertices[4])
+        path.addLine(to: vertices[1])
+        path.addLine(to: vertices[3])
+        path.closeSubpath()
+        
+        let shape = SKShapeNode(path: path)
+        return shape
     }
     
     /// Show bomb flash effect (white screen flash)

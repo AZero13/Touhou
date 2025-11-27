@@ -55,14 +55,19 @@ final class EnemyComponent: GKComponent {
         guard let entity = entity,
               let transform = entity.component(ofType: TransformComponent.self) else { return }
         
+        // Check if boss is defeated
+        let bossComponent = entity.component(ofType: BossComponent.self)
+        let isDefeated = bossComponent?.isDefeated ?? false
+        
         // Update target-based movement (for bosses) or constant velocity (for fairies)
         if transform.isMovingToTarget {
             transform.updateTargetMovement(deltaTime: deltaTime)
-        } else {
-            // Apply constant velocity for fairies
+        } else if !isDefeated {
+            // Apply constant velocity for fairies (or non-defeated bosses)
             transform.position.x += transform.velocity.dx * deltaTime
             transform.position.y += transform.velocity.dy * deltaTime
         }
+        // If defeated and not moving to target, don't apply any movement
         
         // Mark enemies that go off bottom of screen for destruction (not bosses)
         if enemyType == .fairy && transform.position.y < -50 {

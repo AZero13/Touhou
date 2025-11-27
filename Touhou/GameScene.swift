@@ -63,10 +63,12 @@ class GameScene: SKScene, EventListener {
         bossLayer = SKNode()
         bossLayer.name = "bossLayer"
         bossLayer.isHidden = true  // Hidden until boss appears
+        bossLayer.zPosition = 500  // Above effect layer (spell card effect is at 400)
         addChild(bossLayer)
         
         effectLayer = SKNode()
         effectLayer.name = "effectLayer"
+        effectLayer.zPosition = 400  // Spell card effects go here
         addChild(effectLayer)
         
         uiLayer = SKNode()

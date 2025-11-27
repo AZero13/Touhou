@@ -23,6 +23,39 @@ final class EntityFacade {
     }
     
     @discardableResult
+    /// Spawn a boss using a BossData struct (cleaner than massive constructor)
+    func spawnBoss(data: BossData) -> GKEntity {
+        let entity = entityManager.createEntity()
+        let bossComponent = BossComponent(
+            name: data.name,
+            phaseNumber: data.phaseNumber,
+            hasTimeBonus: data.hasTimeBonus,
+            timeLimit: data.timeLimit,
+            bonusPointsBase: data.bonusPointsBase,
+            totalPhases: data.totalPhases,
+            phaseHealths: data.phaseHealths
+        )
+        entity.addComponent(bossComponent)
+        entity.addComponent(EnemyComponent(
+            enemyType: .boss,
+            scoreValue: 5000,
+            dropItem: nil,
+            attackPattern: data.attackPattern,
+            patternConfig: data.patternConfig,
+            shotInterval: data.shotInterval
+        ))
+        entity.addComponent(TransformComponent(position: data.position, velocity: .zero))
+        // Set health to first phase's health (BossComponent initializes currentPhaseHealth)
+        let firstPhaseHealth = bossComponent.phaseHealths.first ?? data.health
+        entity.addComponent(HealthComponent(health: firstPhaseHealth, maxHealth: firstPhaseHealth))
+        // Ensure currentPhaseHealth is synced
+        bossComponent.currentPhaseHealth = firstPhaseHealth
+        entity.addComponent(HitboxComponent(enemyHitbox: 14))
+        registerEntity(entity)
+        return entity
+    }
+    
+    /// Legacy spawnBoss with individual parameters (for backwards compatibility)
     func spawnBoss(
         name: String,
         health: Int,
@@ -37,35 +70,21 @@ final class EntityFacade {
         totalPhases: Int = 1,
         phaseHealths: [Int] = []
     ) -> GKEntity {
-        let entity = entityManager.createEntity()
-        let finalPhaseHealths = phaseHealths.isEmpty ? [health] : phaseHealths
-        let bossComponent = BossComponent(
+        let data = BossData(
             name: name,
+            health: health,
+            position: position,
             phaseNumber: phaseNumber,
+            attackPattern: attackPattern,
+            patternConfig: patternConfig,
+            shotInterval: shotInterval,
             hasTimeBonus: hasTimeBonus,
             timeLimit: timeLimit,
             bonusPointsBase: bonusPointsBase,
             totalPhases: totalPhases,
-            phaseHealths: finalPhaseHealths
+            phaseHealths: phaseHealths
         )
-        entity.addComponent(bossComponent)
-        entity.addComponent(EnemyComponent(
-            enemyType: .boss,
-            scoreValue: 5000,
-            dropItem: nil,
-            attackPattern: attackPattern,
-            patternConfig: patternConfig,
-            shotInterval: shotInterval
-        ))
-        entity.addComponent(TransformComponent(position: position, velocity: .zero))
-        // Set health to first phase's health (BossComponent initializes currentPhaseHealth)
-        let firstPhaseHealth = bossComponent.phaseHealths.first ?? health
-        entity.addComponent(HealthComponent(health: firstPhaseHealth, maxHealth: firstPhaseHealth))
-        // Ensure currentPhaseHealth is synced
-        bossComponent.currentPhaseHealth = firstPhaseHealth
-        entity.addComponent(HitboxComponent(enemyHitbox: 14))
-        registerEntity(entity)
-        return entity
+        return spawnBoss(data: data)
     }
     
     @discardableResult

@@ -95,15 +95,14 @@ final class CommandQueue {
     private func applyDamage(entity: GKEntity, amount: Int, entityManager: EntityManager, eventBus: EventBus) {
         guard let health = entity.component(ofType: HealthComponent.self) else { return }
         
-        // For multi-phase bosses, sync health with BossComponent's currentPhaseHealth
-        if let bossComponent = entity.component(ofType: BossComponent.self),
-           bossComponent.totalPhases > 1 {
+        // For all bosses (single or multi-phase), sync health with BossComponent's currentPhaseHealth
+        if let bossComponent = entity.component(ofType: BossComponent.self) {
             // Update bossComponent's current phase health
             bossComponent.currentPhaseHealth = max(0, bossComponent.currentPhaseHealth - amount)
             // Sync HealthComponent with current phase health
             health.health = bossComponent.currentPhaseHealth
         } else {
-            // Regular damage for non-multi-phase entities
+            // Regular damage for non-boss entities
             health.health -= amount
         }
         

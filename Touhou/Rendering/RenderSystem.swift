@@ -87,17 +87,10 @@ final class RenderSystem {
             let startY = scene.size.height - 30
             let origin = CGPoint(x: (scene.size.width - barWidth) / 2, y: startY)
             
-            // Remove old health bar nodes
-            bossLayer.children.forEach { node in
-                if node.name?.hasPrefix("bossHealthBar") == true || node.name == "bossPhaseCounter" {
-                    node.removeFromParent()
-                }
-            }
-            
             // Calculate remaining phases (only show if > 0)
             let remainingPhases = bossComp.totalPhases - bossComp.currentPhase
             
-            // Phase counter label (shows remaining phases)
+            // Phase counter label (shows remaining phases) - reuse existing node
             let phaseCounterName = "bossPhaseCounter"
             var phaseCounter = bossLayer.childNode(withName: phaseCounterName) as? SKLabelNode
             if remainingPhases > 0 {
@@ -107,7 +100,7 @@ final class RenderSystem {
                     phaseCounter?.fontName = "Menlo-Bold"
                     phaseCounter?.fontSize = 16
                     phaseCounter?.fontColor = .white
-                    phaseCounter?.zPosition = 302
+                    phaseCounter?.zPosition = 402
                     phaseCounter?.verticalAlignmentMode = .center
                     phaseCounter?.horizontalAlignmentMode = .left
                     if let counterToAdd = phaseCounter {
@@ -118,12 +111,13 @@ final class RenderSystem {
                 }
                 // Position to the right of the health bar
                 phaseCounter?.position = CGPoint(x: (scene.size.width + barWidth) / 2 + 10, y: startY)
+                phaseCounter?.isHidden = false
             } else {
                 // No phases remaining - hide the counter
-                phaseCounter?.removeFromParent()
+                phaseCounter?.isHidden = true
             }
             
-            // Draw single health bar for current phase only
+            // Background bar - reuse existing node
             let bgName = "bossHealthBarBG"
             var bg = bossLayer.childNode(withName: bgName) as? SKShapeNode
             if bg == nil {
@@ -132,13 +126,14 @@ final class RenderSystem {
                 bg?.name = bgName
                 bg?.strokeColor = .white
                 bg?.fillColor = .clear
-                bg?.zPosition = 301
+                bg?.zPosition = 401
                 if let bgToAdd = bg {
                     bossLayer.addChild(bgToAdd)
                 }
             }
+            bg?.isHidden = false
             
-            // Fill for current phase
+            // Fill bar - reuse existing node and update size
             let fillName = "bossHealthBarFill"
             var fill = bossLayer.childNode(withName: fillName) as? SKShapeNode
             
@@ -154,14 +149,16 @@ final class RenderSystem {
                 fill?.name = fillName
                 fill?.strokeColor = .clear
                 fill?.fillColor = .systemPink
-                fill?.zPosition = 300
+                fill?.zPosition = 400
                 if let fillToAdd = fill {
                     bossLayer.addChild(fillToAdd)
                 }
             } else {
+                // Update existing fill bar size based on current health
                 let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
                 fill?.path = CGPath(roundedRect: rect, cornerWidth: 4, cornerHeight: 4, transform: nil)
             }
+            fill?.isHidden = false
         } else {
             // Hide boss layer when no boss
             bossLayer.isHidden = true

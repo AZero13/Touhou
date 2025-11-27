@@ -33,8 +33,6 @@ class GameScene: SKScene, EventListener {
     private var spellCardContainer: SKNode?
     private var spellCardCircle: SKShapeNode?
     private var currentBossEntity: GKEntity?
-    private var circleSpinAction: SKAction?
-    private var textSpinAction: SKAction?
     
     // Layers
     private var worldLayer: SKNode!      // Game entities: bullets, enemies, player, items
@@ -635,30 +633,36 @@ class GameScene: SKScene, EventListener {
         let scaleY = size.height / GameFacade.playArea.height
         let scale = max(scaleX, scaleY)
         
-        // Create container node for all spell card elements
+        // Create container node for all spell card elements (follows boss position)
         let container = SKNode()
         container.zPosition = 400  // Above everything
         effectLayer.addChild(container)
         spellCardContainer = container
         
-        // Create pentagram
+        // Create pentagram node (will spin clockwise)
+        let pentagramNode = SKNode()
+        container.addChild(pentagramNode)
         let pentagramRadius: CGFloat = 80 * scale
         let pentagram = createPentagram(radius: pentagramRadius)
         pentagram.strokeColor = .red
         pentagram.fillColor = .clear
         pentagram.lineWidth = 2.0
         pentagram.alpha = 0.9
-        container.addChild(pentagram)
+        pentagramNode.addChild(pentagram)
         
-        // Create spinning circle (store reference for continuous rotation)
+        // Create red circle with pulsing opacity (TH06 style)
         let circleRadius: CGFloat = 100 * scale
         let circle = SKShapeNode(circleOfRadius: circleRadius)
-        circle.strokeColor = .yellow
+        circle.strokeColor = .red
         circle.fillColor = .clear
         circle.lineWidth = 2.0
-        circle.alpha = 0.8
+        circle.alpha = 0.6  // Start at lower opacity for pulsing effect
         container.addChild(circle)
         spellCardCircle = circle
+        
+        // Create text container (will spin counter-clockwise, opposite to pentagram)
+        let textContainer = SKNode()
+        container.addChild(textContainer)
         
         // Create "SPELL CARD" text arranged in a circle, curving along the circle
         // Repeat the text multiple times to fill the circle
@@ -691,20 +695,32 @@ class GameScene: SKScene, EventListener {
         }
         
         for textNode in textNodes {
-            container.addChild(textNode)
+            textContainer.addChild(textNode)
         }
         
-        // Circle spins clockwise (continuous loop)
-        let circleSpin = SKAction.rotate(byAngle: 2 * .pi, duration: 1.0)
-        let circleSpinForever = SKAction.repeatForever(circleSpin)
-        circle.run(circleSpinForever)
-        circleSpinAction = circleSpinForever
+        // Pentagram spins clockwise (continuous loop)
+        let pentagramSpin = SKAction.rotate(byAngle: 2 * .pi, duration: 2.0)
+        let pentagramSpinForever = SKAction.repeatForever(pentagramSpin)
+        pentagramNode.run(pentagramSpinForever)
         
-        // Container (with text) spins counter-clockwise (opposite direction)
-        let textSpin = SKAction.rotate(byAngle: -2 * .pi, duration: 1.0)
+        // Text container spins counter-clockwise (opposite to pentagram)
+        let textSpin = SKAction.rotate(byAngle: -2 * .pi, duration: 2.0)
         let textSpinForever = SKAction.repeatForever(textSpin)
-        container.run(textSpinForever)
-        textSpinAction = textSpinForever
+        textContainer.run(textSpinForever)
+        
+        // Pulsing opacity effect for circle (TH06 style)
+        let fadeIn = SKAction.fadeAlpha(to: 0.9, duration: 1.0)
+        let fadeOut = SKAction.fadeAlpha(to: 0.4, duration: 1.0)
+        let pulseSequence = SKAction.sequence([fadeIn, fadeOut])
+        let pulseForever = SKAction.repeatForever(pulseSequence)
+        circle.run(pulseForever)
+        
+        // Pulsing opacity effect for pentagram (subtle)
+        let pentagramFadeIn = SKAction.fadeAlpha(to: 1.0, duration: 1.2)
+        let pentagramFadeOut = SKAction.fadeAlpha(to: 0.7, duration: 1.2)
+        let pentagramPulseSequence = SKAction.sequence([pentagramFadeIn, pentagramFadeOut])
+        let pentagramPulseForever = SKAction.repeatForever(pentagramPulseSequence)
+        pentagram.run(pentagramPulseForever)
     }
     
     /// Update spell card effect to follow boss position
@@ -751,8 +767,6 @@ class GameScene: SKScene, EventListener {
         spellCardContainer = nil
         spellCardCircle = nil
         currentBossEntity = nil
-        circleSpinAction = nil
-        textSpinAction = nil
     }
     
     /// Create a pentagram shape

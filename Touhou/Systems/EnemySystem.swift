@@ -152,31 +152,35 @@ final class EnemySystem: GameSystem {
     
     private func spawnStageBoss(context: GameRuntimeContext) {
         // Unified boss spawning - same mechanism used by timeline
+        // Rumia has 2 phases: first uses rumiaShot, second uses rumiaShot2
         let boss = context.entities.spawnBoss(
             name: "Stage Boss",
             health: 300,
             position: CGPoint(x: 192, y: 360),
             phaseNumber: 1,
-            attackPattern: .tripleShot,
+            attackPattern: .rumiaShot,
             patternConfig: PatternConfig(
-                physics: PhysicsConfig(speed: 120),
-                visual: VisualConfig(shape: .star, color: .purple),
-                bulletCount: 8,
-                spread: 80,
-                spiralSpeed: 12
-            )
+                physics: PhysicsConfig(speed: 100),
+                visual: VisualConfig(size: .small, shape: .circle, color: .red)
+            ),
+            shotInterval: 1.2,
+            totalPhases: 2,
+            phaseHealths: [300, 300]  // Two phases, 300 health each
         )
         bossSpawned = true
         eventBus.fire(BossIntroStartedEvent(bossEntity: boss))
-        print("EnemySystem: Stage boss spawned via unified system")
+        print("EnemySystem: Stage boss spawned via unified system with \(boss.component(ofType: BossComponent.self)?.totalPhases ?? 1) phases")
     }
     
     private func checkStageCompletion(context: GameRuntimeContext) {
         guard !stageCompleteDispatched else { return }
         
-        // Check if stage boss (phase 1+) currently exists
+        // Check if stage boss (phase 1+) currently exists and is not marked for destruction
         let stageBosses = entityManager.getEntities(with: BossComponent.self).filter { entity in
-            entity.component(ofType: BossComponent.self)?.phaseNumber ?? 0 >= 1
+            let bossComp = entity.component(ofType: BossComponent.self)
+            let isStageBoss = (bossComp?.phaseNumber ?? 0) >= 1
+            let isNotMarked = !entityManager.isMarkedForDestruction(entity)
+            return isStageBoss && isNotMarked
         }
         
         // If stage boss exists but bossSpawned isn't true yet, mark it
@@ -186,9 +190,12 @@ final class EnemySystem: GameSystem {
             bossSpawned = true
         }
         
-        // Only trigger completion if boss WAS spawned and is NOW defeated
+        // Only trigger completion if boss WAS spawned and is NOW defeated (empty or all marked for destruction)
         if bossSpawned && stageBosses.isEmpty {
+            // Also check that regular enemies are gone (excluding those marked for destruction)
             let remainingEnemies = entityManager.getEntities(with: EnemyComponent.self)
+                .filter { !entityManager.isMarkedForDestruction($0) }
+            
             if remainingEnemies.isEmpty {
                 stageCompleteDispatched = true
                 
@@ -257,18 +264,16 @@ final class EnemySystem: GameSystem {
         for enemy in enemies {
             guard let transform = enemy.component(ofType: TransformComponent.self) else { continue }
             
-            // Check if boss is defeated - if so, only allow target-based movement (fleeing)
-            let bossComponent = enemy.component(ofType: BossComponent.self)
-            let isDefeated = bossComponent?.isDefeated ?? false
-            
-            // Don't apply velocity-based movement if boss is defeated (fleeing uses target movement)
-            if !isDefeated {
-                // Move enemy down
-                transform.position.y += transform.velocity.dy * deltaTime
+            // Skip entities already marked for destruction to prevent duplicate processing
+            if entityManager.isMarkedForDestruction(enemy) {
+                continue
             }
-            // If defeated, target-based movement is handled by EnemyComponent.update()
+            
+            // Movement is handled by EnemyComponent.update() (component system)
+            // We only check for offscreen here to avoid duplicate position updates
             
             // Mark enemies that go offscreen for destruction
+            let bossComponent = enemy.component(ofType: BossComponent.self)
             let isBoss = bossComponent != nil
             
             // Entities spawn at top (y ~420) and exit bottom (y < -50)

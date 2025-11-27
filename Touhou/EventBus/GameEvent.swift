@@ -407,3 +407,15 @@ struct BossFledEvent: GameEvent, Sendable {
         self.bossEntity = bossEntity
     }
 }
+
+struct BossPhaseTransitionEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    let bossEntity: GKEntity
+    let newPhase: Int
+    
+    init(bossEntity: GKEntity, newPhase: Int) {
+        self.timestamp = CACurrentMediaTime()
+        self.bossEntity = bossEntity
+        self.newPhase = newPhase
+    }
+}

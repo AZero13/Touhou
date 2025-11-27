@@ -60,8 +60,37 @@ final class HealthSystem: GameSystem {
     }
     
     private func handleEnemyDeath(_ event: EnemyDiedEvent, context: GameRuntimeContext) {
-        if let bossComponent = event.entity.component(ofType: BossComponent.self) {
-            // Mark boss as defeated immediately to prevent repeated bonus awards
+        if let bossComponent = event.entity.component(ofType: BossComponent.self),
+           let healthComponent = event.entity.component(ofType: HealthComponent.self) {
+            
+            // Check if this is a multi-phase boss and current phase is defeated
+            if bossComponent.totalPhases > 1 && bossComponent.currentPhase < bossComponent.totalPhases {
+                // Phase transition: move to next phase
+                bossComponent.currentPhase += 1
+                let nextPhaseMaxHealth = bossComponent.phaseHealths[bossComponent.currentPhase - 1]
+                bossComponent.currentPhaseHealth = nextPhaseMaxHealth
+                // Update HealthComponent to reflect new phase
+                healthComponent.updateMaxHealth(nextPhaseMaxHealth)
+                healthComponent.health = nextPhaseMaxHealth
+                
+                // Change attack pattern for new phase (if needed)
+                if let enemyComponent = event.entity.component(ofType: EnemyComponent.self) {
+                    // Update pattern based on phase (e.g., phase 1 = rumiaShot, phase 2 = rumiaShot2)
+                    if bossComponent.currentPhase == 2 {
+                        enemyComponent.attackPattern = .rumiaShot2
+                    }
+                }
+                
+                // Convert bullets to points on phase transition
+                BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
+                eventBus.fire(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
+                
+                // Fire phase transition event
+                eventBus.fire(BossPhaseTransitionEvent(bossEntity: event.entity, newPhase: bossComponent.currentPhase))
+                return  // Don't defeat boss yet
+            }
+            
+            // All phases defeated - boss is fully defeated
             guard !bossComponent.isDefeated else { return }
             bossComponent.isDefeated = true
             
@@ -71,6 +100,10 @@ final class HealthSystem: GameSystem {
             // Midbosses flee away, stage bosses vanish immediately
             if isMidboss {
                 makeBossFlee(entity: event.entity, bossComponent: bossComponent)
+            } else {
+                // Stage boss: mark for destruction so it vanishes immediately
+                // This allows checkStageCompletion to detect the boss is gone
+                entityManager.markForDestruction(event.entity)
             }
             
             // Boss defeated

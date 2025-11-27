@@ -78,14 +78,53 @@ final class RenderSystem {
         if let boss = allEntities.first(where: { entity in
             let bossComp = entity.component(ofType: BossComponent.self)
             return bossComp != nil && !(bossComp?.isDefeated ?? false)
-        }) {
+        }),
+           let bossComp = boss.component(ofType: BossComponent.self) {
             // Show boss layer when boss exists and is not defeated
             bossLayer.isHidden = false
             let barWidth = scene.size.width * 0.8
             let barHeight: CGFloat = 12
-            let origin = CGPoint(x: (scene.size.width - barWidth) / 2, y: scene.size.height - 30)
+            let startY = scene.size.height - 30
+            let origin = CGPoint(x: (scene.size.width - barWidth) / 2, y: startY)
+            
+            // Remove old health bar nodes
+            bossLayer.children.forEach { node in
+                if node.name?.hasPrefix("bossHealthBar") == true || node.name == "bossPhaseCounter" {
+                    node.removeFromParent()
+                }
+            }
+            
+            // Calculate remaining phases (only show if > 0)
+            let remainingPhases = bossComp.totalPhases - bossComp.currentPhase
+            
+            // Phase counter label (shows remaining phases)
+            let phaseCounterName = "bossPhaseCounter"
+            var phaseCounter = bossLayer.childNode(withName: phaseCounterName) as? SKLabelNode
+            if remainingPhases > 0 {
+                if phaseCounter == nil {
+                    phaseCounter = SKLabelNode(text: "\(remainingPhases)")
+                    phaseCounter?.name = phaseCounterName
+                    phaseCounter?.fontName = "Menlo-Bold"
+                    phaseCounter?.fontSize = 16
+                    phaseCounter?.fontColor = .white
+                    phaseCounter?.zPosition = 302
+                    phaseCounter?.verticalAlignmentMode = .center
+                    phaseCounter?.horizontalAlignmentMode = .left
+                    if let counterToAdd = phaseCounter {
+                        bossLayer.addChild(counterToAdd)
+                    }
+                } else {
+                    phaseCounter?.text = "\(remainingPhases)"
+                }
+                // Position to the right of the health bar
+                phaseCounter?.position = CGPoint(x: (scene.size.width + barWidth) / 2 + 10, y: startY)
+            } else {
+                // No phases remaining - hide the counter
+                phaseCounter?.removeFromParent()
+            }
+            
+            // Draw single health bar for current phase only
             let bgName = "bossHealthBarBG"
-            let fillName = "bossHealthBarFill"
             var bg = bossLayer.childNode(withName: bgName) as? SKShapeNode
             if bg == nil {
                 let rect = CGRect(x: origin.x, y: origin.y, width: barWidth, height: barHeight)
@@ -98,14 +137,16 @@ final class RenderSystem {
                     bossLayer.addChild(bgToAdd)
                 }
             }
+            
+            // Fill for current phase
+            let fillName = "bossHealthBarFill"
             var fill = bossLayer.childNode(withName: fillName) as? SKShapeNode
-            // Get health percentage from HealthComponent
-            let pct: CGFloat = {
-                if let hc = boss.component(ofType: HealthComponent.self) {
-                    return max(0, min(1, CGFloat(hc.health) / CGFloat(hc.maxHealth)))
-                }
-                return 0
-            }()
+            
+            // Calculate health percentage for current phase
+            let phaseIndex = bossComp.currentPhase - 1
+            let phaseMaxHealth = bossComp.phaseHealths[phaseIndex]
+            let currentHealth = bossComp.currentPhaseHealth
+            let pct = max(0, min(1, CGFloat(currentHealth) / CGFloat(phaseMaxHealth)))
             
             if fill == nil {
                 let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
@@ -124,9 +165,12 @@ final class RenderSystem {
         } else {
             // Hide boss layer when no boss
             bossLayer.isHidden = true
-            // Clean up health bar nodes
-            bossLayer.childNode(withName: "bossHealthBarBG")?.removeFromParent()
-            bossLayer.childNode(withName: "bossHealthBarFill")?.removeFromParent()
+            // Clean up health bar nodes and phase counter
+            bossLayer.children.forEach { node in
+                if node.name?.hasPrefix("bossHealthBar") == true || node.name == "bossPhaseCounter" {
+                    node.removeFromParent()
+                }
+            }
         }
     }
     
@@ -175,7 +219,9 @@ final class RenderSystem {
         }
         
         shape.fillColor = bullet.color.nsColor
-        shape.strokeColor = .clear
+        // Add white outline for enemy bullets (TH06 style)
+        shape.strokeColor = bullet.ownedByPlayer ? .clear : .white
+        shape.lineWidth = bullet.ownedByPlayer ? 0 : 1.0
         shape.zPosition = 50 + CGFloat(bullet.size.radius)
         
         return shape

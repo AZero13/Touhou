@@ -33,16 +33,22 @@ final class EntityFacade {
         shotInterval: TimeInterval = 1.2,
         hasTimeBonus: Bool = false,
         timeLimit: TimeInterval = 20.0,
-        bonusPointsBase: Int = 10000
+        bonusPointsBase: Int = 10000,
+        totalPhases: Int = 1,
+        phaseHealths: [Int] = []
     ) -> GKEntity {
         let entity = entityManager.createEntity()
-        entity.addComponent(BossComponent(
+        let finalPhaseHealths = phaseHealths.isEmpty ? [health] : phaseHealths
+        let bossComponent = BossComponent(
             name: name,
             phaseNumber: phaseNumber,
             hasTimeBonus: hasTimeBonus,
             timeLimit: timeLimit,
-            bonusPointsBase: bonusPointsBase
-        ))
+            bonusPointsBase: bonusPointsBase,
+            totalPhases: totalPhases,
+            phaseHealths: finalPhaseHealths
+        )
+        entity.addComponent(bossComponent)
         entity.addComponent(EnemyComponent(
             enemyType: .boss,
             scoreValue: 5000,
@@ -52,7 +58,11 @@ final class EntityFacade {
             shotInterval: shotInterval
         ))
         entity.addComponent(TransformComponent(position: position, velocity: .zero))
-        entity.addComponent(HealthComponent(health: health, maxHealth: health))
+        // Set health to first phase's health (BossComponent initializes currentPhaseHealth)
+        let firstPhaseHealth = bossComponent.phaseHealths.first ?? health
+        entity.addComponent(HealthComponent(health: firstPhaseHealth, maxHealth: firstPhaseHealth))
+        // Ensure currentPhaseHealth is synced
+        bossComponent.currentPhaseHealth = firstPhaseHealth
         entity.addComponent(HitboxComponent(enemyHitbox: 14))
         registerEntity(entity)
         return entity

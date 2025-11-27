@@ -18,7 +18,7 @@ final class HealthComponent: GKComponent {
         }
     }
     
-    let maxHealth: Int
+    var maxHealth: Int  // Mutable to support phase transitions
     var invulnerabilityTimer: TimeInterval = 0
     
     init(health: Int, maxHealth: Int, invulnerabilityTimer: TimeInterval = 0) {
@@ -26,6 +26,15 @@ final class HealthComponent: GKComponent {
         self.maxHealth = maxHealth
         self.invulnerabilityTimer = invulnerabilityTimer
         super.init()
+    }
+    
+    /// Update max health (used for phase transitions)
+    func updateMaxHealth(_ newMaxHealth: Int) {
+        self.maxHealth = newMaxHealth
+        // Clamp current health to new max
+        if _health > newMaxHealth {
+            _health = newMaxHealth
+        }
     }
     
     required init?(coder: NSCoder) {

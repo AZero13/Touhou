@@ -20,7 +20,14 @@ class EntityManager {
     }
     
     func markForDestruction(_ entity: GKEntity) {
-        entitiesToDestroy.append(entity)
+        // Prevent duplicate marking
+        if !entitiesToDestroy.contains(where: { $0 === entity }) {
+            entitiesToDestroy.append(entity)
+        }
+    }
+    
+    func isMarkedForDestruction(_ entity: GKEntity) -> Bool {
+        return entitiesToDestroy.contains(where: { $0 === entity })
     }
     
     func destroyMarkedEntities(unregisterEntity: (GKEntity) -> Void) {

@@ -94,18 +94,34 @@ final class CommandQueue {
 
     private func applyDamage(entity: GKEntity, amount: Int, entityManager: EntityManager, eventBus: EventBus) {
         guard let health = entity.component(ofType: HealthComponent.self) else { return }
-        health.health -= amount
+        
+        // For multi-phase bosses, sync health with BossComponent's currentPhaseHealth
+        if let bossComponent = entity.component(ofType: BossComponent.self),
+           bossComponent.totalPhases > 1 {
+            // Update bossComponent's current phase health
+            bossComponent.currentPhaseHealth = max(0, bossComponent.currentPhaseHealth - amount)
+            // Sync HealthComponent with current phase health
+            health.health = bossComponent.currentPhaseHealth
+        } else {
+            // Regular damage for non-multi-phase entities
+            health.health -= amount
+        }
+        
         if !health.isAlive {
             if let enemy = entity.component(ofType: EnemyComponent.self) {
                 eventBus.fire(EnemyDiedEvent(entity: entity, scoreValue: enemy.scoreValue, dropItem: enemy.dropItem))
                 
-                // Midbosses (phaseNumber == 0) flee away, stage bosses (phaseNumber >= 1) vanish immediately
-                let isMidboss = entity.component(ofType: BossComponent.self)?.phaseNumber == 0
-                if !isMidboss {
-                    // Stage bosses vanish immediately
+                // Check if this is a multi-phase boss - if so, HealthSystem will handle phase transition
+                // Only mark for destruction if it's not a multi-phase boss or if all phases are defeated
+                let bossComponent = entity.component(ofType: BossComponent.self)
+                let isMultiPhase = bossComponent?.totalPhases ?? 1 > 1
+                let isMidboss = bossComponent?.phaseNumber == 0
+                
+                if !isMidboss && !isMultiPhase {
+                    // Single-phase stage bosses vanish immediately
                     entityManager.markForDestruction(entity)
                 }
-                // Midbosses are handled in HealthSystem - they flee instead
+                // Multi-phase bosses and midbosses are handled in HealthSystem
             }
         }
     }

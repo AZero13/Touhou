@@ -10,8 +10,8 @@ import GameplayKit
 
 /// EnemySystem - handles enemy spawning and movement
 final class EnemySystem: GameSystem {
-    private var entityManager: EntityManager!
-    private var eventBus: EventBus!
+    private var entityManager: EntityManaging!
+    private var eventBus: EventDispatching!
     
     private var stageTimer: TimeInterval = 0
     private var stageTimeline: StageTimeline?

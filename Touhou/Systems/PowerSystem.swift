@@ -9,8 +9,8 @@ import Foundation
 import GameplayKit
 
 final class PowerSystem: GameSystem {
-    private var entityManager: EntityManager!
-    private var eventBus: EventBus!
+    private var entityManager: EntityManaging!
+    private var eventBus: EventDispatching!
     
     static let powerThresholds: [Int] = [8, 16, 32, 48, 64, 80, 96, 128]
     

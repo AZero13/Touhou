@@ -21,8 +21,8 @@ struct BulletModifierChange {
 /// System that applies bullet modifiers over time
 /// Used for patterns like TH06 Sub0 that rotate bullets at specific times
 final class BulletModifierSystem: GameSystem {
-    private var entityManager: EntityManager!
-    private var eventBus: EventBus!
+    private var entityManager: EntityManaging!
+    private var eventBus: EventDispatching!
     private var scheduledChanges: [BulletModifierChange] = []
     private var timer: TimeInterval = 0
     private var isActive: Bool = false

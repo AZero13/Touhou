@@ -13,8 +13,16 @@ protocol EventListener: AnyObject {
     func handleEvent(_ event: GameEvent)
 }
 
+/// Protocol for dispatching and handling game events
 @MainActor
-class EventBus {
+protocol EventDispatching: AnyObject {
+    func register(listener: EventListener)
+    func unregister(_ listener: EventListener)
+    func fire(_ event: GameEvent)
+    func processEvents(context: GameRuntimeContext?)
+}
+
+class EventBus: EventDispatching {
     private var eventQueue: [GameEvent] = []
     private var subscribers: [String: [WeakEventListener]] = [:]
     

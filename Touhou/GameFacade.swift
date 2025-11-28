@@ -19,8 +19,8 @@ class GameFacade: GameEngine {
     static let playArea: CGRect = CGRect(x: 0, y: 0, width: 384, height: 448)
     static let maxStage: Int = 6
     
-    private let entityManager = EntityManager()
-    private let eventBus = EventBus()
+    let entityManager: EntityManaging = EntityManager()
+    let eventBus: EventDispatching = EventBus()
     private let commandQueue = CommandQueue()
     
     private(set) lazy var entities: EntityFacade = {

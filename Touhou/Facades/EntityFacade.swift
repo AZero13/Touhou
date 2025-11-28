@@ -10,12 +10,12 @@ import GameplayKit
 import CoreGraphics
 
 final class EntityFacade {
-    private let entityManager: EntityManager
+    private let entityManager: EntityManaging
     private let commandQueue: CommandQueue
-    private let eventBus: EventBus
+    private let eventBus: EventDispatching
     private let registerEntity: (GKEntity) -> Void
     
-    init(entityManager: EntityManager, commandQueue: CommandQueue, eventBus: EventBus, registerEntity: @escaping (GKEntity) -> Void) {
+    init(entityManager: EntityManaging, commandQueue: CommandQueue, eventBus: EventDispatching, registerEntity: @escaping (GKEntity) -> Void) {
         self.entityManager = entityManager
         self.commandQueue = commandQueue
         self.eventBus = eventBus

@@ -12,8 +12,8 @@ import GameplayKit
 /// IMPORTANT: This system must run after all other systems to ensure entities marked
 /// for destruction during the frame are properly cleaned up at the end.
 final class CleanupSystem: GameSystem {
-    private var entityManager: EntityManager!
-    private var eventBus: EventBus!
+    private var entityManager: EntityManaging!
+    private var eventBus: EventDispatching!
     
     func initialize(context: GameRuntimeContext) {
         self.entityManager = context.entityManager

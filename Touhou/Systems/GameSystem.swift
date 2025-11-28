@@ -11,8 +11,8 @@ import GameplayKit
 /// Runtime context passed to systems each update
 /// Contains all shared game state and services systems need
 struct GameRuntimeContext {
-    let entityManager: EntityManager
-    let eventBus: EventBus
+    let entityManager: EntityManaging
+    let eventBus: EventDispatching
     let entities: EntityFacade
     let combat: CombatFacade
     let isTimeFrozen: Bool

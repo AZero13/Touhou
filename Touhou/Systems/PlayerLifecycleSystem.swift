@@ -9,8 +9,8 @@ import GameplayKit
 
 /// PlayerLifecycleSystem - handles player spawning and lifecycle management
 final class PlayerLifecycleSystem: GameSystem {
-    private var entityManager: EntityManager!
-    private var eventBus: EventBus!
+    private var entityManager: EntityManaging!
+    private var eventBus: EventDispatching!
     private var playerEntity: GKEntity?
     
     private enum Tuning {
@@ -25,8 +25,8 @@ final class PlayerLifecycleSystem: GameSystem {
     }
     
     func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
-        // Sync playerEntity reference with EntityManager
-        // This keeps the local reference in sync with EntityManager's state
+        // Sync playerEntity reference with EntityManaging
+        // This keeps the local reference in sync with EntityManaging's state
         syncPlayerEntity()
     }
     
@@ -40,7 +40,7 @@ final class PlayerLifecycleSystem: GameSystem {
             resetPlayerPosition(entity: e.entity)
         case let e as StageStartedEvent:
             // Sync playerEntity reference before handling stage start
-            // This ensures we have the latest reference from EntityManager
+            // This ensures we have the latest reference from EntityManaging
             syncPlayerEntity()
             
             // Stage 1 = new run: spawn player if missing, reset stats

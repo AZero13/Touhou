@@ -42,7 +42,7 @@ enum TimelineEvent {
     
     /// Make an enemy shoot (for enemies spawned with autoShoot: false)
     case enemyShoot(
-        enemySelector: (EntityManager) -> [GKEntity], // Function to find enemies
+        enemySelector: (EntityManaging) -> [GKEntity], // Function to find enemies
         pattern: EnemyPattern,
         patternConfig: PatternConfig
     )
@@ -51,7 +51,7 @@ enum TimelineEvent {
     case spawnBullets([BulletSpawnCommand])
     
     /// Custom action (closure for complex behaviors)
-    case custom((EntityManager, EventBus) -> Void)
+    case custom((EntityManaging, EventDispatching) -> Void)
 }
 
 /// Stage timeline - orchestrates stage events over time
@@ -68,8 +68,8 @@ final class StageTimeline {
     private var currentStepIndex: Int = 0
     private var timer: TimeInterval = 0
     private var isActive: Bool = false
-    private var entityManager: EntityManager?
-    private var eventBus: EventBus?
+    private var entityManager: EntityManaging?
+    private var eventBus: EventDispatching?
     
     init(steps: [Step]) {
         // Sort steps by time to ensure correct execution order
@@ -77,7 +77,7 @@ final class StageTimeline {
     }
     
     /// Initialize with entity manager and event bus
-    func initialize(entityManager: EntityManager, eventBus: EventBus) {
+    func initialize(entityManager: EntityManaging, eventBus: EventDispatching) {
         self.entityManager = entityManager
         self.eventBus = eventBus
     }
@@ -135,7 +135,7 @@ final class StageTimeline {
     
     // MARK: - Private Methods
     
-    private func executeEvent(_ event: TimelineEvent, entityManager: EntityManager, eventBus: EventBus) {
+    private func executeEvent(_ event: TimelineEvent, entityManager: EntityManaging, eventBus: EventDispatching) {
         switch event {
         case .spawnEnemy(let type, let position, let velocity, let dropItem, let autoShoot, let attackPattern, let patternConfig, let shotInterval):
             spawnEnemy(
@@ -196,7 +196,7 @@ final class StageTimeline {
         attackPattern: EnemyPattern?,
         patternConfig: PatternConfig?,
         shotInterval: TimeInterval?,
-        entityManager: EntityManager
+        entityManager: EntityManaging
     ) {
         switch type {
         case .fairy:
@@ -237,8 +237,8 @@ final class StageTimeline {
         hasTimeBonus: Bool,
         timeLimit: TimeInterval?,
         bonusPointsBase: Int?,
-        entityManager: EntityManager,
-        eventBus: EventBus
+        entityManager: EntityManaging,
+        eventBus: EventDispatching
     ) {
         let boss = GameFacade.shared.entities.spawnBoss(
             name: name,
@@ -331,7 +331,7 @@ struct TimelineBuilder {
     /// Add an enemy shoot event (for enemies spawned with autoShoot: false)
     func addEnemyShoot(
         at time: TimeInterval,
-        enemySelector: @escaping (EntityManager) -> [GKEntity],
+        enemySelector: @escaping (EntityManaging) -> [GKEntity],
         pattern: EnemyPattern,
         patternConfig: PatternConfig = PatternConfig()
     ) -> TimelineBuilder {
@@ -363,7 +363,7 @@ struct TimelineBuilder {
     /// Add a custom action
     func addAction(
         at time: TimeInterval,
-        action: @escaping (EntityManager, EventBus) -> Void
+        action: @escaping (EntityManaging, EventDispatching) -> Void
     ) -> TimelineBuilder {
         var builder = self
         builder.steps.append(StageTimeline.Step(

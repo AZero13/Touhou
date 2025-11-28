@@ -12,7 +12,7 @@ import GameplayKit
 enum BulletModifierHelpers {
     /// Apply modifier function to bullets matching selector
     static func applyToBullets(
-        entityManager: EntityManager,
+        entityManager: EntityManaging,
         selector: BulletSelector,
         modifier: (GKEntity, BulletMotionModifiersComponent) -> Void
     ) {
@@ -31,35 +31,35 @@ enum BulletModifierHelpers {
     }
     
     /// Freeze all bullets (both player and enemy) - set timeScale = 0
-    static func freezeAllBullets(entityManager: EntityManager) {
+    static func freezeAllBullets(entityManager: EntityManaging) {
         applyToBullets(entityManager: entityManager, selector: .all) { _, mods in
             mods.timeScale = 0.0
         }
     }
     
     /// Freeze all enemy bullets (set timeScale = 0)
-    static func freezeEnemyBullets(entityManager: EntityManager) {
+    static func freezeEnemyBullets(entityManager: EntityManaging) {
         applyToBullets(entityManager: entityManager, selector: .enemy) { _, mods in
             mods.timeScale = 0.0
         }
     }
     
     /// Unfreeze bullets matching selector (set timeScale = 1.0)
-    static func unfreezeBullets(entityManager: EntityManager, selector: BulletSelector) {
+    static func unfreezeBullets(entityManager: EntityManaging, selector: BulletSelector) {
         applyToBullets(entityManager: entityManager, selector: selector) { _, mods in
             mods.timeScale = 1.0
         }
     }
     
     /// Unfreeze all bullets
-    static func unfreezeAllBullets(entityManager: EntityManager) {
+    static func unfreezeAllBullets(entityManager: EntityManaging) {
         applyToBullets(entityManager: entityManager, selector: .all) { _, mods in
             mods.timeScale = 1.0
         }
     }
     
     /// Set timeScale for bullets matching selector
-    static func setTimeScale(entityManager: EntityManager, selector: BulletSelector, scale: CGFloat) {
+    static func setTimeScale(entityManager: EntityManaging, selector: BulletSelector, scale: CGFloat) {
         applyToBullets(entityManager: entityManager, selector: selector) { _, mods in
             mods.timeScale = scale
         }

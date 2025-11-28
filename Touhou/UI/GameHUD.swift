@@ -8,6 +8,7 @@
 import SpriteKit
 import GameplayKit
 
+@MainActor
 class GameHUD {
     // MARK: - Properties
     private weak var scene: SKScene?

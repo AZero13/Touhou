@@ -8,8 +8,24 @@
 import Foundation
 import GameplayKit
 
+/// Protocol for managing game entities
 @MainActor
-class EntityManager {
+protocol EntityManaging: AnyObject {
+    func createEntity() -> GKEntity
+    func markForDestruction(_ entity: GKEntity)
+    func isMarkedForDestruction(_ entity: GKEntity) -> Bool
+    func destroyMarkedEntities(unregisterEntity: (GKEntity) -> Void)
+    
+    func getAllEntities() -> [GKEntity]
+    func getEntities<T: GKComponent>(with componentType: T.Type) -> [GKEntity]
+    func getEntities(with componentTypes: [GKComponent.Type]) -> [GKEntity]
+    func getPlayerEntity() -> GKEntity?
+    func getPlayerComponent() -> PlayerComponent?
+    func getAllComponents<T: GKComponent>(_ componentType: T.Type) -> [T]
+}
+
+@MainActor
+class EntityManager: EntityManaging {
     private var entities: [GKEntity] = []
     private var entitiesToDestroy: [GKEntity] = []
     

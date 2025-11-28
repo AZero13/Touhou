@@ -32,7 +32,7 @@ final class CommandQueue {
         queue.removeAll()
     }
     
-    func process(entityManager: EntityManager, eventBus: EventBus, isTimeFrozen: Bool, registerEntity: (GKEntity) -> Void) {
+    func process(entityManager: EntityManaging, eventBus: EventDispatching, isTimeFrozen: Bool, registerEntity: (GKEntity) -> Void) {
         if queue.isEmpty { return }
         for command in queue {
             switch command {
@@ -60,7 +60,7 @@ final class CommandQueue {
         queue.removeAll()
     }
     
-    static func despawnAllBullets(entityManager: EntityManager, destroyEntity: (GKEntity) -> Void, selector: ((BulletComponent) -> Bool)? = nil) {
+    static func despawnAllBullets(entityManager: EntityManaging, destroyEntity: (GKEntity) -> Void, selector: ((BulletComponent) -> Bool)? = nil) {
         let bullets = entityManager.getEntities(with: BulletComponent.self)
         for bulletEntity in bullets {
             guard let bulletComp = bulletEntity.component(ofType: BulletComponent.self) else { continue }
@@ -71,7 +71,7 @@ final class CommandQueue {
     }
     
     @discardableResult
-    private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager, registerEntity: (GKEntity) -> Void) -> GKEntity {
+    private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManaging, registerEntity: (GKEntity) -> Void) -> GKEntity {
         createBulletEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager, registerEntity: registerEntity)
     }
     
@@ -85,14 +85,14 @@ final class CommandQueue {
         }
     }
 
-    private func spawnItem(type: ItemType, position: CGPoint, velocity: CGVector, entityManager: EntityManager, registerEntity: (GKEntity) -> Void) {
+    private func spawnItem(type: ItemType, position: CGPoint, velocity: CGVector, entityManager: EntityManaging, registerEntity: (GKEntity) -> Void) {
         let entity = entityManager.createEntity()
         entity.addComponent(ItemComponent(itemType: type, value: 0))
         entity.addComponent(TransformComponent(position: position, velocity: velocity))
         registerEntity(entity)
     }
 
-    private func applyDamage(entity: GKEntity, amount: Int, entityManager: EntityManager, eventBus: EventBus) {
+    private func applyDamage(entity: GKEntity, amount: Int, entityManager: EntityManaging, eventBus: EventDispatching) {
         guard let health = entity.component(ofType: HealthComponent.self) else { return }
         
         // For all bosses (single or multi-phase), sync health with BossComponent's currentPhaseHealth
@@ -125,7 +125,7 @@ final class CommandQueue {
         }
     }
     
-    private func adjustLives(delta: Int, entityManager: EntityManager, eventBus: EventBus) {
+    private func adjustLives(delta: Int, entityManager: EntityManaging, eventBus: EventDispatching) {
         guard let playerEntity = entityManager.getPlayerEntity(),
               let player = playerEntity.component(ofType: PlayerComponent.self) else { return }
         player.lives += delta
@@ -139,21 +139,22 @@ final class CommandQueue {
             } else {
                 player.power -= 16
             }
-            eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
             player.powerItemCountForScore = 0
             player.bombs = 3
+            eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
+
             eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
             eventBus.fire(PlayerRespawnedEvent(entity: playerEntity))
         }
     }
     
-    private func adjustBombs(delta: Int, entityManager: EntityManager, eventBus: EventBus) {
+    private func adjustBombs(delta: Int, entityManager: EntityManaging, eventBus: EventDispatching) {
         guard let player = entityManager.getPlayerComponent() else { return }
         player.bombs += delta
         eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
     }
     
-    private func adjustPower(delta: Int, entityManager: EntityManager, eventBus: EventBus) {
+    private func adjustPower(delta: Int, entityManager: EntityManaging, eventBus: EventDispatching) {
         guard let player = entityManager.getPlayerComponent() else { return }
         player.power += delta
         if delta > 0 {
@@ -162,13 +163,13 @@ final class CommandQueue {
         eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
     }
     
-    private func adjustScore(amount: Int, entityManager: EntityManager, eventBus: EventBus) {
+    private func adjustScore(amount: Int, entityManager: EntityManaging, eventBus: EventDispatching) {
         guard let player = entityManager.getPlayerComponent() else { return }
         player.score += amount
         eventBus.fire(ScoreChangedEvent(newTotal: player.score))
     }
     
-    private func createBulletEntity(from command: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManager, registerEntity: (GKEntity) -> Void) -> GKEntity {
+    private func createBulletEntity(from command: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManaging, registerEntity: (GKEntity) -> Void) -> GKEntity {
         let entity = entityManager.createEntity()
         
         let bullet = BulletComponent(

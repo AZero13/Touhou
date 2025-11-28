@@ -9,8 +9,8 @@ import Foundation
 import GameplayKit
 
 final class ScoreSystem: GameSystem {
-    private var entityManager: EntityManager!
-    private var eventBus: EventBus!
+    private var entityManager: EntityManaging!
+    private var eventBus: EventDispatching!
     private var highScore: Int = 0
     private let highScoreStore = UserDefaultsHighScoreStore()
     

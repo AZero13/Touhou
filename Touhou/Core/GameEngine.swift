@@ -11,6 +11,8 @@ import GameplayKit
 @MainActor
 protocol GameEngine: AnyObject {
     var entities: EntityFacade { get }
+    var entityManager: EntityManaging { get }
+    var eventBus: EventDispatching { get }
     var currentStage: Int { get }
     var isTimeFrozen: Bool { get set }
     var isInNotStartedState: Bool { get }

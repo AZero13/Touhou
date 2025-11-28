@@ -9,8 +9,8 @@ import Foundation
 import GameplayKit
 
 final class HealthSystem: GameSystem {
-    private var entityManager: EntityManager!
-    private var eventBus: EventBus!
+    private var entityManager: EntityManaging!
+    private var eventBus: EventDispatching!
     
     func initialize(context: GameRuntimeContext) {
         self.entityManager = context.entityManager

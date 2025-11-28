@@ -10,8 +10,8 @@ import GameplayKit
 
 /// CollisionSystem - handles collision detection between entities
 final class CollisionSystem: GameSystem {
-    private var entityManager: EntityManager!
-    private var eventBus: EventBus!
+    private var entityManager: EntityManaging!
+    private var eventBus: EventDispatching!
     
     // MARK: - Cached Entity Queries
     

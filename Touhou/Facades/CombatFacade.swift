@@ -9,11 +9,11 @@ import Foundation
 import GameplayKit
 
 final class CombatFacade {
-    private let entityManager: EntityManager
+    private let entityManager: EntityManaging
     private let commandQueue: CommandQueue
-    private let eventBus: EventBus
+    private let eventBus: EventDispatching
     
-    init(entityManager: EntityManager, commandQueue: CommandQueue, eventBus: EventBus) {
+    init(entityManager: EntityManaging, commandQueue: CommandQueue, eventBus: EventDispatching) {
         self.entityManager = entityManager
         self.commandQueue = commandQueue
         self.eventBus = eventBus

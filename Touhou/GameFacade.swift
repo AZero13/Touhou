@@ -10,8 +10,12 @@ import GameplayKit
 import CoreGraphics
 
 @MainActor
-class GameFacade {
+class GameFacade: GameEngine {
     static let shared = GameFacade()
+    
+    // GameEngine protocol requirement
+    var playArea: CGRect { return GameFacade.playArea }
+    
     static let playArea: CGRect = CGRect(x: 0, y: 0, width: 384, height: 448)
     static let maxStage: Int = 6
     
@@ -47,7 +51,7 @@ class GameFacade {
         stateMachine.currentState is GameNotStartedState
     }
     
-    private init() {
+    init() {
         setupStateMachine()
         setupSystems()
     }

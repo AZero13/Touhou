@@ -12,22 +12,8 @@ class GameScene: SKScene, EventListener {
     
     private var renderSystem: RenderSystem!
     
-    // Pause menu UI
-    private var pauseMenuNode: SKNode?
-    private var closeLabel: SKLabelNode?
-    private var restartLabel: SKLabelNode?
-    
-    // Midboss timer UI
-    private var timeBonusLabel: SKLabelNode?
-    
-    // Dialogue UI
-    private var dialogueBox: SKNode?
-    private var dialogueSpeakerLabel: SKLabelNode?
-    private var dialogueTextLabel: SKLabelNode?
-    private var dialogueAnnotationLabel: SKLabelNode?
-    private var currentDialogue: DialogueSequence?
-    private var currentDialogueIndex: Int = 0
-    private var wasTimeFrozenBeforeDialogue: Bool = false
+    private var hud: GameHUD!
+    private var gameEngine: GameEngine!
     
     // Spell card effect (follows boss during fight)
     private var spellCardContainer: SKNode?
@@ -47,6 +33,15 @@ class GameScene: SKScene, EventListener {
     private var floatingScoreAction: SKAction!
     private var enemyDeathAction: SKAction!
     private var bombFlashAction: SKAction!
+    
+    init(size: CGSize, gameEngine: GameEngine) {
+        self.gameEngine = gameEngine
+        super.init(size: size)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func didMove(to view: SKView) {
         backgroundColor = SKColor.black
@@ -56,44 +51,39 @@ class GameScene: SKScene, EventListener {
         
         // World layer
         worldLayer = SKNode()
-        worldLayer.name = "worldLayer"
+        worldLayer.name = Constants.NodeName.worldLayer
         addChild(worldLayer)
         
         // Boss UI (healthbar)
         bossLayer = SKNode()
-        bossLayer.name = "bossLayer"
+        bossLayer.name = Constants.NodeName.bossLayer
         bossLayer.isHidden = true  // Hidden until boss appears
-        bossLayer.zPosition = 500  // Above effect layer (spell card effect is at 400)
+        bossLayer.zPosition = Constants.ZLayer.boss  // Above effect layer (spell card effect is at 400)
         addChild(bossLayer)
         
         effectLayer = SKNode()
-        effectLayer.name = "effectLayer"
-        effectLayer.zPosition = 400  // Spell card effects go here
+        effectLayer.name = Constants.NodeName.effectLayer
+        effectLayer.zPosition = Constants.ZLayer.effect  // Spell card effects go here
         addChild(effectLayer)
         
         uiLayer = SKNode()
-        uiLayer.name = "uiLayer"
+        uiLayer.name = Constants.NodeName.uiLayer
         addChild(uiLayer)
+        
+        // Initialize HUD
+        hud = GameHUD(uiLayer: uiLayer)
+        hud.setup(in: self, engine: gameEngine)
 
         // Create cached actions for effects
         setupEffectActions()
-
-        // Create pause menu (initially hidden)
-        createPauseMenu()
-        
-        // Create time bonus timer (initially hidden)
-        createTimeBonusTimer()
-        
-        // Create dialogue box (initially hidden)
-        createDialogueBox()
         
         // Register for game events
-        GameFacade.shared.registerListener(self)
+        gameEngine.registerListener(self)
         
         // Only start a new run if we're in NotStarted state (i.e., app just launched)
         // Don't reset if we're transitioning between stages (scene is recreated but game continues)
-        if GameFacade.shared.isInNotStartedState {
-            GameFacade.shared.startNewRun()
+        if gameEngine.isInNotStartedState {
+            gameEngine.startNewRun()
         }
     }
     
@@ -124,23 +114,23 @@ class GameScene: SKScene, EventListener {
     
     override func update(_ currentTime: TimeInterval) {
         // Check for dialogue advancement (before game update)
-        if dialogueBox?.isHidden == false {
-            GameFacade.shared.update(currentTime)
+        if hud.isDialogueActive {
+            gameEngine.update(currentTime)
             let input = InputManager.shared.currentInput
             if input.shoot.justPressed {
-                advanceDialogue()
+                hud.advanceDialogue()
             }
             
             // Update boss UI (bar and timer)
-            updateBossUI()
+            hud.updateBossUI(bossLayer: bossLayer)
             return
         }
         
         // Update game logic (this will also update InputManager)
-        GameFacade.shared.update(currentTime)
+        gameEngine.update(currentTime)
         
         // Update boss UI (bar and timer)
-        updateBossUI()
+        hud.updateBossUI(bossLayer: bossLayer)
         
         // Update spell card effect to follow boss
         updateSpellCardEffect()
@@ -150,7 +140,7 @@ class GameScene: SKScene, EventListener {
         // Update rendering after all actions and physics have been processed
         // This ensures that any position changes from actions won't be overwritten
         if let renderSystem = renderSystem {
-            renderSystem.sync(entities: GameFacade.shared.entities, scene: self, worldLayer: worldLayer, bossLayer: bossLayer, effectLayer: effectLayer)
+            renderSystem.sync(entities: gameEngine.entities, scene: self, worldLayer: worldLayer, bossLayer: bossLayer, effectLayer: effectLayer)
         }
     }
     
@@ -160,14 +150,14 @@ class GameScene: SKScene, EventListener {
     func handleEvent(_ event: GameEvent) {
         switch event {
         case is GamePausedEvent:
-            self.showPauseMenu()
-            self.pauseSpellCardEffect()
+            hud.showPauseMenu()
+            self.pauseMenuEffect()
         case is GameResumedEvent:
             self.resumeSpellCardEffect()
         case is PauseMenuHiddenEvent:
-            self.hidePauseMenu()
+            hud.hidePauseMenu()
         case let e as PauseMenuUpdateEvent:
-            self.updatePauseMenuSelection(selectedOption: e.selectedOption)
+            hud.updatePauseMenuSelection(selectedOption: e.selectedOption)
         case let e as GrazeEvent:
             self.playGrazeEffect(for: e.bulletEntity)
         case let e as EnemyHitEvent:
@@ -178,8 +168,7 @@ class GameScene: SKScene, EventListener {
             self.showEnemyDeathEffect(for: e.entity)
         case is BossDefeatedEvent:
             // Boss defeated - hide health bar and timer immediately (boss will flee or vanish)
-            bossLayer.isHidden = true
-            timeBonusLabel?.isHidden = true
+            hud.hideBossUI(bossLayer: bossLayer)
             // Remove spell card effect (spell card succeeded)
             removeSpellCardEffect()
         case is BossFledEvent:
@@ -199,7 +188,7 @@ class GameScene: SKScene, EventListener {
             // Remove spell card effect (spell card failed - time expired)
             removeSpellCardEffect()
         case let e as DialogueTriggeredEvent:
-            self.startDialogue(dialogueId: e.dialogueId)
+            hud.startDialogue(dialogueId: e.dialogueId)
         case is BombActivatedEvent:
             self.showBombFlashEffect()
         case let e as StageTransitionEvent:
@@ -209,291 +198,8 @@ class GameScene: SKScene, EventListener {
         }
     }
     
-    // MARK: - Pause Menu UI
-    
-    private func createPauseMenu() {
-        let menuNode = SKNode()
-        menuNode.name = "pauseMenu"
-        menuNode.isHidden = true
-        
-        // Title
-        let titleLabel = SKLabelNode(text: "PAUSE")
-        titleLabel.fontName = "Menlo-Bold"
-        titleLabel.fontSize = 32
-        titleLabel.fontColor = .white
-        titleLabel.position = CGPoint(x: size.width / 2, y: size.height / 2 + 60)
-        menuNode.addChild(titleLabel)
-        
-        // Close option
-        let close = SKLabelNode(text: "CLOSE")
-        close.fontName = "Menlo"
-        close.fontSize = 24
-        close.fontColor = .white
-        close.position = CGPoint(x: size.width / 2, y: size.height / 2)
-        close.name = "close"
-        menuNode.addChild(close)
-        self.closeLabel = close
-        
-        // Restart option
-        let restart = SKLabelNode(text: "RESTART")
-        restart.fontName = "Menlo"
-        restart.fontSize = 24
-        restart.fontColor = .white
-        restart.position = CGPoint(x: size.width / 2, y: size.height / 2 - 40)
-        restart.name = "restart"
-        menuNode.addChild(restart)
-        self.restartLabel = restart
-        
-        // Add dark overlay
-        let overlay = SKSpriteNode(color: .black, size: size)
-        overlay.alpha = 0.7
-        overlay.position = CGPoint(x: size.width / 2, y: size.height / 2)
-        overlay.zPosition = -1
-        menuNode.addChild(overlay)
-        
-        menuNode.zPosition = 1000 // Above everything
-        uiLayer.addChild(menuNode)  // Add to UI layer
-        self.pauseMenuNode = menuNode
-    }
-    
-    private func showPauseMenu() {
-        pauseMenuNode?.isHidden = false
-    }
-    
-    private func hidePauseMenu() {
-        pauseMenuNode?.isHidden = true
-    }
-    
-    private func updatePauseMenuSelection(selectedOption: PauseMenuOption) {
-        // Highlight selected option (white), dim unselected (gray)
-        switch selectedOption {
-        case .close:
-            closeLabel?.fontColor = .white
-            closeLabel?.fontName = "Menlo-Bold"
-            restartLabel?.fontColor = .gray
-            restartLabel?.fontName = "Menlo"
-        case .restart:
-            closeLabel?.fontColor = .gray
-            closeLabel?.fontName = "Menlo"
-            restartLabel?.fontColor = .white
-            restartLabel?.fontName = "Menlo-Bold"
-        }
-    }
-    
-    // MARK: - Dialogue UI
-    
-    private func createDialogueBox() {
-        let boxNode = SKNode()
-        boxNode.name = "dialogueBox"
-        boxNode.isHidden = true
-        boxNode.zPosition = 2000  // Above everything
-        
-        // Dark background box at bottom of screen
-        let boxHeight: CGFloat = 140
-        let background = SKSpriteNode(color: NSColor(white: 0.0, alpha: 0.85), size: CGSize(width: size.width, height: boxHeight))
-        background.position = CGPoint(x: size.width / 2, y: boxHeight / 2)
-        boxNode.addChild(background)
-        
-        // Speaker name label (top-left of box)
-        let speakerLabel = SKLabelNode(text: "REIMU")
-        speakerLabel.fontName = "Menlo-Bold"
-        speakerLabel.fontSize = 18
-        speakerLabel.fontColor = .white
-        speakerLabel.horizontalAlignmentMode = .left
-        speakerLabel.verticalAlignmentMode = .top
-        speakerLabel.position = CGPoint(x: 20, y: boxHeight - 10)
-        boxNode.addChild(speakerLabel)
-        self.dialogueSpeakerLabel = speakerLabel
-        
-        // Dialogue text label (center of box)
-        let textLabel = SKLabelNode(text: "")
-        textLabel.fontName = "Menlo"
-        textLabel.fontSize = 16
-        textLabel.fontColor = .white
-        textLabel.numberOfLines = 0
-        textLabel.preferredMaxLayoutWidth = size.width - 40
-        textLabel.horizontalAlignmentMode = .left
-        textLabel.verticalAlignmentMode = .top
-        textLabel.position = CGPoint(x: 20, y: boxHeight - 40)
-        boxNode.addChild(textLabel)
-        self.dialogueTextLabel = textLabel
-        
-        // Annotation label (bottom-right)
-        let annotationLabel = SKLabelNode(text: "")
-        annotationLabel.fontName = "Menlo-Italic"
-        annotationLabel.fontSize = 14
-        annotationLabel.fontColor = .gray
-        annotationLabel.horizontalAlignmentMode = .right
-        annotationLabel.verticalAlignmentMode = .bottom
-        annotationLabel.position = CGPoint(x: size.width - 20, y: 10)
-        boxNode.addChild(annotationLabel)
-        self.dialogueAnnotationLabel = annotationLabel
-        
-        // Prompt indicator (bottom-right corner)
-        let promptLabel = SKLabelNode(text: "Press Z to continue")
-        promptLabel.fontName = "Menlo"
-        promptLabel.fontSize = 12
-        promptLabel.fontColor = .lightGray
-        promptLabel.horizontalAlignmentMode = .right
-        promptLabel.verticalAlignmentMode = .bottom
-        promptLabel.position = CGPoint(x: size.width - 20, y: 5)
-        promptLabel.name = "promptIndicator"
-        
-        // Blinking animation for prompt
-        let fadeOut = SKAction.fadeAlpha(to: 0.3, duration: 0.5)
-        let fadeIn = SKAction.fadeAlpha(to: 1.0, duration: 0.5)
-        promptLabel.run(.repeatForever(.sequence([fadeOut, fadeIn])))
-        
-        boxNode.addChild(promptLabel)
-        
-        uiLayer.addChild(boxNode)
-        self.dialogueBox = boxNode
-    }
-    
-    private func startDialogue(dialogueId: String) {
-        print("GameScene: Starting dialogue - \(dialogueId)")
-        guard let dialogue = DialogueData.getDialogue(id: dialogueId) else {
-            print("GameScene: ERROR - Dialogue '\(dialogueId)' not found!")
-            return
-        }
-        
-        currentDialogue = dialogue
-        currentDialogueIndex = 0
-        wasTimeFrozenBeforeDialogue = GameFacade.shared.isTimeFrozen
-        GameFacade.shared.isTimeFrozen = true
-        
-        // Show dialogue box
-        dialogueBox?.isHidden = false
-        
-        // Display first line
-        showDialogueLine(at: 0)
-    }
-    
-    private func showDialogueLine(at index: Int) {
-        guard let dialogue = currentDialogue, index < dialogue.lines.count else {
-            endDialogue()
-            return
-        }
-        
-        let line = dialogue.lines[index]
-        
-        // Update speaker name
-        switch line.speaker {
-        case .reimu:
-            dialogueSpeakerLabel?.text = "REIMU"
-            dialogueSpeakerLabel?.fontColor = .white
-        case .boss:
-            dialogueSpeakerLabel?.text = "???"
-            dialogueSpeakerLabel?.fontColor = .yellow
-            
-            // Trigger boss spawn when boss first speaks (stage boss dialogue)
-            if dialogue.id == "stage1_boss" && index == 6 {
-                print("GameScene: Boss first speaks (line \(index)), firing spawn trigger")
-                GameFacade.shared.fireEvent(DialogueSpawnTriggerEvent(dialogueId: "stage1_boss", triggerName: "spawn_stage_boss"))
-            }
-        }
-        
-        // Update text
-        dialogueTextLabel?.text = line.text
-        
-        // Update annotation (or hide if nil)
-        if let annotation = line.annotation {
-            dialogueAnnotationLabel?.text = annotation
-            dialogueAnnotationLabel?.isHidden = false
-        } else {
-            dialogueAnnotationLabel?.isHidden = true
-        }
-    }
-    
-    private func advanceDialogue() {
-        guard currentDialogue != nil else { return }
-        
-        currentDialogueIndex += 1
-        
-        if let dialogue = currentDialogue, currentDialogueIndex < dialogue.lines.count {
-            showDialogueLine(at: currentDialogueIndex)
-        } else {
-            endDialogue()
-        }
-    }
-    
-    private func endDialogue() {
-        guard let dialogue = currentDialogue else { return }
-        
-        // Hide dialogue box
-        dialogueBox?.isHidden = true
-        GameFacade.shared.isTimeFrozen = wasTimeFrozenBeforeDialogue
-        
-        // Fire completion event
-        GameFacade.shared.fireEvent(DialogueCompletedEvent(dialogueId: dialogue.id))
-        
-        // Call completion handler if exists
-        dialogue.onComplete?()
-        
-        // Clear current dialogue
-        currentDialogue = nil
-        currentDialogueIndex = 0
-    }
-    
-    // MARK: - Time Bonus Timer UI
-    
-    private func createTimeBonusTimer() {
-        let label = SKLabelNode(text: "TIME 00")
-        label.fontName = "Menlo-Bold"
-        label.fontSize = 16
-        label.fontColor = .white
-        label.horizontalAlignmentMode = .right
-        label.verticalAlignmentMode = .top
-        label.position = CGPoint(x: size.width - 10, y: size.height - 40)  // Below boss health bar
-        label.zPosition = 1001  // Above everything
-        label.isHidden = true
-        uiLayer.addChild(label)
-        self.timeBonusLabel = label
-    }
-    
-    
-    /// Update boss UI (bar and timer) based on current game state
-    /// This is the single source of truth for boss UI visibility
-    private func updateBossUI() {
-        let bosses = GameFacade.shared.entities.getEntities(with: BossComponent.self)
-        
-        // No bosses? Hide all boss UI
-        guard let boss = bosses.first,
-              let bossComp = boss.component(ofType: BossComponent.self) else {
-            bossLayer.isHidden = true
-            timeBonusLabel?.isHidden = true
-            return
-        }
-        
-        // Hide timer if boss is defeated
-        if bossComp.isDefeated {
-            timeBonusLabel?.isHidden = true
-            // Hide health bar when boss is defeated (it will flee or vanish)
-            bossLayer.isHidden = true
-            return
-        }
-        
-        // Boss exists and not defeated - show boss bar
-        bossLayer.isHidden = false
-        
-        // Update timer if boss has time bonus
-        if bossComp.hasTimeBonus {
-            timeBonusLabel?.isHidden = false
-            let remainingTime = max(0, bossComp.timeLimit - bossComp.elapsedTime)
-            let seconds = Int(ceil(remainingTime))
-            timeBonusLabel?.text = "TIME \(seconds)"
-            
-            // Change color based on remaining time (red when running out)
-            if remainingTime < 5.0 {
-                timeBonusLabel?.fontColor = .red
-            } else if remainingTime < 10.0 {
-                timeBonusLabel?.fontColor = .yellow
-            } else {
-                timeBonusLabel?.fontColor = .white
-            }
-        } else {
-            timeBonusLabel?.isHidden = true
-        }
+    private func pauseMenuEffect() {
+        self.pauseSpellCardEffect()
     }
     
     private func showTimeBonusText(bonus: Int) {
@@ -520,8 +226,8 @@ class GameScene: SKScene, EventListener {
     }
     
     private func showFailedText(atLogical position: CGPoint) {
-        let scaleX = size.width / GameFacade.playArea.width
-        let scaleY = size.height / GameFacade.playArea.height
+        let scaleX = size.width / gameEngine.playArea.width
+        let scaleY = size.height / gameEngine.playArea.height
         let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
         
         let label = SKLabelNode(text: "FAILED")
@@ -551,8 +257,8 @@ class GameScene: SKScene, EventListener {
     }
 
     private func showGrazeEffect(atLogical position: CGPoint) {
-        let scaleX = size.width / GameFacade.playArea.width
-        let scaleY = size.height / GameFacade.playArea.height
+        let scaleX = size.width / gameEngine.playArea.width
+        let scaleY = size.height / gameEngine.playArea.height
         let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
         let radius: CGFloat = 8 * max(scaleX, scaleY)
         let node = SKShapeNode(circleOfRadius: radius)
@@ -560,15 +266,15 @@ class GameScene: SKScene, EventListener {
         node.strokeColor = .white
         node.lineWidth = 1.0
         node.alpha = 1.0
-        node.zPosition = 200
+        node.zPosition = Constants.ZLayer.grazeEffect
         effectLayer.addChild(node)  // Add to effect layer
         node.run(grazeEffectAction)  // Use cached action
         run(grazeSoundAction)  // Use cached sound action
     }
     
     private func showHitEffect(atLogical position: CGPoint) {
-        let scaleX = size.width / GameFacade.playArea.width
-        let scaleY = size.height / GameFacade.playArea.height
+        let scaleX = size.width / gameEngine.playArea.width
+        let scaleY = size.height / gameEngine.playArea.height
         let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
         let radius: CGFloat = 4 * max(scaleX, scaleY)
         let node = SKShapeNode(circleOfRadius: radius)
@@ -577,7 +283,7 @@ class GameScene: SKScene, EventListener {
         node.lineWidth = 1.5
         node.fillColor = .clear
         node.alpha = 1.0
-        node.zPosition = 300
+        node.zPosition = Constants.ZLayer.hitEffect
         effectLayer.addChild(node)
         node.run(hitEffectAction)
     }
@@ -587,8 +293,8 @@ class GameScene: SKScene, EventListener {
         // Skip if value is 0 (bombs/lives don't award score)
         guard value > 0 else { return }
         
-        let scaleX = size.width / GameFacade.playArea.width
-        let scaleY = size.height / GameFacade.playArea.height
+        let scaleX = size.width / gameEngine.playArea.width
+        let scaleY = size.height / gameEngine.playArea.height
         let scenePosition = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
         
         let label = SKLabelNode(text: "\(value)")
@@ -596,7 +302,7 @@ class GameScene: SKScene, EventListener {
         label.fontSize = 20 * max(scaleX, scaleY)
         label.fontColor = value >= 100000 ? .yellow : .white  // Yellow for high value (matching TH06)
         label.position = scenePosition
-        label.zPosition = 250  // Above items, below bosses
+        label.zPosition = Constants.ZLayer.floatingScore  // Above items, below bosses
         label.verticalAlignmentMode = .center
         label.horizontalAlignmentMode = .center
         
@@ -608,8 +314,8 @@ class GameScene: SKScene, EventListener {
     private func showEnemyDeathEffect(for enemyEntity: GKEntity) {
         guard let transform = enemyEntity.component(ofType: TransformComponent.self) else { return }
         
-        let scaleX = size.width / GameFacade.playArea.width
-        let scaleY = size.height / GameFacade.playArea.height
+        let scaleX = size.width / gameEngine.playArea.width
+        let scaleY = size.height / gameEngine.playArea.height
         let scenePosition = CGPoint(x: transform.position.x * scaleX, y: transform.position.y * scaleY)
         let radius: CGFloat = 24 * max(scaleX, scaleY)
         let node = SKShapeNode(circleOfRadius: radius)
@@ -631,13 +337,13 @@ class GameScene: SKScene, EventListener {
         
         currentBossEntity = bossEntity
         
-        let scaleX = size.width / GameFacade.playArea.width
-        let scaleY = size.height / GameFacade.playArea.height
+        let scaleX = size.width / gameEngine.playArea.width
+        let scaleY = size.height / gameEngine.playArea.height
         let scale = max(scaleX, scaleY)
         
         // Create container node for all spell card elements (follows boss position)
         let container = SKNode()
-        container.zPosition = 400  // Above everything
+        container.zPosition = Constants.ZLayer.spellCard  // Above everything
         effectLayer.addChild(container)
         spellCardContainer = container
         
@@ -728,7 +434,7 @@ class GameScene: SKScene, EventListener {
     /// Update spell card effect to follow boss position
     private func updateSpellCardEffect() {
         // Don't update when paused
-        guard !GameFacade.shared.isTimeFrozen else { return }
+        guard !gameEngine.isTimeFrozen else { return }
         
         guard let container = spellCardContainer,
               let bossEntity = currentBossEntity,
@@ -737,8 +443,8 @@ class GameScene: SKScene, EventListener {
         }
         
         // Update position to follow boss
-        let scaleX = size.width / GameFacade.playArea.width
-        let scaleY = size.height / GameFacade.playArea.height
+        let scaleX = size.width / gameEngine.playArea.width
+        let scaleY = size.height / gameEngine.playArea.height
         let scenePosition = CGPoint(x: transform.position.x * scaleX, y: transform.position.y * scaleY)
         container.position = scenePosition
     }
@@ -813,8 +519,8 @@ class GameScene: SKScene, EventListener {
         // Wait 1 second to allow points/items to be collected after boss defeat
         run(SKAction.sequence([
             SKAction.wait(forDuration: 1.0),
-            SKAction.run {
-                GameFacade.shared.fireEvent(SceneReadyForTransitionEvent(nextStageId: nextStageId, totalScore: totalScore))
+            SKAction.run { [weak self] in
+                self?.gameEngine.fireEvent(SceneReadyForTransitionEvent(nextStageId: nextStageId, totalScore: totalScore))
             }
         ]))
     }

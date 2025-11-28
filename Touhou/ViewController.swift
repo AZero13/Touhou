@@ -20,6 +20,9 @@ class ViewController: NSViewController, EventListener {
     @IBOutlet weak var ValueLabel: NSTextField!
     @IBOutlet weak var GrazeLabel: NSTextField!
     
+    // MARK: - Dependencies
+    private let gameEngine: GameEngine = GameFacade()
+    
     // MARK: - UI flash tasks
     private var scoreFlashTask: Task<Void, Never>?
     private var highScoreFlashTask: Task<Void, Never>?
@@ -35,15 +38,14 @@ class ViewController: NSViewController, EventListener {
         presentGameplayScene()
         
         // Register for game events to keep UI in sync
-        GameFacade.shared.registerListener(self)
+        gameEngine.registerListener(self)
     }
     
     // MARK: - Scene Presentation
     
     private func presentGameplayScene(transition: SKTransition? = nil) {
-        let scene = GameScene()
+        let scene = GameScene(size: GameplayView.bounds.size, gameEngine: gameEngine)
         scene.scaleMode = .aspectFill
-        scene.size = GameplayView.bounds.size
         if let t = transition {
             GameplayView.presentScene(scene, transition: t)
         } else {
@@ -53,7 +55,7 @@ class ViewController: NSViewController, EventListener {
     
     private func presentWinScene(totalScore: Int) {
         let scene = WinScene(totalScore: totalScore) { [weak self] in
-            GameFacade.shared.startNewRun()
+            self?.gameEngine.startNewRun()
             let fade = SKTransition.fade(withDuration: 0.5)
             self?.presentGameplayScene(transition: fade)
         }
@@ -68,7 +70,7 @@ class ViewController: NSViewController, EventListener {
             return
         }
         let scene = ScoreScene(totalScore: totalScore, nextStageId: nextStageId) { [weak self] in
-            GameFacade.shared.startStage(stageId: nextStageId)
+            self?.gameEngine.startStage(stageId: nextStageId)
             // Move in from top when leaving score scene to return to gameplay
             let moveInDown = SKTransition.moveIn(with: .down, duration: 1.0)
             moveInDown.pausesIncomingScene = true // Pause new gameplay scene until transition completes

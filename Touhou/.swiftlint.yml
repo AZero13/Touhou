@@ -1,0 +1,20 @@
+disabled_rules:
+  - trailing_whitespace
+  - force_cast
+  - force_try
+  - force_unwrapping
+  - line_length
+  - todo
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - fatal_error_message
+
+excluded:
+  - Carthage
+  - Pods
+  - SwiftLint
+  - Tests
+
+line_length: 120

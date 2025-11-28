@@ -58,7 +58,7 @@ final class PowerSystem: GameSystem {
     
     @inlinable
     static func getThresholdForRank(_ rank: Int) -> Int {
-        powerThresholds[safe: rank] ?? (powerThresholds.last ?? 128)
+        powerThresholds[rank]
     }
 }
 

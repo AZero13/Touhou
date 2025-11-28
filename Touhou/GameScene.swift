@@ -137,11 +137,23 @@ class GameScene: SKScene, EventListener {
     }
     
     override func didFinishUpdate() {
+        // Clear transient effects
+        effectLayer.removeAllChildren()
         // Update rendering after all actions and physics have been processed
         // This ensures that any position changes from actions won't be overwritten
         if let renderSystem = renderSystem {
             renderSystem.sync(entities: gameEngine.entities, scene: self, worldLayer: worldLayer, bossLayer: bossLayer, effectLayer: effectLayer)
         }
+    }
+    
+    // MARK: - Keyboard Input
+    
+    override func keyDown(with event: NSEvent) {
+        InputManager.shared.setKeyPressed(event.keyCode)
+    }
+    
+    override func keyUp(with event: NSEvent) {
+        InputManager.shared.setKeyReleased(event.keyCode)
     }
     
     // MARK: - EventListener

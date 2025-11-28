@@ -16,50 +16,21 @@ class InputManager {
     private var keyboardState: Set<UInt16> = []
     
     private init() {
-        setupKeyboardMonitoring()
-        setupControllerMonitoring()
+        // No setup needed - GCController.controllers() is automatically maintained by the system
     }
     
-    private func setupKeyboardMonitoring() {
-        NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
-            self?.handleKeyboardEvent(event)
-            return event
-        }
+    // MARK: - Keyboard State Management (called by GameScene)
+    
+    /// Updates keyboard state when a key is pressed
+    /// - Parameter keyCode: The key code from the keyboard event
+    func setKeyPressed(_ keyCode: UInt16) {
+        keyboardState.insert(keyCode)
     }
     
-    private func handleKeyboardEvent(_ event: NSEvent) {
-        let keyCode = event.keyCode
-        let isKeyDown = event.type == .keyDown
-        
-        if isKeyDown {
-            keyboardState.insert(keyCode)
-        } else {
-            keyboardState.remove(keyCode)
-        }
-    }
-    
-    private func setupControllerMonitoring() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(controllerDidConnect),
-            name: .GCControllerDidConnect,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(controllerDidDisconnect),
-            name: .GCControllerDidDisconnect,
-            object: nil
-        )
-    }
-    
-    @objc private func controllerDidConnect(_ notification: Notification) {
-        print("Controller connected")
-    }
-    
-    @objc private func controllerDidDisconnect(_ notification: Notification) {
-        print("Controller disconnected")
+    /// Updates keyboard state when a key is released
+    /// - Parameter keyCode: The key code from the keyboard event
+    func setKeyReleased(_ keyCode: UInt16) {
+        keyboardState.remove(keyCode)
     }
     
     func update() {
@@ -131,8 +102,4 @@ class InputManager {
         _currentInput
     }
     private var _currentInput = InputState()
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
 }

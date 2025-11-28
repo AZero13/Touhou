@@ -122,16 +122,8 @@ class GameFacade: GameEngine {
             lastUpdateTime = currentTime
         }
         
-        var deltaTime = currentTime - lastUpdateTime
-        
-        // Clamp deltaTime to prevent huge jumps (e.g. after pause or backgrounding)
-        if deltaTime > 0.1 {
-            deltaTime = 0.1
-        } else if deltaTime < 0 {
-            // Should not happen if clocks are synced, but safety first
-            deltaTime = 0
-        }
-        
+        let deltaTime = currentTime - lastUpdateTime
+
         lastUpdateTime = currentTime
         
         InputManager.shared.update()

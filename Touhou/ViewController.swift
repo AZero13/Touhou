@@ -21,7 +21,7 @@ class ViewController: NSViewController, EventListener {
     @IBOutlet weak var GrazeLabel: NSTextField!
     
     // MARK: - Dependencies
-    private let gameEngine: GameEngine = GameFacade()
+    private let gameEngine: GameEngine = GameFacade.shared
     
     // MARK: - UI flash tasks
     private var scoreFlashTask: Task<Void, Never>?

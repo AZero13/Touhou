@@ -38,6 +38,10 @@ final class EnemySystem: GameSystem {
         loadStageScript(stageId: 1, context: context)
     }
     
+    private var completionPending: Bool = false
+    private var completionTimer: TimeInterval = 0
+    private let completionDelay: TimeInterval = 3.0 // 3 seconds delay for item collection
+    
     func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
         stageTimer += deltaTime
         
@@ -52,7 +56,7 @@ final class EnemySystem: GameSystem {
         processBossSpawnSequence(context: context)
         
         // Check for stage completion
-        checkStageCompletion(context: context)
+        checkStageCompletion(deltaTime: deltaTime, context: context)
     }
     
     // MARK: - Update Helpers
@@ -171,8 +175,8 @@ final class EnemySystem: GameSystem {
         eventBus.fire(BossIntroStartedEvent(bossEntity: boss))
         print("EnemySystem: Stage boss spawned via unified system with \(boss.component(ofType: BossComponent.self)?.totalPhases ?? 1) phases")
     }
-    
-    private func checkStageCompletion(context: GameRuntimeContext) {
+
+    private func checkStageCompletion(deltaTime: TimeInterval, context: GameRuntimeContext) {
         guard !stageCompleteDispatched else { return }
         
         // Check if stage boss (phase 1+) currently exists and is not marked for destruction
@@ -184,7 +188,6 @@ final class EnemySystem: GameSystem {
         }
         
         // If stage boss exists but bossSpawned isn't true yet, mark it
-        // This tracks that an actual boss entity has appeared
         if !stageBosses.isEmpty && !bossSpawned {
             print("EnemySystem: Stage boss entity detected, marking bossSpawned = true")
             bossSpawned = true
@@ -197,18 +200,31 @@ final class EnemySystem: GameSystem {
                 .filter { !entityManager.isMarkedForDestruction($0) }
             
             if remainingEnemies.isEmpty {
-                stageCompleteDispatched = true
+                // Start completion timer if not already pending
+                if !completionPending {
+                    print("EnemySystem: Boss defeated, starting completion timer (\(completionDelay)s)")
+                    completionPending = true
+                    completionTimer = completionDelay
+                }
                 
-                // Stage 1: trigger victory dialogue after boss defeated
-                if context.currentStage == 1 {
-                    print("EnemySystem: Stage boss defeated, triggering victory dialogue")
-                    eventBus.fire(DialogueTriggeredEvent(dialogueId: "stage1_victory"))
-                } else {
-                    // Other stages: transition immediately
-                    let nextId = context.currentStage >= GameFacade.maxStage ? (GameFacade.maxStage + 1) : (context.currentStage + 1)
-                    let totalScore = entityManager.getPlayerComponent()?.score ?? 0
-                    print("Boss defeated! Transitioning from stage \(context.currentStage) to stage \(nextId)")
-                    eventBus.fire(StageTransitionEvent(nextStageId: nextId, totalScore: totalScore))
+                // Update timer
+                completionTimer -= deltaTime
+                
+                if completionTimer <= 0 {
+                    stageCompleteDispatched = true
+                    completionPending = false
+                    
+                    // Stage 1: trigger victory dialogue after boss defeated
+                    if context.currentStage == 1 {
+                        print("EnemySystem: Stage boss defeated, triggering victory dialogue")
+                        eventBus.fire(DialogueTriggeredEvent(dialogueId: "stage1_victory"))
+                    } else {
+                        // Other stages: transition immediately
+                        let nextId = context.currentStage >= GameFacade.maxStage ? (GameFacade.maxStage + 1) : (context.currentStage + 1)
+                        let totalScore = entityManager.getPlayerComponent()?.score ?? 0
+                        print("Boss defeated! Transitioning from stage \(context.currentStage) to stage \(nextId)")
+                        eventBus.fire(StageTransitionEvent(nextStageId: nextId, totalScore: totalScore))
+                    }
                 }
             }
         }

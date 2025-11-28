@@ -117,7 +117,21 @@ class GameFacade: GameEngine {
     }
     
     func update(_ currentTime: TimeInterval) {
-        let deltaTime = currentTime - lastUpdateTime
+        // Initialize lastUpdateTime if it's the first frame or after a reset
+        if lastUpdateTime == 0 {
+            lastUpdateTime = currentTime
+        }
+        
+        var deltaTime = currentTime - lastUpdateTime
+        
+        // Clamp deltaTime to prevent huge jumps (e.g. after pause or backgrounding)
+        if deltaTime > 0.1 {
+            deltaTime = 0.1
+        } else if deltaTime < 0 {
+            // Should not happen if clocks are synced, but safety first
+            deltaTime = 0
+        }
+        
         lastUpdateTime = currentTime
         
         InputManager.shared.update()
@@ -163,7 +177,7 @@ class GameFacade: GameEngine {
         clearTransientWorld()
         commandQueue.clear()
         _currentStage = stageId
-        lastUpdateTime = CACurrentMediaTime()
+        lastUpdateTime = 0 // Reset time so next update initializes it correctly
         stateMachine.enter(GamePlayingState.self)
         eventBus.fire(StageStartedEvent(stageId: stageId))
         eventBus.processEvents(context: createRuntimeContext())  // Process StageStartedEvent immediately so systems initialize before first frame

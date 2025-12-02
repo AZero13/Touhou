@@ -86,6 +86,14 @@ final class CollisionSystem: GameSystem {
                 handleEnemyTouchPlayer(enemy: enemy, player: player)
             }
         }
+        
+        // Check player collecting items
+        let items = entityManager.getEntities(with: ItemComponent.self)
+        for item in items {
+            if checkCollision(entityA: item, entityB: player) {
+                handleItemCollection(item: item, player: player)
+            }
+        }
 
         
     }
@@ -219,6 +227,23 @@ final class CollisionSystem: GameSystem {
             collisionType: .enemyTouchPlayer,
             hitPosition: hitPosition
         ))
+    }
+    
+    private func handleItemCollection(item: GKEntity, player: GKEntity) {
+        guard let itemComp = item.component(ofType: ItemComponent.self),
+              let transform = item.component(ofType: TransformComponent.self) else {
+            return
+        }
+        
+        // Fire item collected event (for sound effect)
+        eventBus.fire(ItemCollectedEvent(itemType: itemComp.itemType, position: transform.position))
+        
+        // Fire power-up collected event (for scoring and power increase)
+        // This event is already handled by ScoreSystem and PowerSystem
+        eventBus.fire(PowerUpCollectedEvent(itemType: itemComp.itemType, value: itemComp.value, position: transform.position))
+        
+        // Mark item for destruction
+        entityManager.markForDestruction(item)
     }
 
     private func checkGraze(bullet: GKEntity, player: GKEntity) -> Bool {

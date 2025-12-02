@@ -143,6 +143,26 @@ struct EnemyHitEvent: GameEvent, @unchecked Sendable {
     }
 }
 
+struct PlayerShootEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    
+    init() {
+        self.timestamp = CACurrentMediaTime()
+    }
+}
+
+struct ItemCollectedEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    let itemType: ItemType
+    let position: CGPoint
+    
+    init(itemType: ItemType, position: CGPoint) {
+        self.timestamp = CACurrentMediaTime()
+        self.itemType = itemType
+        self.position = position
+    }
+}
+
 struct ScoreChangedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let newTotal: Int

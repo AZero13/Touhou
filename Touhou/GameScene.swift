@@ -34,6 +34,16 @@ class GameScene: SKScene, EventListener {
     private var enemyDeathAction: SKAction!
     private var bombFlashAction: SKAction!
     
+    // Sound actions
+    private var playerShootSoundAction: SKAction!
+    private var enemyHitSoundAction: SKAction!
+    private var enemyDeathSoundAction: SKAction!
+    private var playerHitSoundAction: SKAction!
+    private var itemPickupSoundAction: SKAction!
+    private var bombSoundAction: SKAction!
+    private var bossSpellSoundAction: SKAction!
+    private var pauseSoundAction: SKAction!
+    
     init(size: CGSize, gameEngine: GameEngine) {
         self.gameEngine = gameEngine
         super.init(size: size)
@@ -96,7 +106,16 @@ class GameScene: SKScene, EventListener {
         let hitFade = SKAction.fadeOut(withDuration: 0.15)
         hitEffectAction = .sequence([.group([hitExpand, hitFade]), .removeFromParent()])
         
-        grazeSoundAction = SKAction.playSoundFileNamed("graze.caf", waitForCompletion: false)
+        // Sound effects (files expected in project bundle)
+        grazeSoundAction = SKAction.playSoundFileNamed("graze.wav", waitForCompletion: false)
+        playerShootSoundAction = SKAction.playSoundFileNamed("plst00.wav", waitForCompletion: false)
+        enemyHitSoundAction = SKAction.playSoundFileNamed("enep00.wav", waitForCompletion: false)
+        enemyDeathSoundAction = SKAction.playSoundFileNamed("enep01.wav", waitForCompletion: false)
+        playerHitSoundAction = SKAction.playSoundFileNamed("pldead00.wav", waitForCompletion: false)
+        itemPickupSoundAction = SKAction.playSoundFileNamed("item00.wav", waitForCompletion: false)
+        bombSoundAction = SKAction.playSoundFileNamed("cat00.wav", waitForCompletion: false)
+        bossSpellSoundAction = SKAction.playSoundFileNamed("cat01.wav", waitForCompletion: false)
+        pauseSoundAction = SKAction.playSoundFileNamed("pause.wav", waitForCompletion: false)
         
         let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 1.0)
         let fadeOut = SKAction.fadeOut(withDuration: 1.0)
@@ -160,8 +179,13 @@ class GameScene: SKScene, EventListener {
     func handleEvent(_ event: GameEvent) {
         switch event {
         case is GamePausedEvent:
+            run(pauseSoundAction)
             hud.showPauseMenu()
             self.pauseMenuEffect()
+        case is PlayerShootEvent:
+            run(playerShootSoundAction)
+        case is ItemCollectedEvent:
+            run(itemPickupSoundAction)
         case is GameResumedEvent:
             self.resumeSpellCardEffect()
         case is PauseMenuHiddenEvent:
@@ -171,10 +195,12 @@ class GameScene: SKScene, EventListener {
         case let e as GrazeEvent:
             self.playGrazeEffect(for: e.bulletEntity)
         case let e as EnemyHitEvent:
+            run(enemyHitSoundAction)
             self.showHitEffect(atLogical: e.hitPosition)
         case let e as PowerUpCollectedEvent:
             self.showFloatingScore(value: e.value, atLogical: e.position)
         case let e as EnemyDiedEvent:
+            run(enemyDeathSoundAction)
             self.showEnemyDeathEffect(for: e.entity)
         case is BossDefeatedEvent:
             // Boss defeated - hide health bar and timer immediately (boss will flee or vanish)
@@ -190,6 +216,7 @@ class GameScene: SKScene, EventListener {
             hud.hideSpellName()
             hud.hideBossUI(bossLayer: bossLayer)
         case let e as BossIntroStartedEvent:
+            run(bossSpellSoundAction)
             // Create persistent spell card effect around boss
             createSpellCardEffect(for: e.bossEntity)
             // Boss UI will be shown automatically by updateBossUI()
@@ -210,6 +237,7 @@ class GameScene: SKScene, EventListener {
         case let e as DialogueTriggeredEvent:
             hud.startDialogue(dialogueId: e.dialogueId)
         case is BombActivatedEvent:
+            run(bombSoundAction)
             self.showBombFlashEffect()
         case let e as StageTransitionEvent:
             self.handleStageTransition(nextStageId: e.nextStageId, totalScore: e.totalScore)

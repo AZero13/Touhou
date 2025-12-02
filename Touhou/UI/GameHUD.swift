@@ -28,6 +28,7 @@ class GameHUD {
     private var dialogueSpeakerLabel: SKLabelNode?
     private var dialogueTextLabel: SKLabelNode?
     private var dialogueAnnotationLabel: SKLabelNode?
+    private var spellNameLabel: SKLabelNode?
     private var currentDialogue: DialogueSequence?
     private var currentDialogueIndex: Int = 0
     private var wasTimeFrozenBeforeDialogue: Bool = false
@@ -44,6 +45,7 @@ class GameHUD {
         createPauseMenu(size: scene.size)
         createTimeBonusTimer(size: scene.size)
         createDialogueBox(size: scene.size)
+        createSpellNameLabel(size: scene.size)
     }
     
     // MARK: - Pause Menu
@@ -285,11 +287,68 @@ class GameHUD {
         label.fontColor = .white
         label.horizontalAlignmentMode = .right
         label.verticalAlignmentMode = .top
-        label.position = CGPoint(x: size.width - 10, y: size.height - 40)  // Below boss health bar
+        // Boss bar is at size.height - 60; place the timer safely below that
+        label.position = CGPoint(x: size.width - 10, y: size.height - 90)
         label.zPosition = Constants.ZLayer.timeBonus  // Above everything
         label.isHidden = true
         uiLayer.addChild(label)
         self.timeBonusLabel = label
+    }
+    
+    // MARK: - Spell Card Name UI
+    
+    private func createSpellNameLabel(size: CGSize) {
+        let label = SKLabelNode(text: "")
+        label.fontName = Constants.Font.bold
+        // Slightly smaller than large so long names fit on screen
+        label.fontSize = Constants.UI.headerFontSize
+        label.fontColor = .yellow
+        label.horizontalAlignmentMode = .center
+        // Use bottom alignment so the label grows upward from its position
+        label.verticalAlignmentMode = .bottom
+        label.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        label.zPosition = Constants.ZLayer.spellName
+        label.isHidden = true
+        uiLayer.addChild(label)
+        self.spellNameLabel = label
+    }
+    
+    /// Show the current spell card name (TH06 style): appear near center, float up above boss bar.
+    func showSpellName(_ text: String) {
+        guard let scene = scene else { return }
+        
+        if spellNameLabel == nil {
+            createSpellNameLabel(size: scene.size)
+        }
+        guard let label = spellNameLabel else { return }
+        
+        label.removeAllActions()
+        label.text = text
+        label.alpha = 1.0
+        label.isHidden = false
+        
+        let size = scene.size
+        // Start slightly above center so the whole ascent stays visible
+        let startPosition = CGPoint(x: size.width / 2, y: size.height * 0.55)
+        label.position = startPosition
+        
+        // Target position: just above the boss health bar
+        let barHeight: CGFloat = 12
+        // Must stay in sync with RenderSystem's boss bar Y offset
+        let barY = size.height - 60
+        // Since verticalAlignmentMode is .bottom, this is the bottom of the text box.
+        // Place it a few points above the bar, but well within the viewport.
+        let targetY = barY + barHeight + 4
+        let targetPosition = CGPoint(x: size.width / 2, y: targetY)
+        
+        let moveUp = SKAction.move(to: targetPosition, duration: 0.8)
+        moveUp.timingMode = .easeOut
+        label.run(moveUp)
+    }
+    
+    func hideSpellName() {
+        spellNameLabel?.isHidden = true
+        spellNameLabel?.removeAllActions()
     }
     
     func updateBossUI(bossLayer: SKNode) {
@@ -301,6 +360,7 @@ class GameHUD {
               let bossComp = boss.component(ofType: BossComponent.self) else {
             bossLayer.isHidden = true
             timeBonusLabel?.isHidden = true
+            hideSpellName()
             return
         }
         
@@ -309,6 +369,7 @@ class GameHUD {
             timeBonusLabel?.isHidden = true
             // Hide health bar when boss is defeated (it will flee or vanish)
             bossLayer.isHidden = true
+            hideSpellName()
             return
         }
         
@@ -338,5 +399,6 @@ class GameHUD {
     func hideBossUI(bossLayer: SKNode) {
         bossLayer.isHidden = true
         timeBonusLabel?.isHidden = true
+        hideSpellName()
     }
 }

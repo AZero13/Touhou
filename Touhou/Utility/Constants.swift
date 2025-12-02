@@ -24,6 +24,7 @@ struct Constants {
         static let pauseMenu: CGFloat = 1000
         static let timeBonus: CGFloat = 1001
         static let dialogue: CGFloat = 2000
+        static let spellName: CGFloat = 1500
     }
     
     struct NodeName {

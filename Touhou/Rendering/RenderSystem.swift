@@ -84,7 +84,8 @@ final class RenderSystem {
             bossLayer.isHidden = false
             let barWidth = scene.size.width * 0.8
             let barHeight: CGFloat = 12
-            let startY = scene.size.height - 30
+            // Move bar down slightly to make room for spell card name above it
+            let startY = scene.size.height - 60
             let origin = CGPoint(x: (scene.size.width - barWidth) / 2, y: startY)
             
             // Calculate remaining phases (only show if > 0)

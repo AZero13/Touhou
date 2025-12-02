@@ -137,8 +137,6 @@ class GameScene: SKScene, EventListener {
     }
     
     override func didFinishUpdate() {
-        // Clear transient effects
-        effectLayer.removeAllChildren()
         // Update rendering after all actions and physics have been processed
         // This ensures that any position changes from actions won't be overwritten
         if let renderSystem = renderSystem {
@@ -183,28 +181,64 @@ class GameScene: SKScene, EventListener {
             hud.hideBossUI(bossLayer: bossLayer)
             // Remove spell card effect (spell card succeeded)
             removeSpellCardEffect()
+            // Spell card name and timer should vanish when spell ends
+            hud.hideSpellName()
         case is BossFledEvent:
             // Boss fled - remove spell card effect (spell card ended)
             removeSpellCardEffect()
-            // Health bar will be hidden automatically when boss entity is destroyed
-            break
+            // Spell card name and timer should vanish when spell ends (midboss flee)
+            hud.hideSpellName()
+            hud.hideBossUI(bossLayer: bossLayer)
         case let e as BossIntroStartedEvent:
             // Create persistent spell card effect around boss
             createSpellCardEffect(for: e.bossEntity)
             // Boss UI will be shown automatically by updateBossUI()
-            break
+            // Show initial spell name based on boss type/phase (TH06-style)
+            showSpellNameIfNeeded(for: e.bossEntity, phase: 1)
+        case let e as BossPhaseTransitionEvent:
+            // Phase change (multi-phase boss) - update spell name
+            showSpellNameIfNeeded(for: e.bossEntity, phase: e.newPhase)
         case let e as TimeBonusAwardedEvent:
             self.showTimeBonusText(bonus: e.bonusPoints)
         case let e as TimeBonusFailedEvent:
             self.showFailedText(atLogical: e.position)
             // Remove spell card effect (spell card failed - time expired)
             removeSpellCardEffect()
+            // Spell card name and timer should vanish when spell ends (time out)
+            hud.hideSpellName()
+            hud.hideBossUI(bossLayer: bossLayer)
         case let e as DialogueTriggeredEvent:
             hud.startDialogue(dialogueId: e.dialogueId)
         case is BombActivatedEvent:
             self.showBombFlashEffect()
         case let e as StageTransitionEvent:
             self.handleStageTransition(nextStageId: e.nextStageId, totalScore: e.totalScore)
+        default:
+            break
+        }
+    }
+    
+    /// Map specific bosses/phases to spell card names (currently Rumia only).
+    private func showSpellNameIfNeeded(for bossEntity: GKEntity, phase: Int) {
+        guard let bossComp = bossEntity.component(ofType: BossComponent.self) else { return }
+        
+        // Only handle Rumia for now
+        guard bossComp.name.contains("Rumia") else { return }
+        
+        // Midboss (phaseNumber == 0): Moon Sign "Moonlight Ray"
+        if bossComp.phaseNumber == 0 {
+            hud.showSpellName("Moon Sign \"Moonlight Ray\"")
+            return
+        }
+        
+        // Stage boss phases
+        switch phase {
+        case 1:
+            // First spell card
+            hud.showSpellName("Night Sign \"Night Bird\"")
+        case 2:
+            // Second spell card
+            hud.showSpellName("Darkness Sign \"Demarcation\"")
         default:
             break
         }

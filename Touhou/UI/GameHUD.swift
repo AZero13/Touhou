@@ -33,6 +33,9 @@ class GameHUD {
     private var currentDialogueIndex: Int = 0
     private var wasTimeFrozenBeforeDialogue: Bool = false
     
+    // Timer state tracking for timeout sound
+    private var lastTimerSeconds: Int = -1
+    
     // MARK: - Initialization
     init(uiLayer: SKNode) {
         self.uiLayer = uiLayer
@@ -383,6 +386,13 @@ class GameHUD {
             let seconds = Int(ceil(remainingTime))
             timeBonusLabel?.text = "TIME \(seconds)"
             
+            // Play timeout sound when timer ticks down while yellow or red
+            if remainingTime < 10.0 && seconds < lastTimerSeconds && lastTimerSeconds >= 0 {
+                // Timer is yellow/red and just ticked down - play timeout sound
+                engine.eventBus.fire(TimerTickEvent())
+            }
+            lastTimerSeconds = seconds
+            
             // Change color based on remaining time (red when running out)
             if remainingTime < 5.0 {
                 timeBonusLabel?.fontColor = .red
@@ -393,6 +403,7 @@ class GameHUD {
             }
         } else {
             timeBonusLabel?.isHidden = true
+            lastTimerSeconds = -1  // Reset timer tracking
         }
     }
     

@@ -43,6 +43,7 @@ class GameScene: SKScene, EventListener {
     private var bombSoundAction: SKAction!
     private var bossSpellSoundAction: SKAction!
     private var pauseSoundAction: SKAction!
+    private var timeoutSoundAction: SKAction!
     
     init(size: CGSize, gameEngine: GameEngine) {
         self.gameEngine = gameEngine
@@ -116,6 +117,7 @@ class GameScene: SKScene, EventListener {
         bombSoundAction = SKAction.playSoundFileNamed("cat00.wav", waitForCompletion: false)
         bossSpellSoundAction = SKAction.playSoundFileNamed("cat01.wav", waitForCompletion: false)
         pauseSoundAction = SKAction.playSoundFileNamed("pause.wav", waitForCompletion: false)
+        timeoutSoundAction = SKAction.playSoundFileNamed("timeout.wav", waitForCompletion: false)
         
         let moveUp = SKAction.moveBy(x: 0, y: 30, duration: 1.0)
         let fadeOut = SKAction.fadeOut(withDuration: 1.0)
@@ -186,6 +188,8 @@ class GameScene: SKScene, EventListener {
             run(playerShootSoundAction)
         case is ItemCollectedEvent:
             run(itemPickupSoundAction)
+        case is TimerTickEvent:
+            run(timeoutSoundAction)
         case is GameResumedEvent:
             self.resumeSpellCardEffect()
         case is PauseMenuHiddenEvent:

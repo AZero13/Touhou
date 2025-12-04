@@ -163,6 +163,14 @@ struct ItemCollectedEvent: GameEvent, Sendable {
     }
 }
 
+struct TimerTickEvent: GameEvent, Sendable {
+    let timestamp: TimeInterval
+    
+    init() {
+        self.timestamp = CACurrentMediaTime()
+    }
+}
+
 struct ScoreChangedEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
     let newTotal: Int

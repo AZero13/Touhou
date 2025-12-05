@@ -166,7 +166,8 @@ enum Stage1Timeline {
         
         // More waves AFTER midboss (TH06 spawns these after midboss is defeated/leaves)
         // Timeline continues advancing, but spawns are blocked while boss is present
-        let postMidbossWaveStart = midbossSpawnTime + 22.0  // After midboss timeout
+        // Spawn shortly after the midboss is gone so the screen isn't idle
+        let postMidbossWaveStart = midbossSpawnTime + 3.0
         let finalBurstPositions: [(x: CGFloat, side: Bool)] = [
             (32, true), (64, true), (40, true), (72, true),
             (48, true), (80, true), (56, true), (88, true),

@@ -252,7 +252,9 @@ final class RenderSystem {
         sprite.zPosition = 60
         
         if let laser = entity.component(ofType: LaserComponent.self) {
-            sprite.size = CGSize(width: laser.width, height: laser.length)
+            // Initialize with current interpolated values so the first frame matches warmup/telegraph
+            sprite.size = CGSize(width: laser.currentWidth, height: laser.currentLength)
+            sprite.alpha = laser.currentAlpha
         }
         return sprite
     }

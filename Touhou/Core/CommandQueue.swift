@@ -98,8 +98,14 @@ final class CommandQueue {
                                            width: cmd.width,
                                            angle: cmd.angle,
                                            duration: cmd.duration,
+                                           warmup: cmd.warmup,
+                                           fadeOut: cmd.fadeOut,
                                            tickInterval: cmd.tickInterval,
-                                           anchor: anchorTransform))
+                                           endWidth: nil,
+                                           anchor: anchorTransform,
+                                           previewWidth: cmd.previewWidth,
+                                           startDelay: cmd.startDelay,
+                                           activationOverride: cmd.activationOverride))
         
         registerEntity(entity)
     }

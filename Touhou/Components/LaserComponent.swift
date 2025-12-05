@@ -38,6 +38,11 @@ final class LaserComponent: GKComponent {
     var currentAngle: CGFloat = 0
     var currentAlpha: CGFloat = 1
     
+    private let activeWidth: CGFloat
+    private let previewWidth: CGFloat
+    private let startDelay: TimeInterval
+    private let activationOverride: TimeInterval?
+    
     init(length: CGFloat,
          width: CGFloat,
          angle: CGFloat,
@@ -48,7 +53,10 @@ final class LaserComponent: GKComponent {
          endAngle: CGFloat? = nil,
          endLength: CGFloat? = nil,
          endWidth: CGFloat? = nil,
-         anchor: TransformComponent? = nil) {
+         anchor: TransformComponent? = nil,
+         previewWidth: CGFloat? = nil,
+         startDelay: TimeInterval = 0.0,
+         activationOverride: TimeInterval? = nil) {
         self.length = length
         self.width = width
         self.angle = angle
@@ -60,10 +68,14 @@ final class LaserComponent: GKComponent {
         self.endLength = endLength
         self.endWidth = endWidth
         self.anchorTransform = anchor
+        self.activeWidth = width
+        self.previewWidth = previewWidth ?? max(4, width * 0.3)
+        self.startDelay = startDelay
+        self.activationOverride = activationOverride
         // Initialize current values to base values
         let minBeamLength = hypot(GameFacade.playArea.width, GameFacade.playArea.height) + 40
         self.currentLength = max(length, minBeamLength)
-        self.currentWidth = width
+        self.currentWidth = self.previewWidth
         self.currentAngle = angle
         self.currentAlpha = 0 // start invisible until warmup completes
         super.init()
@@ -86,7 +98,17 @@ final class LaserComponent: GKComponent {
         // Ensure the beam always extends offscreen in its travel direction
         let minBeamLength = hypot(GameFacade.playArea.width, GameFacade.playArea.height) + 40
         currentLength = max(interpolatedLength, minBeamLength)
-        currentWidth = interpolate(from: width, to: endWidth ?? width, t: eased)
+        
+        // Apply start delay (no alpha, no width growth before this)
+        let telegraphElapsed = max(0, elapsed - startDelay)
+        
+        // Telegraph: grow width from preview to active during warmup, hold active after
+        if warmup > 0, telegraphElapsed < warmup {
+            let wT = CGFloat(telegraphElapsed / warmup)
+            currentWidth = previewWidth + (activeWidth - previewWidth) * wT
+        } else {
+            currentWidth = activeWidth
+        }
         
         // Keep transform in math space (0 = right, -π/2 = down); rendering applies sprite offset.
         transform.rotation = currentAngle
@@ -94,8 +116,10 @@ final class LaserComponent: GKComponent {
         // and should be used by the rendering system. TransformComponent doesn't have a scale property.
         
         // Compute alpha for warmup / fade out
-        if warmup > 0, elapsed < warmup {
-            currentAlpha = CGFloat(elapsed / warmup)
+        if telegraphElapsed <= 0 {
+            currentAlpha = 0
+        } else if warmup > 0, telegraphElapsed < warmup {
+            currentAlpha = CGFloat(telegraphElapsed / warmup)
         } else if fadeOut > 0, elapsed >= duration - fadeOut {
             let remaining = duration - elapsed
             currentAlpha = max(0, CGFloat(remaining / fadeOut))
@@ -115,6 +139,17 @@ final class LaserComponent: GKComponent {
     }
     
     func canDamage(_ target: GKEntity) -> Bool {
+        // No damage before start delay or telegraph phase, or before activationOverride if provided
+        if elapsed < startDelay {
+            return false
+        }
+        let telegraphElapsed = max(0, elapsed - startDelay)
+        if telegraphElapsed < warmup {
+            return false
+        }
+        if let activationOverride = activationOverride, elapsed < activationOverride {
+            return false
+        }
         let id = ObjectIdentifier(target)
         let now = CACurrentMediaTime()
         let last = lastDamageTimestamps[id] ?? 0

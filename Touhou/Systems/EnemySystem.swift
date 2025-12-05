@@ -299,11 +299,16 @@ final class EnemySystem: GameSystem {
             
             if offscreenBottom || offscreenTop {
                 if isBoss {
-                    print("EnemySystem: Boss went offscreen (y: \(transform.position.y)), despawning")
-                    // Fire event so UI can clean up (boss bar, timer)
-                    eventBus.fire(BossFledEvent(bossEntity: enemy))
+                    // Only allow bosses to despawn once defeated or timed out; otherwise keep them alive
+                    if let bossComponent = bossComponent,
+                       (bossComponent.isDefeated || bossComponent.isTimeExpired) {
+                        print("EnemySystem: Boss went offscreen (y: \(transform.position.y)), despawning")
+                        eventBus.fire(BossFledEvent(bossEntity: enemy))
+                        context.entities.destroy(enemy)
+                    }
+                } else {
+                    context.entities.destroy(enemy)
                 }
-                context.entities.destroy(enemy)
             }
         }
     }

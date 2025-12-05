@@ -111,8 +111,20 @@ struct LaserSpawnCommand {
     let position: CGPoint
     let angle: CGFloat
     let length: CGFloat
+    /// Target active width
     let width: CGFloat
+    /// Optional preview width used during warmup (telegraph). Defaults to 30% of width.
+    let previewWidth: CGFloat?
     let duration: TimeInterval
+    /// Telegraph duration before the beam becomes active
+    let warmup: TimeInterval
+    /// Fade out tail duration
+    let fadeOut: TimeInterval
+    /// Optional delay before warmup begins (for staggered multi-beam telegraphs)
+    let startDelay: TimeInterval
+    /// Optional absolute activation time (seconds since spawn) to force simultaneous activation
+    /// If nil, activation happens immediately after warmup.
+    let activationOverride: TimeInterval?
     let color: BulletColor
     let damage: Int
     let tickInterval: TimeInterval
@@ -122,7 +134,12 @@ struct LaserSpawnCommand {
          angle: CGFloat,
          length: CGFloat,
          width: CGFloat,
+         previewWidth: CGFloat? = nil,
          duration: TimeInterval = 1.0,
+         warmup: TimeInterval = 0.1,
+         fadeOut: TimeInterval = 0.2,
+         startDelay: TimeInterval = 0.0,
+         activationOverride: TimeInterval? = nil,
          color: BulletColor = .red,
          damage: Int = 1,
          tickInterval: TimeInterval = 0.15,
@@ -131,7 +148,12 @@ struct LaserSpawnCommand {
         self.angle = angle
         self.length = length
         self.width = width
+        self.previewWidth = previewWidth
         self.duration = duration
+        self.warmup = warmup
+        self.fadeOut = fadeOut
+        self.startDelay = startDelay
+        self.activationOverride = activationOverride
         self.color = color
         self.damage = damage
         self.tickInterval = tickInterval

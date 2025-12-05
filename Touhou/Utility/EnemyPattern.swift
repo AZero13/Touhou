@@ -51,29 +51,79 @@ enum EnemyPattern: CaseIterable {
             return [makeLaser(position: position, angle: angle, config: config, duration: 2.0, widthScale: 0.2, lengthMin: 300)]
             
         case .rumiaShot:
-            // Phase 1: occasional short beam; aim at player if available
-            let angle = targetPosition.flatMap { MathUtility.angle(from: position, to: $0) } ?? -.pi / 2
-            return [makeLaser(position: position, angle: angle, config: config, duration: 1.0, widthScale: 0.18, lengthMin: 240)]
+            // Phase 1: 5 beams all aiming at the player, warming up one-by-one (0.5s step), then activating together
+            let baseAngle = targetPosition.flatMap { MathUtility.angle(from: position, to: $0) } ?? -.pi / 2
+            let laserCount = 5
+            let warmup: TimeInterval = 0.5
+            let stagger: TimeInterval = 0.5
+            let activationTime: TimeInterval = warmup + stagger * Double(laserCount - 1) // all fire when last finishes
+            let activeDuration: TimeInterval = 1.5
+            let totalDuration = activationTime + activeDuration + 0.3 // include fade
+            return (0..<laserCount).map { idx in
+                let startDelay = stagger * Double(idx)
+                return makeLaser(position: position,
+                                 angle: baseAngle,
+                                 config: config,
+                                 duration: totalDuration,
+                                 widthScale: 0.22,
+                                 lengthMin: 260,
+                                 warmup: warmup,
+                                 previewWidthScale: 0.25,
+                                 startDelay: startDelay,
+                                 activationOverride: activationTime)
+            }
             
         case .rumiaShot2:
-            // Rumia phase 2: add a shorter beam; aim at player if available
-            let angle = targetPosition.flatMap { MathUtility.angle(from: position, to: $0) } ?? -.pi / 2
-            return [makeLaser(position: position, angle: angle, config: config, duration: 1.4, widthScale: 0.25, lengthMin: 260)]
+            // Phase 2: similar 5-beam telegraph, all aiming at the player, slightly wider/longer
+            let baseAngle = targetPosition.flatMap { MathUtility.angle(from: position, to: $0) } ?? -.pi / 2
+            let laserCount = 5
+            let warmup: TimeInterval = 0.5
+            let stagger: TimeInterval = 0.5
+            let activationTime: TimeInterval = warmup + stagger * Double(laserCount - 1)
+            let activeDuration: TimeInterval = 1.8
+            let totalDuration = activationTime + activeDuration + 0.3
+            return (0..<laserCount).map { idx in
+                let startDelay = stagger * Double(idx)
+                return makeLaser(position: position,
+                                 angle: baseAngle,
+                                 config: config,
+                                 duration: totalDuration,
+                                 widthScale: 0.28,
+                                 lengthMin: 280,
+                                 warmup: warmup,
+                                 previewWidthScale: 0.25,
+                                 startDelay: startDelay,
+                                 activationOverride: activationTime)
+            }
             
         default:
             return []
         }
     }
     
-    private func makeLaser(position: CGPoint, angle: CGFloat, config: PatternConfig, duration: TimeInterval, widthScale: CGFloat, lengthMin: CGFloat) -> LaserSpawnCommand {
+    private func makeLaser(position: CGPoint,
+                           angle: CGFloat,
+                           config: PatternConfig,
+                           duration: TimeInterval,
+                           widthScale: CGFloat,
+                           lengthMin: CGFloat,
+                           warmup: TimeInterval = 0.1,
+                           previewWidthScale: CGFloat = 0.3,
+                           startDelay: TimeInterval = 0.0,
+                           activationOverride: TimeInterval? = nil) -> LaserSpawnCommand {
         let length = max(lengthMin, config.physics.speed * 3)
         let width = max(12, config.spread * widthScale)
+        let previewWidth = max(4, width * previewWidthScale)
         return LaserSpawnCommand(
             position: position,
             angle: angle,
             length: length,
             width: width,
+            previewWidth: previewWidth,
             duration: duration,
+            warmup: warmup,
+            startDelay: startDelay,
+            activationOverride: activationOverride,
             color: config.visual.color,
             damage: config.physics.damage,
             tickInterval: 0.12,

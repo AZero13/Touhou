@@ -108,13 +108,12 @@ final class StageTimeline {
         while currentStepIndex < steps.count {
             let step = steps[currentStepIndex]
             if timer >= step.time {
-                // Execute event, but skip enemy spawns if boss is present (like TH06)
+                // If a boss is active, pause enemy spawns until the boss leaves
                 if case .spawnEnemy = step.event, bossPresent {
-                    // Skip spawn but still advance (like TH06)
-                    // print("StageTimeline: Skipping enemy spawn at \(step.time) (boss present)")
-                } else {
-                    executeEvent(step.event, entityManager: entityManager, eventBus: eventBus)
+                    break  // Do not advance; wait and spawn once the arena is clear
                 }
+                
+                executeEvent(step.event, entityManager: entityManager, eventBus: eventBus)
                 currentStepIndex += 1
             } else {
                 break

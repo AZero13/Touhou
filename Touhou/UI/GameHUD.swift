@@ -303,13 +303,14 @@ class GameHUD {
     private func createSpellNameLabel(size: CGSize) {
         let label = SKLabelNode(text: "")
         label.fontName = Constants.Font.bold
-        // Slightly smaller than large so long names fit on screen
-        label.fontSize = Constants.UI.headerFontSize
+        label.fontSize = Constants.UI.defaultFontSize
         label.fontColor = .yellow
-        label.horizontalAlignmentMode = .center
+        label.horizontalAlignmentMode = .left
         // Use bottom alignment so the label grows upward from its position
         label.verticalAlignmentMode = .bottom
-        label.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        // Left align to health bar (health bar starts at 10% from left: (width - width*0.8)/2 = width*0.1)
+        let healthBarLeftX = size.width * 0.1
+        label.position = CGPoint(x: healthBarLeftX, y: size.height / 2)
         label.zPosition = Constants.ZLayer.spellName
         label.isHidden = true
         uiLayer.addChild(label)
@@ -331,18 +332,20 @@ class GameHUD {
         label.isHidden = false
         
         let size = scene.size
+        // Left align to health bar (health bar starts at 10% from left: (width - width*0.8)/2 = width*0.1)
+        let healthBarLeftX = size.width * 0.1
         // Start slightly above center so the whole ascent stays visible
-        let startPosition = CGPoint(x: size.width / 2, y: size.height * 0.55)
+        let startPosition = CGPoint(x: healthBarLeftX, y: size.height * 0.55)
         label.position = startPosition
         
-        // Target position: just above the boss health bar
+        // Target position: just above the boss health bar, left-aligned
         let barHeight: CGFloat = 12
         // Must stay in sync with RenderSystem's boss bar Y offset
         let barY = size.height - 60
         // Since verticalAlignmentMode is .bottom, this is the bottom of the text box.
         // Place it a few points above the bar, but well within the viewport.
         let targetY = barY + barHeight + 4
-        let targetPosition = CGPoint(x: size.width / 2, y: targetY)
+        let targetPosition = CGPoint(x: healthBarLeftX, y: targetY)
         
         let moveUp = SKAction.move(to: targetPosition, duration: 0.8)
         moveUp.timingMode = .easeOut

@@ -13,6 +13,7 @@ import GameplayKit
 final class CommandQueue {
     enum Command {
         case spawnBullet(BulletSpawnCommand, ownedByPlayer: Bool)
+        case spawnLaser(LaserSpawnCommand, ownedByPlayer: Bool)
         case destroyEntity(GKEntity)
         case spawnItem(type: ItemType, position: CGPoint, velocity: CGVector)
         case applyDamage(entity: GKEntity, amount: Int)
@@ -41,6 +42,8 @@ final class CommandQueue {
                 applyFreezeModifier(to: entity)
             case let .spawnBullet(cmd, ownedByPlayer):
                 spawnBullet(cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager, registerEntity: registerEntity)
+            case let .spawnLaser(cmd, ownedByPlayer):
+                spawnLaser(cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager, registerEntity: registerEntity)
             case let .destroyEntity(entity):
                 entityManager.markForDestruction(entity)
             case let .spawnItem(type, position, velocity):
@@ -73,6 +76,32 @@ final class CommandQueue {
     @discardableResult
     private func spawnBullet(_ cmd: BulletSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManaging, registerEntity: (GKEntity) -> Void) -> GKEntity {
         createBulletEntity(from: cmd, ownedByPlayer: ownedByPlayer, entityManager: entityManager, registerEntity: registerEntity)
+    }
+    
+    private func spawnLaser(_ cmd: LaserSpawnCommand, ownedByPlayer: Bool, entityManager: EntityManaging, registerEntity: (GKEntity) -> Void) {
+        let entity = entityManager.createEntity()
+        
+        // Transform anchored at base of the laser
+        let transform = TransformComponent(position: cmd.position, velocity: .zero)
+        // Store the math angle (0 = right, -π/2 = down). Rendering will apply sprite offset.
+        transform.rotation = cmd.angle
+        entity.addComponent(transform)
+        
+        // Bullet marker for collision/render routing
+        let bullet = BulletComponent(ownedByPlayer: ownedByPlayer, bulletType: .laser, damage: cmd.damage, size: .small, shape: .square, color: cmd.color)
+        bullet.rotationOffset = 0
+        entity.addComponent(bullet)
+        
+        // Laser-specific behavior
+        let anchorTransform = cmd.anchor?.component(ofType: TransformComponent.self)
+        entity.addComponent(LaserComponent(length: cmd.length,
+                                           width: cmd.width,
+                                           angle: cmd.angle,
+                                           duration: cmd.duration,
+                                           tickInterval: cmd.tickInterval,
+                                           anchor: anchorTransform))
+        
+        registerEntity(entity)
     }
     
     private func applyFreezeModifier(to entity: GKEntity) {

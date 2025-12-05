@@ -50,6 +50,9 @@ enum TimelineEvent {
     /// Spawn bullets directly (for patterns that don't need enemies)
     case spawnBullets([BulletSpawnCommand])
     
+    /// Spawn a laser directly (no owning enemy needed)
+    case spawnLaser(LaserSpawnCommand)
+    
     /// Custom action (closure for complex behaviors)
     case custom((EntityManaging, EventDispatching) -> Void)
 }
@@ -170,9 +173,29 @@ final class StageTimeline {
             for enemy in enemies {
                 guard let transform = enemy.component(ofType: TransformComponent.self) else { continue }
                 let playerPosition = GameFacade.shared.entities.player?.component(ofType: TransformComponent.self)?.position
-                let commands = pattern.getBulletCommands(from: transform.position, targetPosition: playerPosition, config: patternConfig)
-                for cmd in commands {
-                    GameFacade.shared.combat.spawnEnemyBullet(cmd)
+                
+                if pattern == .laser {
+                    let laserCommands = pattern.getLaserCommands(from: transform.position, targetPosition: playerPosition, config: patternConfig)
+                    for laserCmd in laserCommands {
+                        // Anchor to the enemy so the beam follows movement
+                        let anchored = LaserSpawnCommand(
+                            position: laserCmd.position,
+                            angle: laserCmd.angle,
+                            length: laserCmd.length,
+                            width: laserCmd.width,
+                            duration: laserCmd.duration,
+                            color: laserCmd.color,
+                            damage: laserCmd.damage,
+                            tickInterval: laserCmd.tickInterval,
+                            anchor: enemy
+                        )
+                        GameFacade.shared.combat.spawnEnemyLaser(anchored)
+                    }
+                } else {
+                    let commands = pattern.getBulletCommands(from: transform.position, targetPosition: playerPosition, config: patternConfig)
+                    for cmd in commands {
+                        GameFacade.shared.combat.spawnEnemyBullet(cmd)
+                    }
                 }
             }
             
@@ -180,6 +203,9 @@ final class StageTimeline {
             for cmd in commands {
                 GameFacade.shared.combat.spawnEnemyBullet(cmd)
             }
+            
+        case .spawnLaser(let laserCmd):
+            GameFacade.shared.combat.spawnEnemyLaser(laserCmd)
             
         case .custom(let action):
             action(entityManager, eventBus)
@@ -355,6 +381,19 @@ struct TimelineBuilder {
         builder.steps.append(StageTimeline.Step(
             time: time,
             event: .spawnBullets(commands)
+        ))
+        return builder
+    }
+    
+    /// Add a laser spawn event (direct)
+    func addLaser(
+        at time: TimeInterval,
+        command: LaserSpawnCommand
+    ) -> TimelineBuilder {
+        var builder = self
+        builder.steps.append(StageTimeline.Step(
+            time: time,
+            event: .spawnLaser(command)
         ))
         return builder
     }

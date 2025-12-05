@@ -105,3 +105,36 @@ struct PatternConfig {
         self.spiralSpeed = spiralSpeed
     }
 }
+
+/// Command for spawning a laser beam.
+struct LaserSpawnCommand {
+    let position: CGPoint
+    let angle: CGFloat
+    let length: CGFloat
+    let width: CGFloat
+    let duration: TimeInterval
+    let color: BulletColor
+    let damage: Int
+    let tickInterval: TimeInterval
+    let anchor: GKEntity?
+    
+    init(position: CGPoint,
+         angle: CGFloat,
+         length: CGFloat,
+         width: CGFloat,
+         duration: TimeInterval = 1.0,
+         color: BulletColor = .red,
+         damage: Int = 1,
+         tickInterval: TimeInterval = 0.15,
+         anchor: GKEntity? = nil) {
+        self.position = position
+        self.angle = angle
+        self.length = length
+        self.width = width
+        self.duration = duration
+        self.color = color
+        self.damage = damage
+        self.tickInterval = tickInterval
+        self.anchor = anchor
+    }
+}

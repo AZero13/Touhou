@@ -55,6 +55,13 @@ final class CollisionSystem: GameSystem {
             guard let bulletComp = bullet.component(ofType: BulletComponent.self),
                   bulletComp.ownedByPlayer else { continue }
             
+            if bulletComp.bulletType == .laser,
+               let laser = bullet.component(ofType: LaserComponent.self),
+               let laserTransform = bullet.component(ofType: TransformComponent.self) {
+                handlePlayerLaser(laserEntity: bullet, laser: laser, laserTransform: laserTransform, enemies: enemies)
+                continue
+            }
+            
             for enemy in enemies {
                 if checkCollision(entityA: bullet, entityB: enemy) {
                     handleCollision(entityA: bullet, entityB: enemy)
@@ -66,6 +73,14 @@ final class CollisionSystem: GameSystem {
         for bullet in bullets {
             guard let bulletComp = bullet.component(ofType: BulletComponent.self),
                   !bulletComp.ownedByPlayer else { continue }
+            
+            if bulletComp.bulletType == .laser,
+               let laser = bullet.component(ofType: LaserComponent.self),
+               let laserTransform = bullet.component(ofType: TransformComponent.self),
+               let playerTransform = player.component(ofType: TransformComponent.self) {
+                handleEnemyLaser(laserEntity: bullet, laser: laser, laserTransform: laserTransform, player: player, playerTransform: playerTransform)
+                continue
+            }
             
             if checkCollision(entityA: bullet, entityB: player) {
                 handleCollision(entityA: bullet, entityB: player)
@@ -175,8 +190,10 @@ final class CollisionSystem: GameSystem {
             // Capture position BEFORE marking for destruction
             let hitPosition = bulletEntity.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
             
-            // Immediately mark bullet for destruction (before processing damage)
-            entityManager.markForDestruction(bulletEntity)
+            // Immediately mark bullet for destruction (before processing damage), except lasers
+            if bullet.bulletType != .laser {
+                entityManager.markForDestruction(bulletEntity)
+            }
             
             // Fire collision event (damage will be processed by HealthSystem)
             eventBus.fire(CollisionOccurredEvent(
@@ -200,8 +217,10 @@ final class CollisionSystem: GameSystem {
             // Capture position BEFORE marking for destruction
             let hitPosition = bulletEntity.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
             
-            // Mark bullet for destruction
-            entityManager.markForDestruction(bulletEntity)
+            // Mark bullet for destruction unless it's a laser (lasers persist)
+            if bullet.bulletType != .laser {
+                entityManager.markForDestruction(bulletEntity)
+            }
             
             // Fire collision event
             eventBus.fire(CollisionOccurredEvent(
@@ -211,6 +230,56 @@ final class CollisionSystem: GameSystem {
                 hitPosition: hitPosition
             ))
         }
+    }
+    
+    private func handlePlayerLaser(laserEntity: GKEntity, laser: LaserComponent, laserTransform: TransformComponent, enemies: [GKEntity]) {
+        for enemy in enemies {
+            guard let enemyTransform = enemy.component(ofType: TransformComponent.self) else { continue }
+            let radius = getCollisionRadius(for: enemy)
+            if checkLaserHit(laser: laser, laserTransform: laserTransform, targetPosition: enemyTransform.position, targetRadius: radius) {
+                if laser.canDamage(enemy) {
+                    eventBus.fire(CollisionOccurredEvent(
+                        entityA: laserEntity,
+                        entityB: enemy,
+                        collisionType: .playerBulletHitEnemy,
+                        hitPosition: enemyTransform.position
+                    ))
+                }
+            }
+        }
+    }
+    
+    private func handleEnemyLaser(laserEntity: GKEntity, laser: LaserComponent, laserTransform: TransformComponent, player: GKEntity, playerTransform: TransformComponent) {
+        let playerRadius = getCollisionRadius(for: player)
+        let grazePadding: CGFloat = 12.0
+        
+        if checkLaserHit(laser: laser, laserTransform: laserTransform, targetPosition: playerTransform.position, targetRadius: playerRadius) {
+            if laser.canDamage(player) {
+                eventBus.fire(CollisionOccurredEvent(
+                    entityA: laserEntity,
+                    entityB: player,
+                    collisionType: .enemyBulletHitPlayer,
+                    hitPosition: playerTransform.position
+                ))
+            }
+        } else if checkLaserHit(laser: laser, laserTransform: laserTransform, targetPosition: playerTransform.position, targetRadius: playerRadius + grazePadding) {
+            eventBus.fire(GrazeEvent(bulletEntity: laserEntity, grazeValue: 1))
+        }
+    }
+    
+    private func checkLaserHit(laser: LaserComponent, laserTransform: TransformComponent, targetPosition: CGPoint, targetRadius: CGFloat) -> Bool {
+        let origin = laserTransform.position
+        let dir = CGVector(dx: cos(laser.angle), dy: sin(laser.angle))
+        let toTarget = CGVector(dx: targetPosition.x - origin.x, dy: targetPosition.y - origin.y)
+        
+        let proj = toTarget.dx * dir.dx + toTarget.dy * dir.dy
+        if proj < -targetRadius || proj > laser.length + targetRadius {
+            return false
+        }
+        
+        let perp = abs(toTarget.dx * dir.dy - toTarget.dy * dir.dx)
+        let halfWidth = laser.width * 0.5
+        return perp <= (halfWidth + targetRadius)
     }
     
     private func handleEnemyTouchPlayer(enemy: GKEntity, player: GKEntity) {

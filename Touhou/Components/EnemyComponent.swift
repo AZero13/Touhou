@@ -92,10 +92,25 @@ final class EnemyComponent: GKComponent {
             // Get player position for aimed shots
             let playerPosition = GameFacade.shared.entities.player?.component(ofType: TransformComponent.self)?.position
             let commands = getBulletCommands(from: transform.position, targetPosition: playerPosition)
-            
-            // Spawn bullets via command queue
             for cmd in commands {
                 GameFacade.shared.combat.spawnEnemyBullet(cmd)
+            }
+            
+            // Lasers (if pattern uses them)
+            let lasers = attackPattern.getLaserCommands(from: transform.position, targetPosition: playerPosition, config: patternConfig)
+            for laser in lasers {
+                let anchored = LaserSpawnCommand(
+                    position: laser.position,
+                    angle: laser.angle,
+                    length: laser.length,
+                    width: laser.width,
+                    duration: laser.duration,
+                    color: laser.color,
+                    damage: laser.damage,
+                    tickInterval: laser.tickInterval,
+                    anchor: entity
+                )
+                GameFacade.shared.combat.spawnEnemyLaser(anchored)
             }
         }
     }

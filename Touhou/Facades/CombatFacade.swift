@@ -77,6 +77,10 @@ final class CombatFacade {
         commandQueue.enqueue(.spawnBullet(command, ownedByPlayer: false))
     }
     
+    func spawnEnemyLaser(_ command: LaserSpawnCommand) {
+        commandQueue.enqueue(.spawnLaser(command, ownedByPlayer: false))
+    }
+    
     func fireItemCollectionEvent(itemType: ItemType, value: Int, position: CGPoint) {
         eventBus.fire(PowerUpCollectedEvent(itemType: itemType, value: value, position: position))
     }

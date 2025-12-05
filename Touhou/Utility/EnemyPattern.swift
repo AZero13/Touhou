@@ -18,6 +18,7 @@ enum EnemyPattern: CaseIterable {
     case spiralShot
     case rumiaShot
     case rumiaShot2  // Second spell (Sub5)
+    case laser
     
     /// Get the pattern's bullet spawn commands with config
     func getBulletCommands(from position: CGPoint, targetPosition: CGPoint? = nil, config: PatternConfig = PatternConfig()) -> [BulletSpawnCommand] {
@@ -36,7 +37,48 @@ enum EnemyPattern: CaseIterable {
             return makeRumiaShot(position: position, config: config)
         case .rumiaShot2:
             return makeRumiaShot2(position: position, config: config)
+        case .laser:
+            return []  // Lasers are spawned via getLaserCommands()
         }
+    }
+    
+    /// Laser-specific commands (used when pattern == .laser)
+    func getLaserCommands(from position: CGPoint, targetPosition: CGPoint? = nil, config: PatternConfig = PatternConfig()) -> [LaserSpawnCommand] {
+        switch self {
+        case .laser:
+            // Generic downward beam; aim at target if provided
+            let angle = targetPosition.flatMap { MathUtility.angle(from: position, to: $0) } ?? -.pi / 2
+            return [makeLaser(position: position, angle: angle, config: config, duration: 2.0, widthScale: 0.2, lengthMin: 300)]
+            
+        case .rumiaShot:
+            // Phase 1: occasional short beam; aim at player if available
+            let angle = targetPosition.flatMap { MathUtility.angle(from: position, to: $0) } ?? -.pi / 2
+            return [makeLaser(position: position, angle: angle, config: config, duration: 1.0, widthScale: 0.18, lengthMin: 240)]
+            
+        case .rumiaShot2:
+            // Rumia phase 2: add a shorter beam; aim at player if available
+            let angle = targetPosition.flatMap { MathUtility.angle(from: position, to: $0) } ?? -.pi / 2
+            return [makeLaser(position: position, angle: angle, config: config, duration: 1.4, widthScale: 0.25, lengthMin: 260)]
+            
+        default:
+            return []
+        }
+    }
+    
+    private func makeLaser(position: CGPoint, angle: CGFloat, config: PatternConfig, duration: TimeInterval, widthScale: CGFloat, lengthMin: CGFloat) -> LaserSpawnCommand {
+        let length = max(lengthMin, config.physics.speed * 3)
+        let width = max(12, config.spread * widthScale)
+        return LaserSpawnCommand(
+            position: position,
+            angle: angle,
+            length: length,
+            width: width,
+            duration: duration,
+            color: config.visual.color,
+            damage: config.physics.damage,
+            tickInterval: 0.12,
+            anchor: nil
+        )
     }
     
     // MARK: - Pattern Implementations

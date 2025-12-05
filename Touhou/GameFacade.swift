@@ -70,7 +70,9 @@ class GameFacade: GameEngine {
             GKComponentSystem(componentClass: EnemyComponent.self),
             GKComponentSystem(componentClass: BulletComponent.self),
             GKComponentSystem(componentClass: ItemComponent.self),
-            GKComponentSystem(componentClass: BossComponent.self)
+            GKComponentSystem(componentClass: BossComponent.self),
+            // Lasers need per-frame interpolation (angle/length/width/alpha)
+            GKComponentSystem(componentClass: LaserComponent.self)
         ]
         
         addCrossCuttingSystem(PlayerLifecycleSystem())

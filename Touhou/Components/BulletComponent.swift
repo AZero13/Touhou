@@ -66,6 +66,7 @@ final class BulletComponent: GKComponent {
         case amulet
         case homingAmulet
         case enemyBullet
+        case laser
         case custom(String)
     }
     var bulletType: BulletType
@@ -116,6 +117,11 @@ final class BulletComponent: GKComponent {
     override func update(deltaTime: TimeInterval) {
         guard let entity = entity,
               let transform = entity.component(ofType: TransformComponent.self) else { return }
+        
+        // Lasers are driven by LaserComponent; skip velocity update/offscreen culling here.
+        if bulletType == .laser {
+            return
+        }
         
         let mods = entity.component(ofType: BulletMotionModifiersComponent.self)
         let timeScale: CGFloat = mods?.timeScale ?? 1.0

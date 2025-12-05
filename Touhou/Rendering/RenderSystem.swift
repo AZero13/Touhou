@@ -53,6 +53,18 @@ final class RenderSystem {
                     )
                     node.zRotation = transform.rotation
                 }
+                
+                // Update laser visuals (size/alpha) each frame
+                if let laser = entity.component(ofType: LaserComponent.self),
+                   let sprite = node as? SKSpriteNode {
+                    sprite.size = CGSize(width: laser.currentWidth * scaleX,
+                                         height: laser.currentLength * scaleY)
+                    sprite.alpha = laser.currentAlpha
+                    // SpriteKit's "up" is along +Y; our angles use 0=right. Offset by -π/2 once here.
+                    if let transform = entity.component(ofType: TransformComponent.self) {
+                        sprite.zRotation = transform.rotation - .pi / 2
+                    }
+                }
             } else {
                 // Create RenderComponent for entities that need rendering but don't have one yet
                 if let node = createNode(for: entity) {
@@ -176,7 +188,9 @@ final class RenderSystem {
     
     private func createNode(for entity: GKEntity) -> SKNode? {
         // Determine entity type and create appropriate node
-        if entity.component(ofType: PlayerComponent.self) != nil {
+        if entity.component(ofType: LaserComponent.self) != nil {
+            return createLaserNode(for: entity)
+        } else if entity.component(ofType: PlayerComponent.self) != nil {
             return createPlayerNode(for: entity)
         } else if entity.component(ofType: BossComponent.self) != nil {
             return createBossNode()
@@ -223,6 +237,24 @@ final class RenderSystem {
         shape.zPosition = 50 + CGFloat(bullet.size.radius)
         
         return shape
+    }
+    
+    private func createLaserNode(for entity: GKEntity) -> SKNode {
+        let defaultSize = CGSize(width: 8, height: 120)
+        let color: NSColor
+        if let bullet = entity.component(ofType: BulletComponent.self) {
+            color = bullet.color.nsColor
+        } else {
+            color = .red
+        }
+        let sprite = SKSpriteNode(color: color, size: defaultSize)
+        sprite.anchorPoint = CGPoint(x: 0.5, y: 0.0) // grow from base upward
+        sprite.zPosition = 60
+        
+        if let laser = entity.component(ofType: LaserComponent.self) {
+            sprite.size = CGSize(width: laser.width, height: laser.length)
+        }
+        return sprite
     }
     
     private func createDiamondShape(radius: CGFloat) -> SKShapeNode {

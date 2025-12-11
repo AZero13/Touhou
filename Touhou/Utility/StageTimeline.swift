@@ -101,23 +101,32 @@ final class StageTimeline {
     func update(deltaTime: TimeInterval) {
         guard isActive, let entityManager = entityManager, let eventBus = eventBus else { return }
         
-        // Always advance time (like TH06)
-        timer += deltaTime
+        // Pause the timeline while any boss (midboss or stage boss) is active
+        // This prevents later waves from fast-forwarding during a boss fight
+        if !entityManager.getEntities(with: BossComponent.self).isEmpty {
+            return
+        }
         
-        // Check if boss is present (TH06 blocks spawns during boss fights)
-        let bossPresent = !entityManager.getEntities(with: BossComponent.self).isEmpty
+        // Advance time only when no boss is present
+        timer += deltaTime
         
         // Process all steps that are due
         while currentStepIndex < steps.count {
             let step = steps[currentStepIndex]
             if timer >= step.time {
-                // If a boss is active, pause enemy spawns until the boss leaves
-                if case .spawnEnemy = step.event, bossPresent {
+                // If a boss became active from a previous step in this frame, stop and wait
+                if case .spawnEnemy = step.event,
+                   !entityManager.getEntities(with: BossComponent.self).isEmpty {
                     break  // Do not advance; wait and spawn once the arena is clear
                 }
                 
                 executeEvent(step.event, entityManager: entityManager, eventBus: eventBus)
                 currentStepIndex += 1
+                
+                // If this step spawned a boss (e.g., midboss), halt progression immediately
+                if !entityManager.getEntities(with: BossComponent.self).isEmpty {
+                    break
+                }
             } else {
                 break
             }

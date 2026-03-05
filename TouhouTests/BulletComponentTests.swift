@@ -17,14 +17,14 @@ class BulletComponentTests: XCTestCase {
             ownedByPlayer: true,
             bulletType: .custom("test_bullet"),
             damage: 5,
-            homingStrength: 0.5,
-            maxTurnRate: 1.0,
             size: .medium,
             shape: .diamond,
             color: .blue,
             hasTrail: true,
             trailLength: 5
         )
+        bullet.homingStrength = 0.5
+        bullet.maxTurnRate = 1.0
         
         // Then
         XCTAssertTrue(bullet.ownedByPlayer)

@@ -189,7 +189,7 @@ enum Stage1Timeline {
         return builder.build()
     }
     
-    /// Public method for DialogueSystem to trigger midboss spawn
+    /// Public method to trigger midboss spawn (called from dialogue trigger or timeline)
     static func triggerMidbossSpawn() {
         spawnRumiaMidbossNow()
     }

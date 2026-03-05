@@ -247,6 +247,12 @@ final class EnemySystem: GameSystem {
             // Stage 1: Dialogue triggers this event, clear arena before timeline spawns boss
             print("EnemySystem: SpawnStageBossEvent received, clearing arena for boss spawn")
             beginBossArrivalSequence(context: context)
+        } else if let victory = event as? StageVictoryEvent {
+            // Victory dialogue completed — trigger stage transition
+            let nextId = victory.stageId >= GameFacade.maxStage ? (GameFacade.maxStage + 1) : (victory.stageId + 1)
+            let totalScore = entityManager.getPlayerComponent()?.score ?? 0
+            print("EnemySystem: StageVictoryEvent for stage \(victory.stageId), transitioning to stage \(nextId)")
+            eventBus.fire(StageTransitionEvent(nextStageId: nextId, totalScore: totalScore))
         }
     }
     

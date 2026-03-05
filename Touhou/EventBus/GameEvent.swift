@@ -384,15 +384,14 @@ struct DialogueCompletedEvent: GameEvent, Sendable {
     }
 }
 
-struct DialogueSpawnTriggerEvent: GameEvent, Sendable {
+/// Fired when a stage's victory dialogue completes, to trigger stage transition
+struct StageVictoryEvent: GameEvent, Sendable {
     let timestamp: TimeInterval
-    let dialogueId: String
-    let triggerName: String
+    let stageId: Int
     
-    init(dialogueId: String, triggerName: String) {
+    init(stageId: Int) {
         self.timestamp = CACurrentMediaTime()
-        self.dialogueId = dialogueId
-        self.triggerName = triggerName
+        self.stageId = stageId
     }
 }
 

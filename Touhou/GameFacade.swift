@@ -83,7 +83,6 @@ class GameFacade: GameEngine {
         addCrossCuttingSystem(HealthSystem())
         addCrossCuttingSystem(PowerSystem())
         addCrossCuttingSystem(ScoreSystem())
-        addCrossCuttingSystem(DialogueSystem())
         addCrossCuttingSystem(CleanupSystem())
     }
     

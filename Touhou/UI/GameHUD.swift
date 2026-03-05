@@ -219,20 +219,20 @@ class GameHUD {
         
         let line = dialogue.lines[index]
         
-        // Update speaker name
+        // Fire any trigger attached to this dialogue line (data-driven, no hardcoding)
+        if let trigger = line.trigger {
+            engine?.fireEvent(trigger)
+        }
+        
+        // Update speaker name (data-driven via speakerName or default for speaker type)
+        let displayName = line.speakerName ?? DialogueData.defaultSpeakerName(for: line.speaker)
+        dialogueSpeakerLabel?.text = displayName
+        
         switch line.speaker {
         case .reimu:
-            dialogueSpeakerLabel?.text = "REIMU"
             dialogueSpeakerLabel?.fontColor = .white
         case .boss:
-            dialogueSpeakerLabel?.text = "???"
             dialogueSpeakerLabel?.fontColor = .yellow
-            
-            // Trigger boss spawn when boss first speaks (stage boss dialogue)
-            if dialogue.id == "stage1_boss" && index == 6 {
-                print("GameHUD: Boss first speaks (line \(index)), firing spawn trigger")
-                engine?.fireEvent(DialogueSpawnTriggerEvent(dialogueId: "stage1_boss", triggerName: "spawn_stage_boss"))
-            }
         }
         
         // Update text
@@ -266,11 +266,13 @@ class GameHUD {
         dialogueBox?.isHidden = true
         engine?.isTimeFrozen = wasTimeFrozenBeforeDialogue
         
-        // Fire completion event
+        // Fire dialogue completion event
         engine?.fireEvent(DialogueCompletedEvent(dialogueId: dialogue.id))
         
-        // Call completion handler if exists
-        dialogue.onComplete?()
+        // Fire completion event if one is attached (e.g., StageVictoryEvent)
+        if let completionEvent = dialogue.completionEvent {
+            engine?.fireEvent(completionEvent)
+        }
         
         // Clear current dialogue
         currentDialogue = nil

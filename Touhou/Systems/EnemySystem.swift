@@ -155,7 +155,7 @@ final class EnemySystem: GameSystem {
     private func spawnStageBoss() {
         // Unified boss spawning - same mechanism used by timeline
         // Rumia has 2 phases: first uses rumiaShot, second uses rumiaShot2
-        let boss = engine.spawnBoss(
+        let data = BossData(
             name: "Stage Boss",
             health: 300,
             position: CGPoint(x: 192, y: 360),
@@ -167,8 +167,9 @@ final class EnemySystem: GameSystem {
             ),
             shotInterval: 1.2,
             totalPhases: 2,
-            phaseHealths: [300, 300]  // Two phases, 300 health each
+            phaseHealths: [300, 300] // Two phases, 300 health each
         )
+        let boss = engine.spawnBoss(data: data)
         bossSpawned = true
         engine.fireEvent(BossIntroStartedEvent(bossEntity: boss))
         print("EnemySystem: Stage boss spawned via unified system with \(boss.component(ofType: BossComponent.self)?.totalPhases ?? 1) phases")

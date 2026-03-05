@@ -100,12 +100,13 @@ enum Stage1Timeline {
                 velocity: CGVector(dx: horizontalSpeed, dy: downwardSpeed),
                 dropItem: .point,
                 autoShoot: true,
-                attackPattern: .aimedShot,
-                patternConfig: PatternConfig(
-                    physics: PhysicsConfig(speed: 150),
-                    visual: VisualConfig(color: .blue)
-                ),
-                shotInterval: 1.8
+                attackPattern: AimedShotPattern(
+                    interval: 1.8,
+                    config: PatternConfig(
+                        physics: PhysicsConfig(speed: 150),
+                        visual: VisualConfig(color: .blue)
+                    )
+                )
             )
             // Right entry moving leftwards
             builder = builder.addEnemy(
@@ -115,12 +116,13 @@ enum Stage1Timeline {
                 velocity: CGVector(dx: -horizontalSpeed, dy: downwardSpeed),
                 dropItem: .power,
                 autoShoot: true,
-                attackPattern: .aimedShot,
-                patternConfig: PatternConfig(
-                    physics: PhysicsConfig(speed: 150),
-                    visual: VisualConfig(color: .pink)
-                ),
-                shotInterval: 1.8
+                attackPattern: AimedShotPattern(
+                    interval: 1.8,
+                    config: PatternConfig(
+                        physics: PhysicsConfig(speed: 150),
+                        visual: VisualConfig(color: .pink)
+                    )
+                )
             )
         }
         
@@ -145,12 +147,13 @@ enum Stage1Timeline {
                 velocity: CGVector(dx: 0, dy: -50),
                 dropItem: wave.isLeft ? .point : .power,
                 autoShoot: true,
-                attackPattern: .tripleShot,
-                patternConfig: PatternConfig(
-                    physics: PhysicsConfig(speed: 100),
-                    visual: VisualConfig(color: wave.isLeft ? .green : .cyan)
-                ),
-                shotInterval: 2.0
+                attackPattern: TripleShotPattern(
+                    interval: 2.0,
+                    config: PatternConfig(
+                        physics: PhysicsConfig(speed: 100),
+                        visual: VisualConfig(color: wave.isLeft ? .green : .cyan)
+                    )
+                )
             )
         }
         
@@ -200,23 +203,25 @@ enum Stage1Timeline {
         
         // Spawn offscreen top-center like in TH06
         let spawnPosition = CGPoint(x: centerX, y: 420)
-        let rumia = GameFacade.shared.entities.spawnBoss(
+        let data = BossData(
             name: "Rumia (Midboss)",
             health: 180,
             position: spawnPosition,
             phaseNumber: 0,
-            attackPattern: .spiralShot,
-            patternConfig: PatternConfig(
-                physics: PhysicsConfig(speed: 120),
-                visual: VisualConfig(size: .medium, shape: .star, color: .purple),
-                bulletCount: 12,
-                spiralSpeed: 14
+            attackPattern: SpiralShotPattern(
+                interval: 1.45,
+                config: PatternConfig(
+                    physics: PhysicsConfig(speed: 120),
+                    visual: VisualConfig(size: .medium, shape: .star, color: .purple),
+                    bulletCount: 12,
+                    spiralSpeed: 14
+                )
             ),
-            shotInterval: 1.45,
             hasTimeBonus: true,
             timeLimit: 18.0,  // 18 seconds to defeat for bonus
             bonusPointsBase: 8000  // Max bonus: 8000 points
         )
+        let rumia = GameFacade.shared.spawnBoss(data: data)
         
         // Set score and drop
         if let enemyComponent = rumia.component(ofType: EnemyComponent.self) {

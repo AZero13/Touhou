@@ -31,11 +31,10 @@ enum StageTimelineDefinitions {
                 velocity: CGVector(dx: 0, dy: -50),
                 dropItem: .power,
                 autoShoot: true,
-                attackPattern: .aimedShot,
-                patternConfig: PatternConfig(
-                    physics: PhysicsConfig(speed: 120)
-                ),
-                shotInterval: 2.0
+                attackPattern: AimedShotPattern(
+                    interval: 2.0,
+                    config: PatternConfig(physics: PhysicsConfig(speed: 120))
+                )
             )
             .addEnemy(
                 at: 2.0,
@@ -44,11 +43,10 @@ enum StageTimelineDefinitions {
                 velocity: CGVector(dx: 0, dy: -50),
                 dropItem: .power,
                 autoShoot: true,
-                attackPattern: .tripleShot,
-                patternConfig: PatternConfig(
-                    physics: PhysicsConfig(speed: 110)
-                ),
-                shotInterval: 2.0
+                attackPattern: TripleShotPattern(
+                    interval: 2.0,
+                    config: PatternConfig(physics: PhysicsConfig(speed: 110))
+                )
             )
             .addEnemy(
                 at: 3.0,
@@ -57,12 +55,13 @@ enum StageTimelineDefinitions {
                 velocity: CGVector(dx: 0, dy: -50),
                 dropItem: .power,
                 autoShoot: true,
-                attackPattern: .circleShot,
-                patternConfig: PatternConfig(
-                    physics: PhysicsConfig(speed: 100),
-                    bulletCount: 10
-                ),
-                shotInterval: 2.0
+                attackPattern: CircleShotPattern(
+                    interval: 2.0,
+                    config: PatternConfig(
+                        physics: PhysicsConfig(speed: 100),
+                        bulletCount: 10
+                    )
+                )
             )
             .addAction(
                 at: 60.0,
@@ -71,11 +70,11 @@ enum StageTimelineDefinitions {
                     let enemies = entityManager.getEntities(with: EnemyComponent.self)
                     for enemy in enemies {
                         if enemy.component(ofType: BossComponent.self) == nil {
-                            GameFacade.shared.entities.destroy(enemy)
+                            GameFacade.shared.destroy(enemy)
                         }
                     }
                     // Clear bullets (convertBulletsToPoints requires context, so just clear for default stage)
-                    BulletUtility.clearEnemyBullets(entityManager: entityManager, destroyEntity: GameFacade.shared.entities.destroy)
+                    BulletUtility.clearEnemyBullets(entityManager: entityManager, destroyEntity: GameFacade.shared.destroy)
                 }
             )
             .addBoss(
@@ -84,13 +83,15 @@ enum StageTimelineDefinitions {
                 health: 300,
                 position: CGPoint(x: 192, y: 360),
                 phaseNumber: 1,
-                attackPattern: .tripleShot,
-                patternConfig: PatternConfig(
-                    physics: PhysicsConfig(speed: 120),
-                    visual: VisualConfig(shape: .star, color: .purple),
-                    bulletCount: 8,
-                    spread: 80,
-                    spiralSpeed: 12
+                attackPattern: TripleShotPattern(
+                    interval: 1.2,
+                    config: PatternConfig(
+                        physics: PhysicsConfig(speed: 120),
+                        visual: VisualConfig(shape: .star, color: .purple),
+                        bulletCount: 8,
+                        spread: 80,
+                        spiralSpeed: 12
+                    )
                 )
             )
             .build()

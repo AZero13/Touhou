@@ -1,7 +1,7 @@
 Command line invocation:
     /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild build -project /Users/main/Desktop/Touhou/Touhou.xcodeproj -scheme Touhou -destination platform=macOS
 
-2026-03-05 10:30:31.754 xcodebuild[4701:66665] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+2026-03-05 10:45:07.476 xcodebuild[9765:89925] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
 --- xcodebuild: WARNING: Using the first of multiple matching destinations:
 { platform:macOS, arch:arm64, id:00008112-001E30340E45401E, name:My Mac }
 { platform:macOS, arch:x86_64, id:00008112-001E30340E45401E, name:My Mac }
@@ -34,184 +34,57 @@ ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeD
 
 ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
 
-Build description signature: 5b7267daccaef9b1b30b56c47bba3454
-Build description path: /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/XCBuildData/5b7267daccaef9b1b30b56c47bba3454.xcbuilddata
+Build description signature: ff6475db55e82e48b8377f90a1a5faca
+Build description path: /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/XCBuildData/ff6475db55e82e48b8377f90a1a5faca.xcbuilddata
 ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk /Users/main/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C58-e8867d0c40613ffc63e0238af232dc5000fa09913b459cbbc988d1f6730289ae.sdkstatcache
     cd /Users/main/Desktop/Touhou/Touhou.xcodeproj
     /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -o /Users/main/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C58-e8867d0c40613ffc63e0238af232dc5000fa09913b459cbbc988d1f6730289ae.sdkstatcache
-
-note: Removed stale file '/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/CombatFacade.o'
-
-note: Removed stale file '/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/CombatFacade.stringsdata'
-
-note: Removed stale file '/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/CombatFacade.swiftconstvalues'
-
-note: Removed stale file '/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/EntityFacade.o'
-
-note: Removed stale file '/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/EntityFacade.stringsdata'
-
-note: Removed stale file '/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/EntityFacade.swiftconstvalues'
-
-WriteAuxiliaryFile /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.SwiftConstValuesFileList (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    write-file /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.SwiftConstValuesFileList
-
-WriteAuxiliaryFile /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.SwiftFileList (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    write-file /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.SwiftFileList
-
-WriteAuxiliaryFile /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou-OutputFileMap.json (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    write-file /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou-OutputFileMap.json
-
-WriteAuxiliaryFile /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.LinkFileList (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    write-file /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.LinkFileList
-
-ProcessProductPackaging "" /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou.app.xcent (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-    Entitlements:
-    
-    {
-    "com.apple.security.app-sandbox" = 1;
-    "com.apple.security.files.user-selected.read-only" = 1;
-    "com.apple.security.get-task-allow" = 1;
-}
-    
-    builtin-productPackagingUtility -entitlements -format xml -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou.app.xcent
-
-ProcessProductPackagingDER /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou.app.xcent /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou.app.xcent.der (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    /usr/bin/derq query -f xml -i /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou.app.xcent -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou.app.xcent.der --raw
 
 SwiftDriver Touhou normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Touhou' from project 'Touhou')
     cd /Users/main/Desktop/Touhou
     builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Touhou -Onone -enforce-exclusivity\=checked @/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.SwiftFileList -DDEBUG -default-isolation\=MainActor -strict-memory-safety -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -target arm64-apple-macos13.5 -g -module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -F /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -emit-localized-strings -emit-localized-strings-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/main/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C58-e8867d0c40613ffc63e0238af232dc5000fa09913b459cbbc988d1f6730289ae.sdkstatcache -output-file-map /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou_const_extract_protocols.json -Xcc -iquote -Xcc /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-generated-files.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-own-target-headers.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-all-target-headers.hmap -Xcc -iquote -Xcc /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-project-headers.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/include -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources-normal/arm64 -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources/arm64 -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou-Swift.h -working-directory /Users/main/Desktop/Touhou -experimental-emit-module-separately -disable-cmo
 
-CpResource /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Resources/build.log /Users/main/Desktop/Touhou/Touhou/build.log (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/main/Desktop/Touhou/Touhou/build.log /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Resources
-
 ProcessInfoPlistFile /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Info.plist /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/empty-Touhou.plist (in target 'Touhou' from project 'Touhou')
     cd /Users/main/Desktop/Touhou
     builtin-infoPlistUtility /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/empty-Touhou.plist -producttype com.apple.product-type.application -genpkginfo /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/PkgInfo -expandbuildsettings -platform macosx -additionalcontentfile /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Base.lproj/Main-SBPartialInfo.plist -additionalcontentfile /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/assetcatalog_generated_info.plist -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Info.plist
+
+CpResource /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Resources/build.log /Users/main/Desktop/Touhou/Touhou/build.log (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/main/Desktop/Touhou/Touhou/build.log /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Resources
 
 SwiftEmitModule normal arm64 Emitting\ module\ for\ Touhou (in target 'Touhou' from project 'Touhou')
 
 EmitSwiftModule normal arm64 (in target 'Touhou' from project 'Touhou')
     cd /Users/main/Desktop/Touhou
     
+/Users/main/Desktop/Touhou/Touhou/GameFacade.swift:265:34: warning: call to main actor-isolated initializer 'init(speed:damage:)' in a synchronous nonisolated context
+        physics: PhysicsConfig = PhysicsConfig(),
+                                 ^
+/Users/main/Desktop/Touhou/Touhou/Components/BulletCommands.swift:16:5: note: calls to initializer 'init(speed:damage:)' from outside of its actor context are implicitly asynchronous
+    init(speed: CGFloat = 150, damage: Int = 1) {
+    ^
+/Users/main/Desktop/Touhou/Touhou/GameFacade.swift:266:32: warning: call to main actor-isolated initializer 'init(size:shape:color:hasTrail:trailLength:)' in a synchronous nonisolated context
+        visual: VisualConfig = VisualConfig(),
+                               ^
+/Users/main/Desktop/Touhou/Touhou/Components/BulletCommands.swift:29:5: note: calls to initializer 'init(size:shape:color:hasTrail:trailLength:)' from outside of its actor context are implicitly asynchronous
+    init(size: BulletSize = .small, shape: BulletShape = .circle, color: BulletColor = .red, 
+    ^
+/Users/main/Desktop/Touhou/Touhou/GameFacade.swift:267:36: warning: call to main actor-isolated initializer 'init(homingStrength:maxTurnRate:delay:retargetInterval:maxRetargets:rotationOffset:)' in a synchronous nonisolated context
+        behavior: BehaviorConfig = BehaviorConfig()
+                                   ^
+/Users/main/Desktop/Touhou/Touhou/Components/BulletCommands.swift:47:5: note: calls to initializer 'init(homingStrength:maxTurnRate:delay:retargetInterval:maxRetargets:rotationOffset:)' from outside of its actor context are implicitly asynchronous
+    init(homingStrength: CGFloat? = nil, maxTurnRate: CGFloat? = nil, delay: TimeInterval = 0,
+    ^
 
-SwiftCompile normal arm64 Compiling\ HitboxComponent.swift,\ ItemComponent.swift,\ LaserComponent.swift,\ PlayerComponent.swift,\ RenderComponent.swift,\ TransformComponent.swift,\ CommandQueue.swift /Users/main/Desktop/Touhou/Touhou/Components/HitboxComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/ItemComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/LaserComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/PlayerComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/RenderComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/TransformComponent.swift /Users/main/Desktop/Touhou/Touhou/Core/CommandQueue.swift (in target 'Touhou' from project 'Touhou')
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/HitboxComponent.swift (in target 'Touhou' from project 'Touhou')
+SwiftCompile normal arm64 Compiling\ WinScene.swift /Users/main/Desktop/Touhou/Touhou/WinScene.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/WinScene.swift (in target 'Touhou' from project 'Touhou')
     cd /Users/main/Desktop/Touhou
     
 
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/ItemComponent.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/LaserComponent.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/PlayerComponent.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/RenderComponent.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/TransformComponent.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Core/CommandQueue.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 Compiling\ CleanupSystem.swift,\ CollisionSystem.swift,\ EnemySystem.swift,\ GameSystem.swift,\ HealthSystem.swift,\ ItemAttractionSystem.swift,\ PlayerLifecycleSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/CleanupSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/CollisionSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/EnemySystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/GameSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/HealthSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/ItemAttractionSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/PlayerLifecycleSystem.swift (in target 'Touhou' from project 'Touhou')
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/CleanupSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/CollisionSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/EnemySystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/GameSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
+SwiftCompile normal arm64 Compiling\ HealthSystem.swift,\ StageTimeline.swift /Users/main/Desktop/Touhou/Touhou/Systems/HealthSystem.swift /Users/main/Desktop/Touhou/Touhou/Utility/StageTimeline.swift (in target 'Touhou' from project 'Touhou')
 
 SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/HealthSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/ItemAttractionSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/PlayerLifecycleSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 Compiling\ PowerSystem.swift,\ ScoreSystem.swift,\ GameHUD.swift,\ BulletModifierHelpers.swift,\ BulletUtility.swift,\ Constants.swift,\ DialogueData.swift /Users/main/Desktop/Touhou/Touhou/Systems/PowerSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/ScoreSystem.swift /Users/main/Desktop/Touhou/Touhou/UI/GameHUD.swift /Users/main/Desktop/Touhou/Touhou/Utility/BulletModifierHelpers.swift /Users/main/Desktop/Touhou/Touhou/Utility/BulletUtility.swift /Users/main/Desktop/Touhou/Touhou/Utility/Constants.swift /Users/main/Desktop/Touhou/Touhou/Utility/DialogueData.swift (in target 'Touhou' from project 'Touhou')
-Failed frontend command:
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c /Users/main/Desktop/Touhou/Touhou/Components/BossComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/BossData.swift /Users/main/Desktop/Touhou/Touhou/Components/BulletCommands.swift /Users/main/Desktop/Touhou/Touhou/Components/BulletComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/BulletMotionModifiersComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/EnemyComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/HealthComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/HitboxComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/ItemComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/LaserComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/PlayerComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/RenderComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/TransformComponent.swift /Users/main/Desktop/Touhou/Touhou/Core/CommandQueue.swift /Users/main/Desktop/Touhou/Touhou/Core/EntityManager.swift /Users/main/Desktop/Touhou/Touhou/Core/GameEngine.swift /Users/main/Desktop/Touhou/Touhou/EventBus/EventBus.swift /Users/main/Desktop/Touhou/Touhou/EventBus/GameEvent.swift /Users/main/Desktop/Touhou/Touhou/GameState/GameNotStartedState.swift /Users/main/Desktop/Touhou/Touhou/GameState/GamePausedState.swift /Users/main/Desktop/Touhou/Touhou/GameState/GamePlayingState.swift /Users/main/Desktop/Touhou/Touhou/Input/ButtonState.swift /Users/main/Desktop/Touhou/Touhou/Input/InputManager.swift /Users/main/Desktop/Touhou/Touhou/Input/InputState.swift /Users/main/Desktop/Touhou/Touhou/Persistence/UserDefaultsHighScoreStore.swift /Users/main/Desktop/Touhou/Touhou/Rendering/RenderSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/BulletHomingSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/BulletModifierSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/CleanupSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/CollisionSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/EnemySystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/GameSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/HealthSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/ItemAttractionSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/PlayerLifecycleSystem.swift -primary-file /Users/main/Desktop/Touhou/Touhou/Systems/PowerSystem.swift -primary-file /Users/main/Desktop/Touhou/Touhou/Systems/ScoreSystem.swift -primary-file /Users/main/Desktop/Touhou/Touhou/UI/GameHUD.swift -primary-file /Users/main/Desktop/Touhou/Touhou/Utility/BulletModifierHelpers.swift -primary-file /Users/main/Desktop/Touhou/Touhou/Utility/BulletUtility.swift -primary-file /Users/main/Desktop/Touhou/Touhou/Utility/Constants.swift -primary-file /Users/main/Desktop/Touhou/Touhou/Utility/DialogueData.swift /Users/main/Desktop/Touhou/Touhou/Utility/EnemyPattern.swift /Users/main/Desktop/Touhou/Touhou/Utility/MathUtility.swift /Users/main/Desktop/Touhou/Touhou/Utility/PlayerUtility.swift /Users/main/Desktop/Touhou/Touhou/Utility/Stage1Timeline.swift /Users/main/Desktop/Touhou/Touhou/Utility/StageTimeline.swift /Users/main/Desktop/Touhou/Touhou/Utility/StageTimelineDefinitions.swift /Users/main/Desktop/Touhou/Touhou/AppDelegate.swift /Users/main/Desktop/Touhou/Touhou/GameFacade.swift /Users/main/Desktop/Touhou/Touhou/GameScene.swift /Users/main/Desktop/Touhou/Touhou/ScoreScene.swift /Users/main/Desktop/Touhou/Touhou/ViewController.swift /Users/main/Desktop/Touhou/Touhou/WinScene.swift /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources/GeneratedAssetSymbols.swift -supplementary-output-file-map /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/supplementaryOutputs-6 -emit-localized-strings -emit-localized-strings-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64 -target arm64-apple-macos13.5 -module-can-import-version AppKit 2685.30.107 2685.30.107 -module-can-import-version DeveloperToolsSupport 23.0.4 23.0.4 -module-can-import-version SwiftUI 7.2.5.1 7.2.5 -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libFoundationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#FoundationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libObservationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#ObservationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libPreviewsMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#PreviewsMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libSwiftMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#SwiftMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libSwiftUIMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#SwiftUIMacros -disable-implicit-swift-modules -Xcc -fno-implicit-modules -Xcc -fno-implicit-module-maps -explicit-swift-module-map-file /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou-dependencies-1.json -Xllvm -aarch64-use-tbi -enable-objc-interop -stack-check -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -I /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -F /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -no-color-diagnostics -Xcc -fno-color-diagnostics -enable-testing -g -debug-info-format\=dwarf -dwarf-version\=4 -module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -profile-generate -profile-coverage-mapping -swift-version 5 -enforce-exclusivity\=checked -Onone -D DEBUG -serialize-debugging-options -const-gather-protocols-file /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou_const_extract_protocols.json -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -strict-memory-safety -enable-bare-slash-regex -default-isolation\=MainActor -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -working-directory -Xcc /Users/main/Desktop/Touhou -enable-anonymous-context-mangled-names -file-compilation-dir /Users/main/Desktop/Touhou -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -Xcc -ivfsstatcache -Xcc /Users/main/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C58-e8867d0c40613ffc63e0238af232dc5000fa09913b459cbbc988d1f6730289ae.sdkstatcache -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/swift-overrides.hmap -Xcc -iquote -Xcc /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-generated-files.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-own-target-headers.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-all-target-headers.hmap -Xcc -iquote -Xcc /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-project-headers.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/include -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources-normal/arm64 -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources/arm64 -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources -Xcc -DDEBUG\=1 -no-auto-bridging-header-chaining -module-name Touhou -frontend-parseable-output -disable-clang-spi -target-sdk-version 26.2 -target-sdk-name macosx26.2 -clang-target arm64-apple-macos26.2 -in-process-plugin-server-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/PowerSystem.o -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/ScoreSystem.o -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/GameHUD.o -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/BulletModifierHelpers.o -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/BulletUtility.o -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Constants.o -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/DialogueData.o -index-unit-output-path /Touhou.build/Debug/Touhou.build/Objects-normal/arm64/PowerSystem.o -index-unit-output-path /Touhou.build/Debug/Touhou.build/Objects-normal/arm64/ScoreSystem.o -index-unit-output-path /Touhou.build/Debug/Touhou.build/Objects-normal/arm64/GameHUD.o -index-unit-output-path /Touhou.build/Debug/Touhou.build/Objects-normal/arm64/BulletModifierHelpers.o -index-unit-output-path /Touhou.build/Debug/Touhou.build/Objects-normal/arm64/BulletUtility.o -index-unit-output-path /Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Constants.o -index-unit-output-path /Touhou.build/Debug/Touhou.build/Objects-normal/arm64/DialogueData.o -index-store-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Index.noindex/DataStore -index-system-modules
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/PowerSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/ScoreSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/UI/GameHUD.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-/Users/main/Desktop/Touhou/Touhou/UI/GameHUD.swift:364:29: error: value of type 'any GameEngine' has no member 'entities'
-        let bosses = engine.entities.getEntities(with: BossComponent.self)
-                     ~~~~~~ ^~~~~~~~
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/BulletModifierHelpers.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/BulletUtility.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/Constants.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/DialogueData.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 Compiling\ EnemyPattern.swift,\ MathUtility.swift,\ PlayerUtility.swift,\ Stage1Timeline.swift,\ StageTimeline.swift,\ StageTimelineDefinitions.swift,\ AppDelegate.swift /Users/main/Desktop/Touhou/Touhou/Utility/EnemyPattern.swift /Users/main/Desktop/Touhou/Touhou/Utility/MathUtility.swift /Users/main/Desktop/Touhou/Touhou/Utility/PlayerUtility.swift /Users/main/Desktop/Touhou/Touhou/Utility/Stage1Timeline.swift /Users/main/Desktop/Touhou/Touhou/Utility/StageTimeline.swift /Users/main/Desktop/Touhou/Touhou/Utility/StageTimelineDefinitions.swift /Users/main/Desktop/Touhou/Touhou/AppDelegate.swift (in target 'Touhou' from project 'Touhou')
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/EnemyPattern.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/MathUtility.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/PlayerUtility.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/Stage1Timeline.swift (in target 'Touhou' from project 'Touhou')
     cd /Users/main/Desktop/Touhou
     
 
@@ -219,82 +92,70 @@ SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/StageTimelin
     cd /Users/main/Desktop/Touhou
     
 
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/StageTimelineDefinitions.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/AppDelegate.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 Compiling\ EntityManager.swift,\ GameEngine.swift,\ EventBus.swift,\ GameEvent.swift,\ GameNotStartedState.swift,\ GamePausedState.swift,\ GamePlayingState.swift /Users/main/Desktop/Touhou/Touhou/Core/EntityManager.swift /Users/main/Desktop/Touhou/Touhou/Core/GameEngine.swift /Users/main/Desktop/Touhou/Touhou/EventBus/EventBus.swift /Users/main/Desktop/Touhou/Touhou/EventBus/GameEvent.swift /Users/main/Desktop/Touhou/Touhou/GameState/GameNotStartedState.swift /Users/main/Desktop/Touhou/Touhou/GameState/GamePausedState.swift /Users/main/Desktop/Touhou/Touhou/GameState/GamePlayingState.swift (in target 'Touhou' from project 'Touhou')
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Core/EntityManager.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Core/GameEngine.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/EventBus/EventBus.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/EventBus/GameEvent.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/GameState/GameNotStartedState.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/GameState/GamePausedState.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/GameState/GamePlayingState.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 Compiling\ ButtonState.swift,\ InputManager.swift,\ InputState.swift,\ UserDefaultsHighScoreStore.swift,\ RenderSystem.swift,\ BulletHomingSystem.swift,\ BulletModifierSystem.swift /Users/main/Desktop/Touhou/Touhou/Input/ButtonState.swift /Users/main/Desktop/Touhou/Touhou/Input/InputManager.swift /Users/main/Desktop/Touhou/Touhou/Input/InputState.swift /Users/main/Desktop/Touhou/Touhou/Persistence/UserDefaultsHighScoreStore.swift /Users/main/Desktop/Touhou/Touhou/Rendering/RenderSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/BulletHomingSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/BulletModifierSystem.swift (in target 'Touhou' from project 'Touhou')
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Input/ButtonState.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Input/InputManager.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Input/InputState.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Persistence/UserDefaultsHighScoreStore.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Rendering/RenderSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/BulletHomingSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/BulletModifierSystem.swift (in target 'Touhou' from project 'Touhou')
-    cd /Users/main/Desktop/Touhou
-    
-
-SwiftCompile normal arm64 Compiling\ GameFacade.swift,\ GameScene.swift,\ ScoreScene.swift,\ ViewController.swift,\ WinScene.swift,\ GeneratedAssetSymbols.swift /Users/main/Desktop/Touhou/Touhou/GameFacade.swift /Users/main/Desktop/Touhou/Touhou/GameScene.swift /Users/main/Desktop/Touhou/Touhou/ScoreScene.swift /Users/main/Desktop/Touhou/Touhou/ViewController.swift /Users/main/Desktop/Touhou/Touhou/WinScene.swift /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Touhou' from project 'Touhou')
-
+SwiftCompile normal arm64 Compiling\ GameFacade.swift,\ GameScene.swift /Users/main/Desktop/Touhou/Touhou/GameFacade.swift /Users/main/Desktop/Touhou/Touhou/GameScene.swift (in target 'Touhou' from project 'Touhou')
 SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/GameFacade.swift (in target 'Touhou' from project 'Touhou')
     cd /Users/main/Desktop/Touhou
     
+/Users/main/Desktop/Touhou/Touhou/GameFacade.swift:265:34: warning: call to main actor-isolated initializer 'init(speed:damage:)' in a synchronous nonisolated context
+        physics: PhysicsConfig = PhysicsConfig(),
+                                 ^
+/Users/main/Desktop/Touhou/Touhou/Components/BulletCommands.swift:16:5: note: calls to initializer 'init(speed:damage:)' from outside of its actor context are implicitly asynchronous
+    init(speed: CGFloat = 150, damage: Int = 1) {
+    ^
+/Users/main/Desktop/Touhou/Touhou/GameFacade.swift:266:32: warning: call to main actor-isolated initializer 'init(size:shape:color:hasTrail:trailLength:)' in a synchronous nonisolated context
+        visual: VisualConfig = VisualConfig(),
+                               ^
+/Users/main/Desktop/Touhou/Touhou/Components/BulletCommands.swift:29:5: note: calls to initializer 'init(size:shape:color:hasTrail:trailLength:)' from outside of its actor context are implicitly asynchronous
+    init(size: BulletSize = .small, shape: BulletShape = .circle, color: BulletColor = .red, 
+    ^
+/Users/main/Desktop/Touhou/Touhou/GameFacade.swift:267:36: warning: call to main actor-isolated initializer 'init(homingStrength:maxTurnRate:delay:retargetInterval:maxRetargets:rotationOffset:)' in a synchronous nonisolated context
+        behavior: BehaviorConfig = BehaviorConfig()
+                                   ^
+/Users/main/Desktop/Touhou/Touhou/Components/BulletCommands.swift:47:5: note: calls to initializer 'init(homingStrength:maxTurnRate:delay:retargetInterval:maxRetargets:rotationOffset:)' from outside of its actor context are implicitly asynchronous
+    init(homingStrength: CGFloat? = nil, maxTurnRate: CGFloat? = nil, delay: TimeInterval = 0,
+    ^
 
 SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/GameScene.swift (in target 'Touhou' from project 'Touhou')
     cd /Users/main/Desktop/Touhou
     
+
+SwiftCompile normal arm64 Compiling\ LegacyPattern.swift,\ RumiaPatterns.swift /Users/main/Desktop/Touhou/Touhou/Patterns/LegacyPattern.swift /Users/main/Desktop/Touhou/Touhou/Patterns/RumiaPatterns.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Patterns/LegacyPattern.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Patterns/RumiaPatterns.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 Compiling\ EnemyComponent.swift,\ BulletPattern.swift /Users/main/Desktop/Touhou/Touhou/Components/EnemyComponent.swift /Users/main/Desktop/Touhou/Touhou/Patterns/BulletPattern.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/EnemyComponent.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Patterns/BulletPattern.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 Compiling\ GeneratedAssetSymbols.swift /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 Compiling\ BossComponent.swift,\ BossData.swift /Users/main/Desktop/Touhou/Touhou/Components/BossComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/BossData.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/BossComponent.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/BossData.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 Compiling\ ScoreScene.swift,\ ViewController.swift /Users/main/Desktop/Touhou/Touhou/ScoreScene.swift /Users/main/Desktop/Touhou/Touhou/ViewController.swift (in target 'Touhou' from project 'Touhou')
 
 SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/ScoreScene.swift (in target 'Touhou' from project 'Touhou')
     cd /Users/main/Desktop/Touhou
@@ -304,21 +165,294 @@ SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/ViewController.swift
     cd /Users/main/Desktop/Touhou
     
 
-SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/WinScene.swift (in target 'Touhou' from project 'Touhou')
+SwiftDriverJobDiscovery normal arm64 Compiling GeneratedAssetSymbols.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling WinScene.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ BulletComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/BulletComponent.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/BulletComponent.swift (in target 'Touhou' from project 'Touhou')
     cd /Users/main/Desktop/Touhou
     
 
-SwiftCompile normal arm64 /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'Touhou' from project 'Touhou')
+SwiftCompile normal arm64 Compiling\ GameHUD.swift /Users/main/Desktop/Touhou/Touhou/UI/GameHUD.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/UI/GameHUD.swift (in target 'Touhou' from project 'Touhou')
     cd /Users/main/Desktop/Touhou
     
 
-SwiftCompile normal arm64 Compiling\ BossComponent.swift,\ BossData.swift,\ BulletCommands.swift,\ BulletComponent.swift,\ BulletMotionModifiersComponent.swift,\ EnemyComponent.swift,\ HealthComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/BossComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/BossData.swift /Users/main/Desktop/Touhou/Touhou/Components/BulletCommands.swift /Users/main/Desktop/Touhou/Touhou/Components/BulletComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/BulletMotionModifiersComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/EnemyComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/HealthComponent.swift (in target 'Touhou' from project 'Touhou')
+SwiftDriverJobDiscovery normal arm64 Compiling EnemyComponent.swift, BulletPattern.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ CollisionSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/CollisionSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/CollisionSystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling BossComponent.swift, BossData.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ EntityManager.swift /Users/main/Desktop/Touhou/Touhou/Core/EntityManager.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Core/EntityManager.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling LegacyPattern.swift, RumiaPatterns.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ CommandQueue.swift /Users/main/Desktop/Touhou/Touhou/Core/CommandQueue.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Core/CommandQueue.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling HealthSystem.swift, StageTimeline.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ PlayerLifecycleSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/PlayerLifecycleSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/PlayerLifecycleSystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for Touhou (in target 'Touhou' from project 'Touhou')
+
+SwiftDriver\ Compilation\ Requirements Touhou normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Touhou -Onone -enforce-exclusivity\=checked @/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.SwiftFileList -DDEBUG -default-isolation\=MainActor -strict-memory-safety -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -target arm64-apple-macos13.5 -g -module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -F /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -emit-localized-strings -emit-localized-strings-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/main/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C58-e8867d0c40613ffc63e0238af232dc5000fa09913b459cbbc988d1f6730289ae.sdkstatcache -output-file-map /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou_const_extract_protocols.json -Xcc -iquote -Xcc /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-generated-files.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-own-target-headers.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-all-target-headers.hmap -Xcc -iquote -Xcc /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-project-headers.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/include -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources-normal/arm64 -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources/arm64 -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou-Swift.h -working-directory /Users/main/Desktop/Touhou -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Compiling EntityManager.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ StageTimelineDefinitions.swift /Users/main/Desktop/Touhou/Touhou/Utility/StageTimelineDefinitions.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/StageTimelineDefinitions.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+Copy /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.swiftmodule/arm64-apple-macos.abi.json /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.abi.json (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.abi.json /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.swiftmodule/arm64-apple-macos.abi.json
+
+SwiftDriverJobDiscovery normal arm64 Compiling BulletComponent.swift (in target 'Touhou' from project 'Touhou')
+
+Copy /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.swiftsourceinfo (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.swiftsourceinfo /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo
+
+SwiftCompile normal arm64 Compiling\ TransformComponent.swift,\ GameEngine.swift /Users/main/Desktop/Touhou/Touhou/Components/TransformComponent.swift /Users/main/Desktop/Touhou/Touhou/Core/GameEngine.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/TransformComponent.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Core/GameEngine.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling ScoreScene.swift, ViewController.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ EnemySystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/EnemySystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/EnemySystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 Compiling\ PowerSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/PowerSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/PowerSystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling CollisionSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ BulletUtility.swift /Users/main/Desktop/Touhou/Touhou/Utility/BulletUtility.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/BulletUtility.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling CommandQueue.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ ScoreSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/ScoreSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/ScoreSystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling GameHUD.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ RenderSystem.swift /Users/main/Desktop/Touhou/Touhou/Rendering/RenderSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Rendering/RenderSystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling StageTimelineDefinitions.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ BulletModifierSystem.swift,\ CleanupSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/BulletModifierSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/CleanupSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/BulletModifierSystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/CleanupSystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling PlayerLifecycleSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ Stage1Timeline.swift /Users/main/Desktop/Touhou/Touhou/Utility/Stage1Timeline.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/Stage1Timeline.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling BulletUtility.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ BulletHomingSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/BulletHomingSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/BulletHomingSystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling PowerSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ GameSystem.swift,\ ItemAttractionSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/GameSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/ItemAttractionSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/GameSystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Systems/ItemAttractionSystem.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling ScoreSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ PlayerUtility.swift /Users/main/Desktop/Touhou/Touhou/Utility/PlayerUtility.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Utility/PlayerUtility.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling TransformComponent.swift, GameEngine.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling BulletModifierSystem.swift, CleanupSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling PlayerUtility.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling BulletHomingSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling GameSystem.swift, ItemAttractionSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling EnemySystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling Stage1Timeline.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling RenderSystem.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling GameFacade.swift, GameScene.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 Compiling\ LaserComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/LaserComponent.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/LaserComponent.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 Compiling\ PlayerComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/PlayerComponent.swift (in target 'Touhou' from project 'Touhou')
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/PlayerComponent.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 Compiling\ GamePausedState.swift /Users/main/Desktop/Touhou/Touhou/GameState/GamePausedState.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/GameState/GamePausedState.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 Compiling\ ItemComponent.swift /Users/main/Desktop/Touhou/Touhou/Components/ItemComponent.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/Components/ItemComponent.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 Compiling\ GameNotStartedState.swift /Users/main/Desktop/Touhou/Touhou/GameState/GameNotStartedState.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/GameState/GameNotStartedState.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftCompile normal arm64 Compiling\ GamePlayingState.swift /Users/main/Desktop/Touhou/Touhou/GameState/GamePlayingState.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/GameState/GamePlayingState.swift (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling GameNotStartedState.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling GamePlayingState.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling GamePausedState.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ItemComponent.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling LaserComponent.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriverJobDiscovery normal arm64 Compiling PlayerComponent.swift (in target 'Touhou' from project 'Touhou')
+
+SwiftDriver\ Compilation Touhou normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Touhou -Onone -enforce-exclusivity\=checked @/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.SwiftFileList -DDEBUG -default-isolation\=MainActor -strict-memory-safety -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -target arm64-apple-macos13.5 -g -module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -F /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -emit-localized-strings -emit-localized-strings-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/main/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C58-e8867d0c40613ffc63e0238af232dc5000fa09913b459cbbc988d1f6730289ae.sdkstatcache -output-file-map /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/main/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou_const_extract_protocols.json -Xcc -iquote -Xcc /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-generated-files.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-own-target-headers.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-all-target-headers.hmap -Xcc -iquote -Xcc /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-project-headers.hmap -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/include -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources-normal/arm64 -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources/arm64 -Xcc -I/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou-Swift.h -working-directory /Users/main/Desktop/Touhou -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/Touhou.debug.dylib normal (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-macos13.5 -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -O0 -L/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/EagerLinkingTBDs/Debug -L/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -F/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/EagerLinkingTBDs/Debug -F/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -filelist /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.LinkFileList -install_name @rpath/Touhou.debug.dylib -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/../Frameworks -dead_strip -Xlinker -object_path_lto -Xlinker /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou_dependency_info.dat -fobjc-link-runtime -fprofile-instr-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.swiftmodule @/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou-linker-args.resp -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -Xlinker -no_adhoc_codesign -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/Touhou.debug.dylib
+
+ConstructStubExecutorLinkFileList /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-ExecutorLinkFileList-normal-arm64.txt (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    construct-stub-executor-link-file-list /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/Touhou.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'Touhou' from project 'Touhou')
+
+Ld /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/Touhou normal (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-macos13.5 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -O0 -L/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -F/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/../Frameworks -rdynamic -Xlinker -no_deduplicate -Xlinker -debug_variant -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou-ExecutorLinkFileList-normal-arm64.txt /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/Touhou.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/Touhou
+
+CopySwiftLibs /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/Touhou.debug.dylib --scan-folder /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Frameworks --scan-folder /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/PlugIns --scan-folder /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Library/SystemExtensions --scan-folder /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Extensions --platform macosx --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.3.519.0.rAXXNQ/Metal.xctoolchain --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+
+ExtractAppIntentsMetadata (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.3.519.0.rAXXNQ/Metal.xctoolchain --module-name Touhou --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk --xcode-version 17C529 --platform-family macOS --deployment-target 13.5 --bundle-identifier N.Touhou --output /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/Resources --target-triple arm64-apple-macos13.5 --binary-file /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/Touhou --dependency-file /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou_dependency_info.dat --stringsdata-file /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.SwiftFileList --metadata-file-list /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou.DependencyMetadataFileList --static-metadata-file-list /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou.DependencyStaticMetadataFileList --swift-const-vals-list /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Objects-normal/arm64/Touhou.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-03-05 10:45:12.048 appintentsmetadataprocessor[9822:90251] Starting appintentsmetadataprocessor export
+2026-03-05 10:45:12.049 appintentsmetadataprocessor[9822:90251] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+CodeSign /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/Touhou.debug.dylib (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/Touhou.debug.dylib
+
+CodeSign /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/__preview.dylib (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/MacOS/__preview.dylib
+
+CodeSign /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app (in target 'Touhou' from project 'Touhou')
+    cd /Users/main/Desktop/Touhou
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --entitlements /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Intermediates.noindex/Touhou.build/Debug/Touhou.build/Touhou.app.xcent --timestamp\=none --generate-entitlement-der /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app
+/Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app: code object is not signed at all
+In subcomponent: /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app/Contents/PlugIns/TouhouTests.xctest
+Command CodeSign failed with a nonzero exit code
 
 ** BUILD FAILED **
 
 
 The following build commands failed:
-	SwiftCompile normal arm64 Compiling\ PowerSystem.swift,\ ScoreSystem.swift,\ GameHUD.swift,\ BulletModifierHelpers.swift,\ BulletUtility.swift,\ Constants.swift,\ DialogueData.swift /Users/main/Desktop/Touhou/Touhou/Systems/PowerSystem.swift /Users/main/Desktop/Touhou/Touhou/Systems/ScoreSystem.swift /Users/main/Desktop/Touhou/Touhou/UI/GameHUD.swift /Users/main/Desktop/Touhou/Touhou/Utility/BulletModifierHelpers.swift /Users/main/Desktop/Touhou/Touhou/Utility/BulletUtility.swift /Users/main/Desktop/Touhou/Touhou/Utility/Constants.swift /Users/main/Desktop/Touhou/Touhou/Utility/DialogueData.swift (in target 'Touhou' from project 'Touhou')
-	SwiftCompile normal arm64 /Users/main/Desktop/Touhou/Touhou/UI/GameHUD.swift (in target 'Touhou' from project 'Touhou')
+	CodeSign /Users/main/Library/Developer/Xcode/DerivedData/Touhou-agauothrgfbtoycmryhncelqqxiv/Build/Products/Debug/Touhou.app (in target 'Touhou' from project 'Touhou')
 	Building project Touhou with scheme Touhou
-(3 failures)
+(2 failures)

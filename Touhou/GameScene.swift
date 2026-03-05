@@ -161,7 +161,10 @@ class GameScene: SKScene, EventListener {
         // Update rendering after all actions and physics have been processed
         // This ensures that any position changes from actions won't be overwritten
         if let renderSystem = renderSystem {
-            renderSystem.sync(entities: gameEngine.entities, scene: self, worldLayer: worldLayer, bossLayer: bossLayer, effectLayer: effectLayer)
+            // Use proper dependency injection to sync ECS state to SpriteKit
+            #if os(macOS)
+            renderSystem.sync(engine: gameEngine, scene: self, worldLayer: worldLayer, bossLayer: bossLayer, effectLayer: effectLayer)
+            #endif
         }
     }
     

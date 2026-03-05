@@ -35,7 +35,7 @@ final class MockEventBus: EventDispatching {
         firedEvents.append(event)
     }
     
-    func processEvents(context: GameRuntimeContext?) {
+    func processEvents() {
         processEventsCallCount += 1
         // Mock does not actually process events - just tracks the call
     }

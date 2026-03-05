@@ -21,8 +21,8 @@ final class HealthSystemTests: XCTestCase {
         mockEventBus = MockEventBus()
         system = HealthSystem()
         
-        let context = createTestContext()
-        system.initialize(context: context)
+        let engine = createTestEngine()
+        system.initialize(engine: engine)
     }
     
     override func tearDown() {
@@ -32,24 +32,10 @@ final class HealthSystemTests: XCTestCase {
         super.tearDown()
     }
     
-    func createTestContext() -> GameRuntimeContext {
-        GameRuntimeContext(
+    func createTestEngine() -> MockGameEngine {
+        MockGameEngine(
             entityManager: mockEntityManager,
-            eventBus: mockEventBus,
-            entities: EntityFacade(
-                entityManager: mockEntityManager,
-                commandQueue: CommandQueue(),
-                eventBus: mockEventBus,
-                registerEntity: { _ in }
-            ),
-            combat: CombatFacade(
-                entityManager: mockEntityManager,
-                commandQueue: CommandQueue(),
-                eventBus: mockEventBus
-            ),
-            isTimeFrozen: false,
-            currentStage: 1,
-            unregisterEntity: { _ in }
+            eventBus: mockEventBus
         )
     }
     
@@ -79,7 +65,7 @@ final class HealthSystemTests: XCTestCase {
         let health = entity.component(ofType: HealthComponent.self)!
         let initialTimer = health.invulnerabilityTimer
         
-        system.update(deltaTime: 0.5, context: createTestContext())
+        system.update(deltaTime: 0.5)
         
         XCTAssertLessThan(health.invulnerabilityTimer, initialTimer, "Invulnerability timer should decrease")
     }
@@ -105,7 +91,7 @@ final class HealthSystemTests: XCTestCase {
             phaseHealths: [100, 200]
         ))
         boss.addComponent(HealthComponent(health: 100, maxHealth: 100))
-        boss.addComponent(EnemyComponent(enemyType: .boss, scoreValue: 5000))
+        boss.addComponent(EnemyComponent(enemyType: .boss, scoreValue: 5000, attackPattern: EmptyPattern()))
         mockEntityManager.addEntity(boss)
         
         let bossComp = boss.component(ofType: BossComponent.self)!
@@ -116,8 +102,7 @@ final class HealthSystemTests: XCTestCase {
         let health = boss.component(ofType: HealthComponent.self)!
         health.health = 0
         
-        let context = createTestContext()
-        system.update(deltaTime: 0.016, context: context)
+        system.update(deltaTime: 0.016)
         
         // Boss should transition to phase 2 (health system handles this via BossTransitionedToNextPhaseEvent)
         XCTAssertFalse(health.isAlive, "Boss should be considered dead when phase depleted")

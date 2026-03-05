@@ -17,21 +17,14 @@ final class EnemyComponent: GKComponent {
     var enemyType: EnemyType
     var scoreValue: Int
     var dropItem: ItemType? // What item this enemy drops (nil = no drop)
-    var attackPattern: EnemyPattern
-    var patternConfig: PatternConfig
-    var lastShotTime: TimeInterval
-    var shotInterval: TimeInterval
+    var attackPattern: BulletPattern
     
     init(enemyType: EnemyType, scoreValue: Int, dropItem: ItemType? = nil, 
-         attackPattern: EnemyPattern = .singleShot, patternConfig: PatternConfig = PatternConfig(), 
-         shotInterval: TimeInterval = 2.0) {
+         attackPattern: BulletPattern) {
         self.enemyType = enemyType
         self.scoreValue = scoreValue
         self.dropItem = dropItem
         self.attackPattern = attackPattern
-        self.patternConfig = patternConfig
-        self.lastShotTime = 0
-        self.shotInterval = shotInterval
         super.init()
     }
     
@@ -39,16 +32,7 @@ final class EnemyComponent: GKComponent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Shooting
-    
-    func canShoot(at currentTime: TimeInterval) -> Bool {
-        return currentTime - lastShotTime >= shotInterval
-    }
-    
-    func getBulletCommands(from position: CGPoint, targetPosition: CGPoint?) -> [BulletSpawnCommand] {
-        return attackPattern.getBulletCommands(from: position, targetPosition: targetPosition, config: patternConfig)
-    }
-    
+
     // MARK: - GameplayKit Update
     
     override func update(deltaTime: TimeInterval) {
@@ -75,36 +59,43 @@ final class EnemyComponent: GKComponent {
             return
         }
         
-        // Handle shooting (same pattern as PlayerComponent)
+        // Handle shooting
         if !GameFacade.shared.isTimeFrozen {
-            handleShooting(currentTime: CACurrentMediaTime())
+            handleShooting(deltaTime: deltaTime)
         }
     }
     
     // MARK: - Private Methods
     
-    private func handleShooting(currentTime: TimeInterval) {
+    private func handleShooting(deltaTime: TimeInterval) {
         guard let transform = entity?.component(ofType: TransformComponent.self) else { return }
         let position = transform.position
         
-        if canShoot(at: currentTime) {
-            lastShotTime = currentTime
-            // Simple target finding - gets player position if available
-            let playerPosition = GameFacade.shared.entityManager.getPlayerEntity()?.component(ofType: TransformComponent.self)?.position
-            
-            for var cmd in attackPattern.commands {
-                if cmd.target == .player, let playerPos = playerPosition {
-                    cmd.angle = atan2(playerPos.y - position.y, playerPos.x - position.x)
-                }
-                GameFacade.shared.spawnEnemyBullet(cmd.anchored(to: position))
-            }
-            
-            // Lasers (if pattern uses them)
-            for laserCmd in attackPattern.laserCommands {
-                var anchored = laserCmd
-                anchored.position = position
-                GameFacade.shared.spawnEnemyLaser(anchored)
-            }
+        let playerPosition = GameFacade.shared.entityManager.getPlayerEntity()?.component(ofType: TransformComponent.self)?.position
+        
+        let output = attackPattern.update(dt: deltaTime, position: position, target: playerPosition)
+        
+        for cmd in output.bullets {
+            GameFacade.shared.spawnEnemyBullet(cmd)
+        }
+        
+        for laser in output.lasers {
+            let anchored = LaserSpawnCommand(
+                position: laser.position,
+                angle: laser.angle,
+                length: laser.length,
+                width: laser.width,
+                previewWidth: laser.previewWidth,
+                duration: laser.duration,
+                warmup: laser.warmup,
+                startDelay: laser.startDelay,
+                activationOverride: laser.activationOverride,
+                color: laser.color,
+                damage: laser.damage,
+                tickInterval: laser.tickInterval,
+                anchor: entity
+            )
+            GameFacade.shared.spawnEnemyLaser(anchored)
         }
     }
 }

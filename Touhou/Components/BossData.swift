@@ -15,21 +15,18 @@ struct BossData {
     let health: Int
     let position: CGPoint
     let phaseNumber: Int
-    let attackPattern: EnemyPattern
-    let patternConfig: PatternConfig
-    let shotInterval: TimeInterval
+    let attackPattern: BulletPattern
     let hasTimeBonus: Bool
     let timeLimit: TimeInterval
     let bonusPointsBase: Int
     let totalPhases: Int
     let phaseHealths: [Int]
+    let phasePatterns: [BulletPattern]
     
     // Default values for convenience
     static let defaultHealth = 300
     static let defaultPhaseNumber = 1
-    static let defaultAttackPattern = EnemyPattern.tripleShot
-    static let defaultPatternConfig = PatternConfig()
-    static let defaultShotInterval: TimeInterval = 1.2
+    static let defaultAttackPattern: BulletPattern = TripleShotPattern(interval: 1.2)
     static let defaultHasTimeBonus = false
     static let defaultTimeLimit: TimeInterval = 20.0
     static let defaultBonusPointsBase = 10000
@@ -40,27 +37,25 @@ struct BossData {
         health: Int = Self.defaultHealth,
         position: CGPoint,
         phaseNumber: Int = Self.defaultPhaseNumber,
-        attackPattern: EnemyPattern = Self.defaultAttackPattern,
-        patternConfig: PatternConfig = Self.defaultPatternConfig,
-        shotInterval: TimeInterval = Self.defaultShotInterval,
+        attackPattern: BulletPattern = Self.defaultAttackPattern,
         hasTimeBonus: Bool = Self.defaultHasTimeBonus,
         timeLimit: TimeInterval = Self.defaultTimeLimit,
         bonusPointsBase: Int = Self.defaultBonusPointsBase,
         totalPhases: Int = Self.defaultTotalPhases,
-        phaseHealths: [Int] = []
+        phaseHealths: [Int] = [],
+        phasePatterns: [BulletPattern] = []
     ) {
         self.name = name
         self.health = health
         self.position = position
         self.phaseNumber = phaseNumber
         self.attackPattern = attackPattern
-        self.patternConfig = patternConfig
-        self.shotInterval = shotInterval
         self.hasTimeBonus = hasTimeBonus
         self.timeLimit = timeLimit
         self.bonusPointsBase = bonusPointsBase
         self.totalPhases = totalPhases
         self.phaseHealths = phaseHealths.isEmpty ? [health] : phaseHealths
+        self.phasePatterns = phasePatterns
     }
 }
 

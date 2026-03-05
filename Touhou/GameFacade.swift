@@ -216,13 +216,13 @@ class GameFacade: GameEngine {
             phaseHealths: data.phaseHealths
         )
         entity.addComponent(bossComponent)
+        let initialPattern = data.phasePatterns.first ?? LegacyPattern(pattern: data.attackPattern, config: data.patternConfig, interval: data.shotInterval)
+        
         entity.addComponent(EnemyComponent(
             enemyType: .boss,
             scoreValue: 5000,
             dropItem: nil,
-            attackPattern: data.attackPattern,
-            patternConfig: data.patternConfig,
-            shotInterval: data.shotInterval
+            attackPattern: initialPattern
         ))
         entity.addComponent(TransformComponent(position: data.position, velocity: .zero))
         let firstPhaseHealth = bossComponent.phaseHealths.first ?? data.health
@@ -242,13 +242,13 @@ class GameFacade: GameEngine {
         dropItem: ItemType? = .power
     ) -> GKEntity {
         let entity = entityManager.createEntity()
+        let pattern = LegacyPattern(pattern: attackPattern, config: patternConfig, interval: shotInterval)
+        
         entity.addComponent(EnemyComponent(
             enemyType: .fairy,
             scoreValue: 100,
             dropItem: dropItem,
-            attackPattern: attackPattern,
-            patternConfig: patternConfig,
-            shotInterval: shotInterval
+            attackPattern: pattern
         ))
         entity.addComponent(TransformComponent(position: position, velocity: CGVector(dx: 0, dy: -50)))
         entity.addComponent(HitboxComponent(enemyHitbox: 9))
@@ -262,17 +262,17 @@ class GameFacade: GameEngine {
         velocity: CGVector,
         bulletType: BulletComponent.BulletType = .enemyBullet,
         ownedByPlayer: Bool = false,
-        physics: PhysicsConfig = PhysicsConfig(),
-        visual: VisualConfig = VisualConfig(),
-        behavior: BehaviorConfig = BehaviorConfig()
+        physics: PhysicsConfig? = nil,
+        visual: VisualConfig? = nil,
+        behavior: BehaviorConfig? = nil
     ) {
         let cmd = BulletSpawnCommand(
             position: position,
             velocity: velocity,
             bulletType: bulletType,
-            physics: physics,
-            visual: visual,
-            behavior: behavior
+            physics: physics ?? PhysicsConfig(),
+            visual: visual ?? VisualConfig(),
+            behavior: behavior ?? BehaviorConfig()
         )
         commandQueue.enqueue(.spawnBullet(cmd, ownedByPlayer: ownedByPlayer))
     }
@@ -333,7 +333,7 @@ class GameFacade: GameEngine {
             playerHealth.invulnerabilityTimer = 6.0
         }
         
-        BulletUtility.convertBulletsToPoints(entityManager: entityManager, engine: self)
+        BulletUtility.convertBulletsToPoints(engine: self)
         eventBus.fire(AttractItemsEvent(itemTypes: [.pointBullet]))
         
         let enemies = entityManager.getEntities(with: EnemyComponent.self)

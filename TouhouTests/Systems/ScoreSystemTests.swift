@@ -27,8 +27,8 @@ final class ScoreSystemTests: XCTestCase {
         playerEntity.addComponent(PlayerComponent())
         mockEntityManager.addEntity(playerEntity)
         
-        let context = createTestContext()
-        system.initialize(context: context)
+        let engine = createTestEngine()
+        system.initialize(engine: engine)
     }
     
     override func tearDown() {
@@ -39,24 +39,10 @@ final class ScoreSystemTests: XCTestCase {
         super.tearDown()
     }
     
-    func createTestContext() -> GameRuntimeContext {
-        GameRuntimeContext(
+    func createTestEngine() -> MockGameEngine {
+        MockGameEngine(
             entityManager: mockEntityManager,
-            eventBus: mockEventBus,
-            entities: EntityFacade(
-                entityManager: mockEntityManager,
-                commandQueue: CommandQueue(),
-                eventBus: mockEventBus,
-                registerEntity: { _ in }
-            ),
-            combat: CombatFacade(
-                entityManager: mockEntityManager,
-                commandQueue: CommandQueue(),
-                eventBus: mockEventBus
-            ),
-            isTimeFrozen: false,
-            currentStage: 1,
-            unregisterEntity: { _ in }
+            eventBus: mockEventBus
         )
     }
     
@@ -73,7 +59,7 @@ final class ScoreSystemTests: XCTestCase {
         
         // Simulate power-up collection with value
         let event = PowerUpCollectedEvent(itemType: .power, value: 1000, position: .zero)
-        system.handleEvent(event, context: createTestContext())
+        system.handleEvent(event)
         
         XCTAssertEqual(player.score, initialScore + 1000, "Score should increase by power-up value")
     }
@@ -84,7 +70,7 @@ final class ScoreSystemTests: XCTestCase {
         mockEventBus.reset()
         
         let event = PowerUpCollectedEvent(itemType: .power, value: 500, position: .zero)
-        system.handleEvent(event, context: createTestContext())
+        system.handleEvent(event)
         
         XCTAssertTrue(mockEventBus.didFire(ScoreChangedEvent.self), "ScoreChangedEvent should be fired")
         
@@ -100,7 +86,7 @@ final class ScoreSystemTests: XCTestCase {
         // Set score higher than initial high score (0)
         player.score = 5000
         let event = PowerUpCollectedEvent(itemType: .point, value: 1000, position: .zero)
-        system.handleEvent(event, context: createTestContext())
+        system.handleEvent(event)
         
         // High score should update
         XCTAssertTrue(mockEventBus.didFire(HighScoreChangedEvent.self), "HighScoreChangedEvent should be fired when score exceeds high score")
@@ -111,7 +97,7 @@ final class ScoreSystemTests: XCTestCase {
         let initialScore = player.score
         
         let event = PowerUpCollectedEvent(itemType: .power, value: 0, position: .zero)
-        system.handleEvent(event, context: createTestContext())
+        system.handleEvent(event)
         
         XCTAssertEqual(player.score, initialScore, "Score should not change for zero-value power-up")
     }

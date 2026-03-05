@@ -21,9 +21,7 @@ enum TimelineEvent {
         velocity: CGVector,
         dropItem: ItemType?,
         autoShoot: Bool = false, // If false, shooting is controlled by timeline
-        attackPattern: EnemyPattern? = nil,
-        patternConfig: PatternConfig? = nil,
-        shotInterval: TimeInterval? = nil
+        attackPattern: BulletPattern? = nil
     )
     
     /// Spawn a boss at a position with attack pattern
@@ -32,9 +30,7 @@ enum TimelineEvent {
         health: Int,
         position: CGPoint,
         phaseNumber: Int,
-        attackPattern: EnemyPattern,
-        patternConfig: PatternConfig,
-        shotInterval: TimeInterval? = nil,
+        attackPattern: BulletPattern,
         hasTimeBonus: Bool = false,
         timeLimit: TimeInterval? = nil,
         bonusPointsBase: Int? = nil
@@ -43,8 +39,7 @@ enum TimelineEvent {
     /// Make an enemy shoot (for enemies spawned with autoShoot: false)
     case enemyShoot(
         enemySelector: (EntityManaging) -> [GKEntity], // Function to find enemies
-        pattern: EnemyPattern,
-        patternConfig: PatternConfig
+        pattern: BulletPattern
     )
     
     /// Spawn bullets directly (for patterns that don't need enemies)
@@ -79,10 +74,10 @@ final class StageTimeline {
         self.steps = steps.sorted { $0.time < $1.time }
     }
     
-    /// Initialize with entity manager and event bus
-    func initialize(entityManager: EntityManaging, eventBus: EventDispatching) {
-        self.entityManager = entityManager
-        self.eventBus = eventBus
+    /// Initialize with engine
+    func initialize(engine: GameEngine) {
+        self.entityManager = engine.entityManager
+        self.eventBus = engine.eventBus
     }
     
     /// Start the timeline
@@ -148,7 +143,7 @@ final class StageTimeline {
     
     private func executeEvent(_ event: TimelineEvent, entityManager: EntityManaging, eventBus: EventDispatching) {
         switch event {
-        case .spawnEnemy(let type, let position, let velocity, let dropItem, let autoShoot, let attackPattern, let patternConfig, let shotInterval):
+        case .spawnEnemy(let type, let position, let velocity, let dropItem, let autoShoot, let attackPattern):
             spawnEnemy(
                 type: type,
                 position: position,
@@ -156,20 +151,16 @@ final class StageTimeline {
                 dropItem: dropItem,
                 autoShoot: autoShoot,
                 attackPattern: attackPattern,
-                patternConfig: patternConfig,
-                shotInterval: shotInterval,
                 entityManager: entityManager
             )
             
-        case .spawnBoss(let name, let health, let position, let phaseNumber, let attackPattern, let patternConfig, let shotInterval, let hasTimeBonus, let timeLimit, let bonusPointsBase):
+        case .spawnBoss(let name, let health, let position, let phaseNumber, let attackPattern, let hasTimeBonus, let timeLimit, let bonusPointsBase):
             spawnBoss(
                 name: name,
                 health: health,
                 position: position,
                 phaseNumber: phaseNumber,
                 attackPattern: attackPattern,
-                patternConfig: patternConfig,
-                shotInterval: shotInterval ?? 1.2,
                 hasTimeBonus: hasTimeBonus,
                 timeLimit: timeLimit,
                 bonusPointsBase: bonusPointsBase,
@@ -177,44 +168,41 @@ final class StageTimeline {
                 eventBus: eventBus
             )
             
-        case .enemyShoot(let selector, let pattern, let patternConfig):
+        case .enemyShoot(let selector, var pattern):
             let enemies = selector(entityManager)
             for enemy in enemies {
                 guard let transform = enemy.component(ofType: TransformComponent.self) else { continue }
-                let playerPosition = GameFacade.shared.entities.player?.component(ofType: TransformComponent.self)?.position
+                let playerPosition = GameFacade.shared.entityManager.getPlayerEntity()?.component(ofType: TransformComponent.self)?.position
+                let playerPosition = GameFacade.shared.entityManager.getPlayerEntity()?.component(ofType: TransformComponent.self)?.position
+                let output = pattern.update(dt: 0, position: transform.position, target: playerPosition)
                 
-                if pattern == .laser {
-                    let laserCommands = pattern.getLaserCommands(from: transform.position, targetPosition: playerPosition, config: patternConfig)
-                    for laserCmd in laserCommands {
-                        // Anchor to the enemy so the beam follows movement
-                        let anchored = LaserSpawnCommand(
-                            position: laserCmd.position,
-                            angle: laserCmd.angle,
-                            length: laserCmd.length,
-                            width: laserCmd.width,
-                            duration: laserCmd.duration,
-                            color: laserCmd.color,
-                            damage: laserCmd.damage,
-                            tickInterval: laserCmd.tickInterval,
-                            anchor: enemy
-                        )
-                        GameFacade.shared.combat.spawnEnemyLaser(anchored)
-                    }
-                } else {
-                    let commands = pattern.getBulletCommands(from: transform.position, targetPosition: playerPosition, config: patternConfig)
-                    for cmd in commands {
-                        GameFacade.shared.combat.spawnEnemyBullet(cmd)
-                    }
+                for cmd in output.bullets {
+                    GameFacade.shared.spawnEnemyBullet(cmd)
+                }
+                
+                for laserCmd in output.lasers {
+                    let anchored = LaserSpawnCommand(
+                        position: laserCmd.position,
+                        angle: laserCmd.angle,
+                        length: laserCmd.length,
+                        width: laserCmd.width,
+                        duration: laserCmd.duration,
+                        color: laserCmd.color,
+                        damage: laserCmd.damage,
+                        tickInterval: laserCmd.tickInterval,
+                        anchor: enemy
+                    )
+                    GameFacade.shared.spawnEnemyLaser(anchored)
                 }
             }
             
         case .spawnBullets(let commands):
             for cmd in commands {
-                GameFacade.shared.combat.spawnEnemyBullet(cmd)
+                GameFacade.shared.spawnEnemyBullet(cmd)
             }
             
         case .spawnLaser(let laserCmd):
-            GameFacade.shared.combat.spawnEnemyLaser(laserCmd)
+            GameFacade.shared.spawnEnemyLaser(laserCmd)
             
         case .custom(let action):
             action(entityManager, eventBus)
@@ -227,26 +215,24 @@ final class StageTimeline {
         velocity: CGVector,
         dropItem: ItemType?,
         autoShoot: Bool,
-        attackPattern: EnemyPattern?,
-        patternConfig: PatternConfig?,
-        shotInterval: TimeInterval?,
+        attackPattern: BulletPattern?,
         entityManager: EntityManaging
     ) {
         switch type {
         case .fairy:
-            // If autoShoot is false, don't set attack pattern (shooting controlled by timeline)
-            let pattern = autoShoot ? (attackPattern ?? .singleShot) : .singleShot
-            let config = patternConfig ?? PatternConfig()
-            let interval = shotInterval ?? 2.0
+            let bulletPattern: BulletPattern
+            if autoShoot {
+                bulletPattern = attackPattern ?? SingleShotPattern(interval: 2.0)
+            } else {
+                bulletPattern = EmptyPattern()
+            }
             
             let entity = entityManager.createEntity()
             entity.addComponent(EnemyComponent(
                 enemyType: .fairy,
                 scoreValue: 100,
                 dropItem: dropItem,
-                attackPattern: pattern,
-                patternConfig: config,
-                shotInterval: autoShoot ? interval : .infinity // Disable auto-shooting if false
+                attackPattern: bulletPattern
             ))
             entity.addComponent(TransformComponent(position: position, velocity: velocity))
             entity.addComponent(HitboxComponent(enemyHitbox: 9))
@@ -265,27 +251,21 @@ final class StageTimeline {
         health: Int,
         position: CGPoint,
         phaseNumber: Int,
-        attackPattern: EnemyPattern,
-        patternConfig: PatternConfig,
-        shotInterval: TimeInterval,
+        attackPattern: BulletPattern,
         hasTimeBonus: Bool,
         timeLimit: TimeInterval?,
         bonusPointsBase: Int?,
         entityManager: EntityManaging,
         eventBus: EventDispatching
     ) {
-        let boss = GameFacade.shared.entities.spawnBoss(
+        let data = BossData(
             name: name,
             health: health,
             position: position,
             phaseNumber: phaseNumber,
             attackPattern: attackPattern,
-            patternConfig: patternConfig,
-            shotInterval: shotInterval,
-            hasTimeBonus: hasTimeBonus,
-            timeLimit: timeLimit ?? 20.0,
-            bonusPointsBase: bonusPointsBase ?? 10000
         )
+        let boss = GameFacade.shared.spawnBoss(data: data)
         
         // Fire boss intro event
         eventBus.fire(BossIntroStartedEvent(bossEntity: boss))
@@ -308,9 +288,7 @@ struct TimelineBuilder {
         velocity: CGVector,
         dropItem: ItemType? = nil,
         autoShoot: Bool = false,
-        attackPattern: EnemyPattern? = nil,
-        patternConfig: PatternConfig? = nil,
-        shotInterval: TimeInterval? = nil
+        attackPattern: BulletPattern? = nil
     ) -> TimelineBuilder {
         var builder = self
         builder.steps.append(StageTimeline.Step(
@@ -321,9 +299,7 @@ struct TimelineBuilder {
                 velocity: velocity,
                 dropItem: dropItem,
                 autoShoot: autoShoot,
-                attackPattern: attackPattern,
-                patternConfig: patternConfig,
-                shotInterval: shotInterval
+                attackPattern: attackPattern
             )
         ))
         return builder
@@ -336,9 +312,7 @@ struct TimelineBuilder {
         health: Int,
         position: CGPoint,
         phaseNumber: Int = 1,
-        attackPattern: EnemyPattern = .tripleShot,
-        patternConfig: PatternConfig = PatternConfig(),
-        shotInterval: TimeInterval? = nil,
+        attackPattern: BulletPattern = TripleShotPattern(interval: 1.2),
         hasTimeBonus: Bool = false,
         timeLimit: TimeInterval? = nil,
         bonusPointsBase: Int? = nil
@@ -352,8 +326,6 @@ struct TimelineBuilder {
                 position: position,
                 phaseNumber: phaseNumber,
                 attackPattern: attackPattern,
-                patternConfig: patternConfig,
-                shotInterval: shotInterval,
                 hasTimeBonus: hasTimeBonus,
                 timeLimit: timeLimit,
                 bonusPointsBase: bonusPointsBase
@@ -366,16 +338,14 @@ struct TimelineBuilder {
     func addEnemyShoot(
         at time: TimeInterval,
         enemySelector: @escaping (EntityManaging) -> [GKEntity],
-        pattern: EnemyPattern,
-        patternConfig: PatternConfig = PatternConfig()
+        pattern: BulletPattern
     ) -> TimelineBuilder {
         var builder = self
         builder.steps.append(StageTimeline.Step(
             time: time,
             event: .enemyShoot(
                 enemySelector: enemySelector,
-                pattern: pattern,
-                patternConfig: patternConfig
+                pattern: pattern
             )
         ))
         return builder

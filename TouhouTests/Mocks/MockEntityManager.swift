@@ -81,6 +81,12 @@ final class MockEntityManager: EntityManaging {
         entities.append(entity)
     }
     
+    func removeEntity(_ entity: GKEntity) {
+        if let index = entities.firstIndex(of: entity) {
+            entities.remove(at: index)
+        }
+    }
+    
     func reset() {
         entities.removeAll()
         markedForDestruction.removeAll()

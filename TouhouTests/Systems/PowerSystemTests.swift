@@ -27,8 +27,8 @@ final class PowerSystemTests: XCTestCase {
         playerEntity.addComponent(PlayerComponent())
         mockEntityManager.addEntity(playerEntity)
         
-        let context = createTestContext()
-        system.initialize(context: context)
+        let engine = createTestEngine()
+        system.initialize(engine: engine)
     }
     
     override func tearDown() {
@@ -39,24 +39,10 @@ final class PowerSystemTests: XCTestCase {
         super.tearDown()
     }
     
-    func createTestContext() -> GameRuntimeContext {
-        GameRuntimeContext(
+    func createTestEngine() -> MockGameEngine {
+        MockGameEngine(
             entityManager: mockEntityManager,
-            eventBus: mockEventBus,
-            entities: EntityFacade(
-                entityManager: mockEntityManager,
-                commandQueue: CommandQueue(),
-                eventBus: mockEventBus,
-                registerEntity: { _ in }
-            ),
-            combat: CombatFacade(
-                entityManager: mockEntityManager,
-                commandQueue: CommandQueue(),
-                eventBus: mockEventBus
-            ),
-            isTimeFrozen: false,
-            currentStage: 1,
-            unregisterEntity: { _ in }
+            eventBus: mockEventBus
         )
     }
     
@@ -72,7 +58,7 @@ final class PowerSystemTests: XCTestCase {
         player.power = 0
         
         let event = PowerUpCollectedEvent(itemType: .power, value: 10, position: .zero)
-        system.handleEvent(event, context: createTestContext())
+        system.handleEvent(event)
         
         XCTAssertEqual(player.power, 1, "Power should increase by 1 for power item")
     }
@@ -83,7 +69,7 @@ final class PowerSystemTests: XCTestCase {
         mockEventBus.reset()
         
         let event = PowerUpCollectedEvent(itemType: .power, value: 10, position: .zero)
-        system.handleEvent(event, context: createTestContext())
+        system.handleEvent(event)
         
         XCTAssertTrue(mockEventBus.didFire(PowerLevelChangedEvent.self), "PowerLevelChangedEvent should be fired")
     }
@@ -96,7 +82,7 @@ final class PowerSystemTests: XCTestCase {
         // First threshold is 8
         for _ in 0..<8 {
             let event = PowerUpCollectedEvent(itemType: .power, value: 10, position: .zero)
-            system.handleEvent(event, context: createTestContext())
+            system.handleEvent(event)
         }
         
         XCTAssertEqual(player.power, 8, "Power should be at threshold after collecting 8 items")
@@ -107,7 +93,7 @@ final class PowerSystemTests: XCTestCase {
         player.power = 128  // Max power level
         
         let event = PowerUpCollectedEvent(itemType: .power, value: 10, position: .zero)
-        system.handleEvent(event, context: createTestContext())
+        system.handleEvent(event)
         
         XCTAssertEqual(player.power, 128, "Power should not exceed 128")
     }
@@ -120,7 +106,7 @@ final class PowerSystemTests: XCTestCase {
         // Collect items up to threshold
         for _ in 0..<8 {
             let event = PowerUpCollectedEvent(itemType: .power, value: 10, position: .zero)
-            system.handleEvent(event, context: createTestContext())
+            system.handleEvent(event)
         }
         
         // powerItemCountForScore should reset when threshold is reached

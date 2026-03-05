@@ -19,6 +19,7 @@ final class BossComponent: GKComponent {
     var currentPhase: Int = 1  // Current phase (1-indexed)
     var phaseHealths: [Int] = []  // Max health for each phase
     var currentPhaseHealth: Int = 0  // Current health of the current phase
+    var phasePatterns: [BulletPattern] = [] // Patterns for each phase
     
     // Time bonus system (for midbosses)
     var hasTimeBonus: Bool
@@ -39,7 +40,7 @@ final class BossComponent: GKComponent {
     var movementPatternStartTime: TimeInterval = 0
     var movementPatternIndex: Int = 0
     
-    init(name: String, phaseNumber: Int = 1, hasTimeBonus: Bool = false, timeLimit: TimeInterval = 20.0, bonusPointsBase: Int = 10000, totalPhases: Int = 1, phaseHealths: [Int] = []) {
+    init(name: String, phaseNumber: Int = 1, hasTimeBonus: Bool = false, timeLimit: TimeInterval = 20.0, bonusPointsBase: Int = 10000, totalPhases: Int = 1, phaseHealths: [Int] = [], phasePatterns: [BulletPattern] = []) {
         self.name = name
         self.phaseNumber = phaseNumber
         self.hasTimeBonus = hasTimeBonus
@@ -49,6 +50,7 @@ final class BossComponent: GKComponent {
         self.currentPhase = 1
         self.phaseHealths = phaseHealths.isEmpty ? [300] : phaseHealths  // Default to single phase with 300 health
         self.currentPhaseHealth = self.phaseHealths.first ?? 300
+        self.phasePatterns = phasePatterns
         super.init()
     }
     

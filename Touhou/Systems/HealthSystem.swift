@@ -68,9 +68,8 @@ final class HealthSystem: GameSystem {
                 
                 // Change attack pattern for new phase (if needed)
                 if let enemyComponent = event.entity.component(ofType: EnemyComponent.self) {
-                    // Update pattern based on phase (e.g., phase 1 = rumiaShot, phase 2 = rumiaShot2)
-                    if bossComponent.currentPhase == 2 {
-                        enemyComponent.attackPattern = .rumiaShot2
+                    if bossComponent.currentPhase <= bossComponent.phasePatterns.count {
+                        enemyComponent.attackPattern = bossComponent.phasePatterns[bossComponent.currentPhase - 1]
                     }
                 }
                 
@@ -140,7 +139,7 @@ final class HealthSystem: GameSystem {
         transform.clearTargetMovement()
         
         // Disable shooting
-        enemyComponent.shotInterval = .infinity
+        enemyComponent.attackPattern = EmptyPattern()
         
         // Make midboss fly upward to escape (force movement even though defeated)
         let playArea = GameFacade.playArea

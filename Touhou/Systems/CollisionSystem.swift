@@ -101,7 +101,7 @@ final class CollisionSystem: GameSystem {
         }
         
         // Check player collecting items
-        let items = entityManager.getEntities(with: ItemComponent.self)
+        let items = engine.entityManager.getEntities(with: ItemComponent.self)
         for item in items {
             if checkCollision(entityA: item, entityB: player) {
                 handleItemCollection(item: item, player: player)

@@ -12,25 +12,18 @@ import GameplayKit
 /// IMPORTANT: This system must run after all other systems to ensure entities marked
 /// for destruction during the frame are properly cleaned up at the end.
 final class CleanupSystem: GameSystem {
-    private var entityManager: EntityManaging!
-    private var eventBus: EventDispatching!
+    private weak var engine: GameEngine!
     
-    func initialize(context: GameRuntimeContext) {
-        self.entityManager = context.entityManager
-        self.eventBus = context.eventBus
+    func initialize(engine: GameEngine) {
+        self.engine = engine
     }
     
-    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
+    func update(deltaTime: TimeInterval) {
         // Destroy all marked entities
-        entityManager.destroyMarkedEntities(unregisterEntity: context.unregisterEntity)
-    }
-    
-    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
-        // No events to handle
+        engine.entityManager.destroyMarkedEntities(unregisterEntity: engine.unregisterEntity)
     }
     
     func handleEvent(_ event: GameEvent) {
-        // Fallback for non-GameSystem listeners (shouldn't be called)
-        fatalError("CleanupSystem.handleEvent without context should not be called")
+        // No events to handle
     }
 }

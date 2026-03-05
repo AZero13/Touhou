@@ -9,16 +9,14 @@ import Foundation
 import GameplayKit
 
 final class BulletHomingSystem: GameSystem {
-    private var entityManager: EntityManaging!
-    private var eventBus: EventDispatching!
+    private weak var engine: GameEngine!
     
-    func initialize(context: GameRuntimeContext) {
-        self.entityManager = context.entityManager
-        self.eventBus = context.eventBus
+    func initialize(engine: GameEngine) {
+        self.engine = engine
     }
     
-    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
-        let bulletEntities = entityManager.getEntities(with: BulletComponent.self)
+    func update(deltaTime: TimeInterval) {
+        let bulletEntities = engine.entityManager.getEntities(with: BulletComponent.self)
         
         for entity in bulletEntities {
             guard let bullet = entity.component(ofType: BulletComponent.self),
@@ -68,18 +66,13 @@ final class BulletHomingSystem: GameSystem {
         }
     }
     
-    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
-        // No events to handle
-    }
-    
     func handleEvent(_ event: GameEvent) {
-        // Fallback for non-GameSystem listeners (shouldn't be called)
-        fatalError("BulletHomingSystem.handleEvent without context should not be called")
+        // No events to handle
     }
     
     private func findNearestTarget(for bullet: BulletComponent, from position: CGPoint) -> CGPoint? {
         if bullet.ownedByPlayer {
-            let enemies = entityManager.getEntities(with: EnemyComponent.self)
+            let enemies = engine.entityManager.getEntities(with: EnemyComponent.self)
             var nearestEnemy: GKEntity?
             var nearestDistanceSq: CGFloat = CGFloat.greatestFiniteMagnitude
             
@@ -94,7 +87,7 @@ final class BulletHomingSystem: GameSystem {
             
             return nearestEnemy?.component(ofType: TransformComponent.self)?.position
         } else {
-            return PlayerUtility.getPosition(entityManager: entityManager)
+            return PlayerUtility.getPosition(engine: engine)
         }
     }
 }

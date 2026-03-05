@@ -9,40 +9,33 @@ import Foundation
 import GameplayKit
 
 final class PowerSystem: GameSystem {
-    private var entityManager: EntityManaging!
-    private var eventBus: EventDispatching!
+    private weak var engine: GameEngine!
     
     static let powerThresholds: [Int] = [8, 16, 32, 48, 64, 80, 96, 128]
     
-    func initialize(context: GameRuntimeContext) {
-        self.entityManager = context.entityManager
-        self.eventBus = context.eventBus
+    func initialize(engine: GameEngine) {
+        self.engine = engine
     }
     
-    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
-        guard let playerEntity = entityManager.getPlayerEntity(),
+    func update(deltaTime: TimeInterval) {
+        guard let playerEntity = engine.entityManager.getPlayerEntity(),
               let playerComp = playerEntity.component(ofType: PlayerComponent.self),
               let playerTransform = playerEntity.component(ofType: TransformComponent.self),
               playerComp.power >= 128,
               playerTransform.position.y < 128.0 else { return }
-        eventBus.fire(AttractItemsEvent(itemTypes: [.power, .point, .pointBullet, .bomb, .life]))
-    }
-    
-    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
-        if let powerEvent = event as? PowerLevelChangedEvent {
-            handlePowerChanged(newPower: powerEvent.newTotal, context: context)
-        }
+        engine.fireEvent(AttractItemsEvent(itemTypes: [.power, .point, .pointBullet, .bomb, .life]))
     }
     
     func handleEvent(_ event: GameEvent) {
-        // Fallback for non-GameSystem listeners (shouldn't be called)
-        fatalError("PowerSystem.handleEvent without context should not be called")
+        if let powerEvent = event as? PowerLevelChangedEvent {
+            handlePowerChanged(newPower: powerEvent.newTotal)
+        }
     }
     
-    private func handlePowerChanged(newPower: Int, context: GameRuntimeContext) {
+    private func handlePowerChanged(newPower: Int) {
         if newPower >= 128 {
-            BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
-            eventBus.fire(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
+            BulletUtility.convertBulletsToPoints(engine: engine)
+            engine.fireEvent(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
         }
     }
     

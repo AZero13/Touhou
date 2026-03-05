@@ -9,57 +9,50 @@ import Foundation
 import GameplayKit
 
 final class HealthSystem: GameSystem {
-    private var entityManager: EntityManaging!
-    private var eventBus: EventDispatching!
+    private weak var engine: GameEngine!
     
-    func initialize(context: GameRuntimeContext) {
-        self.entityManager = context.entityManager
-        self.eventBus = context.eventBus
+    func initialize(engine: GameEngine) {
+        self.engine = engine
     }
     
-    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
-        for healthComponent in entityManager.getAllComponents(HealthComponent.self) {
+    func update(deltaTime: TimeInterval) {
+        for healthComponent in engine.entityManager.getAllComponents(HealthComponent.self) {
             if healthComponent.invulnerabilityTimer > 0 {
                 healthComponent.invulnerabilityTimer -= deltaTime
             }
         }
     }
     
-    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
+    func handleEvent(_ event: GameEvent) {
         switch event {
         case let collisionEvent as CollisionOccurredEvent:
-            handleCollisionEvent(collisionEvent, context: context)
+            handleCollisionEvent(collisionEvent)
         case let died as EnemyDiedEvent:
-            handleEnemyDeath(died, context: context)
+            handleEnemyDeath(died)
         default:
             break
         }
     }
     
-    func handleEvent(_ event: GameEvent) {
-        // Fallback for non-GameSystem listeners (shouldn't be called)
-        fatalError("HealthSystem.handleEvent without context should not be called")
-    }
-    
-    private func handleCollisionEvent(_ event: CollisionOccurredEvent, context: GameRuntimeContext) {
+    private func handleCollisionEvent(_ event: CollisionOccurredEvent) {
         switch event.collisionType {
         case .playerBulletHitEnemy:
-            handleEnemyHit(event.entityB, hitPosition: event.hitPosition, context: context)
+            handleEnemyHit(event.entityB, hitPosition: event.hitPosition)
         case .enemyBulletHitPlayer, .enemyTouchPlayer:
-            handlePlayerHit(event.entityB, context: context)
+            handlePlayerHit(event.entityB)
         }
     }
     
-    private func handleEnemyHit(_ enemyEntity: GKEntity, hitPosition: CGPoint, context: GameRuntimeContext) {
-        eventBus.fire(EnemyHitEvent(enemyEntity: enemyEntity, hitPosition: hitPosition))
-        context.combat.damage(enemyEntity, amount: 1)
+    private func handleEnemyHit(_ enemyEntity: GKEntity, hitPosition: CGPoint) {
+        engine.fireEvent(EnemyHitEvent(enemyEntity: enemyEntity, hitPosition: hitPosition))
+        engine.damage(enemyEntity, amount: 1)
     }
     
-    private func handlePlayerHit(_ playerEntity: GKEntity, context: GameRuntimeContext) {
-        context.combat.loseLife()
+    private func handlePlayerHit(_ playerEntity: GKEntity) {
+        engine.loseLife()
     }
     
-    private func handleEnemyDeath(_ event: EnemyDiedEvent, context: GameRuntimeContext) {
+    private func handleEnemyDeath(_ event: EnemyDiedEvent) {
         if let bossComponent = event.entity.component(ofType: BossComponent.self),
            let healthComponent = event.entity.component(ofType: HealthComponent.self) {
             
@@ -82,11 +75,11 @@ final class HealthSystem: GameSystem {
                 }
                 
                 // Convert bullets to points on phase transition
-                BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
-                eventBus.fire(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
+                BulletUtility.convertBulletsToPoints(engine: engine)
+                engine.fireEvent(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
                 
                 // Fire phase transition event
-                eventBus.fire(BossPhaseTransitionEvent(bossEntity: event.entity, newPhase: bossComponent.currentPhase))
+                engine.fireEvent(BossPhaseTransitionEvent(bossEntity: event.entity, newPhase: bossComponent.currentPhase))
                 return  // Don't defeat boss yet
             }
             
@@ -103,35 +96,35 @@ final class HealthSystem: GameSystem {
             } else {
                 // Stage boss: mark for destruction so it vanishes immediately
                 // This allows checkStageCompletion to detect the boss is gone
-                entityManager.markForDestruction(event.entity)
+                engine.entityManager.markForDestruction(event.entity)
             }
             
             // Boss defeated
-            BulletUtility.convertBulletsToPoints(entityManager: entityManager, context: context)
-            eventBus.fire(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
+            BulletUtility.convertBulletsToPoints(engine: engine)
+            engine.fireEvent(AttractItemsEvent(itemTypes: [.point, .pointBullet]))
             
             // Award time bonus if applicable (only once, before boss flees/vanishes)
             if bossComponent.hasTimeBonus && !bossComponent.isTimeExpired {
                 let bonus = bossComponent.calculateTimeBonus()
                 if bonus > 0 {
                     if let transform = event.entity.component(ofType: TransformComponent.self) {
-                        eventBus.fire(TimeBonusAwardedEvent(
+                        engine.fireEvent(TimeBonusAwardedEvent(
                             bonusPoints: bonus,
                             bossName: bossComponent.name,
                             position: transform.position
                         ))
-                        context.combat.addScore(bonus)
+                        engine.addScore(bonus)
                     }
                 }
             }
             
             // Fire event to hide boss UI immediately
-            eventBus.fire(BossDefeatedEvent(bossEntity: event.entity))
+            engine.fireEvent(BossDefeatedEvent(bossEntity: event.entity))
         } else {
             // Regular enemy defeated - drop items
             if let itemType = event.dropItem,
                let transform = event.entity.component(ofType: TransformComponent.self) {
-                context.entities.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: 40))
+                engine.spawnItem(type: itemType, at: transform.position, velocity: CGVector(dx: 0, dy: 40))
             }
         }
     }

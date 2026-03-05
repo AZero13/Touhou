@@ -70,8 +70,8 @@ final class EnemyComponent: GKComponent {
         // If defeated and not moving to target, don't apply any movement
         
         // Mark enemies that go off bottom of screen for destruction (not bosses)
-        if enemyType == .fairy && transform.position.y < -50 {
-            GameFacade.shared.entities.destroy(entity)
+        if enemyType == .fairy && transform.position.y < GameFacade.playArea.minY - 50 {
+            GameFacade.shared.destroy(entity)
             return
         }
         
@@ -85,32 +85,25 @@ final class EnemyComponent: GKComponent {
     
     private func handleShooting(currentTime: TimeInterval) {
         guard let transform = entity?.component(ofType: TransformComponent.self) else { return }
+        let position = transform.position
         
         if canShoot(at: currentTime) {
             lastShotTime = currentTime
+            // Simple target finding - gets player position if available
+            let playerPosition = GameFacade.shared.entityManager.getPlayerEntity()?.component(ofType: TransformComponent.self)?.position
             
-            // Get player position for aimed shots
-            let playerPosition = GameFacade.shared.entities.player?.component(ofType: TransformComponent.self)?.position
-            let commands = getBulletCommands(from: transform.position, targetPosition: playerPosition)
-            for cmd in commands {
-                GameFacade.shared.combat.spawnEnemyBullet(cmd)
+            for var cmd in attackPattern.commands {
+                if cmd.target == .player, let playerPos = playerPosition {
+                    cmd.angle = atan2(playerPos.y - position.y, playerPos.x - position.x)
+                }
+                GameFacade.shared.spawnEnemyBullet(cmd.anchored(to: position))
             }
             
             // Lasers (if pattern uses them)
-            let lasers = attackPattern.getLaserCommands(from: transform.position, targetPosition: playerPosition, config: patternConfig)
-            for laser in lasers {
-                let anchored = LaserSpawnCommand(
-                    position: laser.position,
-                    angle: laser.angle,
-                    length: laser.length,
-                    width: laser.width,
-                    duration: laser.duration,
-                    color: laser.color,
-                    damage: laser.damage,
-                    tickInterval: laser.tickInterval,
-                    anchor: entity
-                )
-                GameFacade.shared.combat.spawnEnemyLaser(anchored)
+            for laserCmd in attackPattern.laserCommands {
+                var anchored = laserCmd
+                anchored.position = position
+                GameFacade.shared.spawnEnemyLaser(anchored)
             }
         }
     }

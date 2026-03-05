@@ -10,8 +10,7 @@ import GameplayKit
 
 /// CollisionSystem - handles collision detection between entities
 final class CollisionSystem: GameSystem {
-    private var entityManager: EntityManaging!
-    private var eventBus: EventDispatching!
+    private weak var engine: GameEngine!
     
     // MARK: - Cached Entity Queries
     
@@ -31,14 +30,13 @@ final class CollisionSystem: GameSystem {
         static let generic: CGFloat = 5.0
     }
     
-    func initialize(context: GameRuntimeContext) {
-        self.entityManager = context.entityManager
-        self.eventBus = context.eventBus
+    func initialize(engine: GameEngine) {
+        self.engine = engine
     }
     
-    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
+    func update(deltaTime: TimeInterval) {
         // Skip all collision/graze checks when time is frozen
-        if context.isTimeFrozen {
+        if engine.isTimeFrozen {
             return
         }
         
@@ -86,7 +84,7 @@ final class CollisionSystem: GameSystem {
                 handleCollision(entityA: bullet, entityB: player)
             } else if checkGraze(bullet: bullet, player: player) {
                 // Graze detected (no collision). Award graze via event
-                eventBus.fire(GrazeEvent(bulletEntity: bullet, grazeValue: 1))
+                engine.fireEvent(GrazeEvent(bulletEntity: bullet, grazeValue: 1))
             }
         }
         
@@ -113,13 +111,8 @@ final class CollisionSystem: GameSystem {
         
     }
     
-    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
-        // No events to handle
-    }
-    
     func handleEvent(_ event: GameEvent) {
-        // Fallback for non-GameSystem listeners (shouldn't be called)
-        fatalError("CollisionSystem.handleEvent without context should not be called")
+        // No events to handle
     }
     
     // MARK: - Private Methods
@@ -192,11 +185,11 @@ final class CollisionSystem: GameSystem {
             
             // Immediately mark bullet for destruction (before processing damage), except lasers
             if bullet.bulletType != .laser {
-                entityManager.markForDestruction(bulletEntity)
+                engine.entityManager.markForDestruction(bulletEntity)
             }
             
             // Fire collision event (damage will be processed by HealthSystem)
-            eventBus.fire(CollisionOccurredEvent(
+            engine.fireEvent(CollisionOccurredEvent(
                 entityA: bulletEntity,
                 entityB: target,
                 collisionType: .playerBulletHitEnemy,
@@ -210,7 +203,7 @@ final class CollisionSystem: GameSystem {
             if let playerHealth = target.component(ofType: HealthComponent.self),
                playerHealth.isInvulnerable {
                 // Player is invulnerable - bullet doesn't damage but still gets destroyed
-                entityManager.markForDestruction(bulletEntity)
+                engine.entityManager.markForDestruction(bulletEntity)
                 return
             }
             
@@ -219,11 +212,11 @@ final class CollisionSystem: GameSystem {
             
             // Mark bullet for destruction unless it's a laser (lasers persist)
             if bullet.bulletType != .laser {
-                entityManager.markForDestruction(bulletEntity)
+                engine.entityManager.markForDestruction(bulletEntity)
             }
             
             // Fire collision event
-            eventBus.fire(CollisionOccurredEvent(
+            engine.fireEvent(CollisionOccurredEvent(
                 entityA: bulletEntity,
                 entityB: target,
                 collisionType: .enemyBulletHitPlayer,
@@ -238,7 +231,7 @@ final class CollisionSystem: GameSystem {
             let radius = getCollisionRadius(for: enemy)
             if checkLaserHit(laser: laser, laserTransform: laserTransform, targetPosition: enemyTransform.position, targetRadius: radius) {
                 if laser.canDamage(enemy) {
-                    eventBus.fire(CollisionOccurredEvent(
+                    engine.fireEvent(CollisionOccurredEvent(
                         entityA: laserEntity,
                         entityB: enemy,
                         collisionType: .playerBulletHitEnemy,
@@ -255,7 +248,7 @@ final class CollisionSystem: GameSystem {
         
         if checkLaserHit(laser: laser, laserTransform: laserTransform, targetPosition: playerTransform.position, targetRadius: playerRadius) {
             if laser.canDamage(player) {
-                eventBus.fire(CollisionOccurredEvent(
+                engine.fireEvent(CollisionOccurredEvent(
                     entityA: laserEntity,
                     entityB: player,
                     collisionType: .enemyBulletHitPlayer,
@@ -263,7 +256,7 @@ final class CollisionSystem: GameSystem {
                 ))
             }
         } else if checkLaserHit(laser: laser, laserTransform: laserTransform, targetPosition: playerTransform.position, targetRadius: playerRadius + grazePadding) {
-            eventBus.fire(GrazeEvent(bulletEntity: laserEntity, grazeValue: 1))
+            engine.fireEvent(GrazeEvent(bulletEntity: laserEntity, grazeValue: 1))
         }
     }
     
@@ -290,7 +283,7 @@ final class CollisionSystem: GameSystem {
         
         let hitPosition = enemy.component(ofType: TransformComponent.self)?.position ?? CGPoint.zero
         
-        eventBus.fire(CollisionOccurredEvent(
+        engine.fireEvent(CollisionOccurredEvent(
             entityA: enemy,
             entityB: player,
             collisionType: .enemyTouchPlayer,
@@ -305,14 +298,14 @@ final class CollisionSystem: GameSystem {
         }
         
         // Fire item collected event (for sound effect)
-        eventBus.fire(ItemCollectedEvent(itemType: itemComp.itemType, position: transform.position))
+        engine.fireEvent(ItemCollectedEvent(itemType: itemComp.itemType, position: transform.position))
         
         // Fire power-up collected event (for scoring and power increase)
         // This event is already handled by ScoreSystem and PowerSystem
-        eventBus.fire(PowerUpCollectedEvent(itemType: itemComp.itemType, value: itemComp.value, position: transform.position))
+        engine.fireEvent(PowerUpCollectedEvent(itemType: itemComp.itemType, value: itemComp.value, position: transform.position))
         
         // Mark item for destruction
-        entityManager.markForDestruction(item)
+        engine.entityManager.markForDestruction(item)
     }
 
     private func checkGraze(bullet: GKEntity, player: GKEntity) -> Bool {
@@ -345,8 +338,8 @@ final class CollisionSystem: GameSystem {
     
     /// Refresh cached entity queries (called once per update)
     private func refreshEntityCache() {
-        cachedBullets = entityManager.getEntities(with: BulletComponent.self)
-        cachedEnemies = entityManager.getEntities(with: EnemyComponent.self)
-        cachedPlayer = entityManager.getPlayerEntity()
+        cachedBullets = engine.entityManager.getEntities(with: BulletComponent.self)
+        cachedEnemies = engine.entityManager.getEntities(with: EnemyComponent.self)
+        cachedPlayer = engine.entityManager.getPlayerEntity()
     }
 }

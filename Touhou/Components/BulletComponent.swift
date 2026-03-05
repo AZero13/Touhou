@@ -144,7 +144,7 @@ final class BulletComponent: GKComponent {
         let playArea = GameFacade.playArea
         if transform.position.x < playArea.minX || transform.position.x > playArea.maxX ||
            transform.position.y < playArea.minY || transform.position.y > playArea.maxY {
-            GameFacade.shared.entities.destroy(entity)
+            GameFacade.shared.destroy(entity)
         }
     }
 }

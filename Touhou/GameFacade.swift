@@ -23,14 +23,6 @@ class GameFacade: GameEngine {
     let eventBus: EventDispatching = EventBus()
     private let commandQueue = CommandQueue()
     
-    private(set) lazy var entities: EntityFacade = {
-        EntityFacade(entityManager: entityManager, commandQueue: commandQueue, eventBus: eventBus, registerEntity: registerEntity)
-    }()
-    
-    private(set) lazy var combat: CombatFacade = {
-        CombatFacade(entityManager: entityManager, commandQueue: commandQueue, eventBus: eventBus)
-    }()
-    
     private var componentSystems: [GKComponentSystem] = []
     private var crossCuttingSystems: [GameSystem] = []
     private var stateMachine: GKStateMachine!
@@ -71,7 +63,6 @@ class GameFacade: GameEngine {
             GKComponentSystem(componentClass: BulletComponent.self),
             GKComponentSystem(componentClass: ItemComponent.self),
             GKComponentSystem(componentClass: BossComponent.self),
-            // Lasers need per-frame interpolation (angle/length/width/alpha)
             GKComponentSystem(componentClass: LaserComponent.self)
         ]
         
@@ -87,23 +78,12 @@ class GameFacade: GameEngine {
     }
     
     private func addCrossCuttingSystem(_ system: GameSystem) {
-        let context = createRuntimeContext()
-        system.initialize(context: context)
+        system.initialize(engine: self)
         eventBus.register(listener: system)
         crossCuttingSystems.append(system)
     }
     
-    private func createRuntimeContext() -> GameRuntimeContext {
-        GameRuntimeContext(
-            entityManager: entityManager,
-            eventBus: eventBus,
-            entities: entities,
-            combat: combat,
-            isTimeFrozen: _isTimeFrozen,
-            currentStage: _currentStage,
-            unregisterEntity: unregisterEntity
-        )
-    }
+    // MARK: - Entity Registration
     
     func registerEntity(_ entity: GKEntity) {
         for componentSystem in componentSystems {
@@ -117,22 +97,20 @@ class GameFacade: GameEngine {
         }
     }
     
+    // MARK: - Game Loop
+    
     func update(_ currentTime: TimeInterval) {
-        // Initialize lastUpdateTime if it's the first frame or after a reset
         if lastUpdateTime == 0 {
             lastUpdateTime = currentTime
         }
         
         let deltaTime = currentTime - lastUpdateTime
-
         lastUpdateTime = currentTime
         
         InputManager.shared.update()
         stateMachine.update(deltaTime: deltaTime)
         
         if stateMachine.currentState is GamePlayingState {
-            let context = createRuntimeContext()
-            
             if !_isTimeFrozen {
                 // Phase 1: Component systems (player, enemies, bullets, items)
                 for componentSystem in componentSystems {
@@ -141,7 +119,7 @@ class GameFacade: GameEngine {
                 
                 // Phase 2: Cross-cutting systems
                 for system in crossCuttingSystems {
-                    system.update(deltaTime: deltaTime, context: context)
+                    system.update(deltaTime: deltaTime)
                 }
             }
             
@@ -153,8 +131,10 @@ class GameFacade: GameEngine {
                 registerEntity: registerEntity
             )
         }
-        eventBus.processEvents(context: createRuntimeContext())
+        eventBus.processEvents()
     }
+    
+    // MARK: - Stage Management
     
     func restartGame() {
         startNewRun()
@@ -170,17 +150,17 @@ class GameFacade: GameEngine {
         clearTransientWorld()
         commandQueue.clear()
         _currentStage = stageId
-        lastUpdateTime = 0 // Reset time so next update initializes it correctly
+        lastUpdateTime = 0
         stateMachine.enter(GamePlayingState.self)
         eventBus.fire(StageStartedEvent(stageId: stageId))
-        eventBus.processEvents(context: createRuntimeContext())  // Process StageStartedEvent immediately so systems initialize before first frame
+        eventBus.processEvents()  // Process StageStartedEvent immediately
         print("Stage \(stageId) started")
     }
     
     func endStage() {
         stateMachine.enter(GameNotStartedState.self)
         eventBus.fire(StageEndedEvent(stageId: _currentStage))
-        eventBus.processEvents(context: createRuntimeContext())
+        eventBus.processEvents()
         clearTransientWorld()
         commandQueue.clear()
         print("Stage \(_currentStage) ended")
@@ -199,6 +179,8 @@ class GameFacade: GameEngine {
         entityManager.destroyMarkedEntities(unregisterEntity: unregisterEntity)
     }
     
+    // MARK: - Events
+    
     func registerListener(_ listener: EventListener) {
         eventBus.register(listener: listener)
     }
@@ -211,14 +193,167 @@ class GameFacade: GameEngine {
         eventBus.fire(event)
     }
     
-    /// Process queued events (useful during dialogue or special states)
     func processEvents() {
-        eventBus.processEvents(context: createRuntimeContext())
+        eventBus.processEvents()
     }
     
-    /// Activate bomb with proper context
+    // MARK: - Entity Spawning (from EntityFacade)
+    
+    var player: GKEntity? {
+        entityManager.getPlayerEntity()
+    }
+    
+    @discardableResult
+    func spawnBoss(data: BossData) -> GKEntity {
+        let entity = entityManager.createEntity()
+        let bossComponent = BossComponent(
+            name: data.name,
+            phaseNumber: data.phaseNumber,
+            hasTimeBonus: data.hasTimeBonus,
+            timeLimit: data.timeLimit,
+            bonusPointsBase: data.bonusPointsBase,
+            totalPhases: data.totalPhases,
+            phaseHealths: data.phaseHealths
+        )
+        entity.addComponent(bossComponent)
+        entity.addComponent(EnemyComponent(
+            enemyType: .boss,
+            scoreValue: 5000,
+            dropItem: nil,
+            attackPattern: data.attackPattern,
+            patternConfig: data.patternConfig,
+            shotInterval: data.shotInterval
+        ))
+        entity.addComponent(TransformComponent(position: data.position, velocity: .zero))
+        let firstPhaseHealth = bossComponent.phaseHealths.first ?? data.health
+        entity.addComponent(HealthComponent(health: firstPhaseHealth, maxHealth: firstPhaseHealth))
+        bossComponent.currentPhaseHealth = firstPhaseHealth
+        entity.addComponent(HitboxComponent(enemyHitbox: 14))
+        registerEntity(entity)
+        return entity
+    }
+    
+    @discardableResult
+    func spawnFairy(
+        position: CGPoint,
+        attackPattern: EnemyPattern,
+        patternConfig: PatternConfig,
+        shotInterval: TimeInterval = 2.0,
+        dropItem: ItemType? = .power
+    ) -> GKEntity {
+        let entity = entityManager.createEntity()
+        entity.addComponent(EnemyComponent(
+            enemyType: .fairy,
+            scoreValue: 100,
+            dropItem: dropItem,
+            attackPattern: attackPattern,
+            patternConfig: patternConfig,
+            shotInterval: shotInterval
+        ))
+        entity.addComponent(TransformComponent(position: position, velocity: CGVector(dx: 0, dy: -50)))
+        entity.addComponent(HitboxComponent(enemyHitbox: 9))
+        entity.addComponent(HealthComponent(health: 1, maxHealth: 1))
+        registerEntity(entity)
+        return entity
+    }
+    
+    func spawnBullet(
+        position: CGPoint,
+        velocity: CGVector,
+        bulletType: BulletComponent.BulletType = .enemyBullet,
+        ownedByPlayer: Bool = false,
+        physics: PhysicsConfig = PhysicsConfig(),
+        visual: VisualConfig = VisualConfig(),
+        behavior: BehaviorConfig = BehaviorConfig()
+    ) {
+        let cmd = BulletSpawnCommand(
+            position: position,
+            velocity: velocity,
+            bulletType: bulletType,
+            physics: physics,
+            visual: visual,
+            behavior: behavior
+        )
+        commandQueue.enqueue(.spawnBullet(cmd, ownedByPlayer: ownedByPlayer))
+    }
+    
+    func spawnItem(type: ItemType, at position: CGPoint, velocity: CGVector = .zero) {
+        commandQueue.enqueue(.spawnItem(type: type, position: position, velocity: velocity))
+    }
+    
+    func destroy(_ entity: GKEntity) {
+        commandQueue.enqueue(.destroyEntity(entity))
+    }
+    
+    func destroyAllBullets(where filter: ((BulletComponent) -> Bool)? = nil) {
+        CommandQueue.despawnAllBullets(entityManager: entityManager, destroyEntity: destroy, selector: filter)
+    }
+    
+    // MARK: - Combat (from CombatFacade)
+    
+    func damage(_ entity: GKEntity, amount: Int) {
+        commandQueue.enqueue(.applyDamage(entity: entity, amount: amount))
+    }
+    
+    func heal(_ entity: GKEntity, amount: Int) {
+        guard let healthComp = entity.component(ofType: HealthComponent.self) else { return }
+        healthComp.health = min(healthComp.maxHealth, healthComp.health + amount)
+    }
+    
+    func gainLives(_ amount: Int) {
+        commandQueue.enqueue(.adjustLives(delta: amount))
+    }
+    
+    func loseLife() {
+        commandQueue.enqueue(.adjustLives(delta: -1))
+    }
+    
+    func gainBombs(_ amount: Int) {
+        commandQueue.enqueue(.adjustBombs(delta: amount))
+    }
+    
+    func loseBomb() {
+        commandQueue.enqueue(.adjustBombs(delta: -1))
+    }
+    
+    func gainPower(_ amount: Int) {
+        commandQueue.enqueue(.adjustPower(delta: amount))
+    }
+    
+    func losePower(_ amount: Int) {
+        commandQueue.enqueue(.adjustPower(delta: -amount))
+    }
+    
+    func addScore(_ amount: Int) {
+        commandQueue.enqueue(.adjustScore(amount: amount))
+    }
+    
     func activateBomb(playerEntity: GKEntity) {
-        let context = createRuntimeContext()
-        combat.activateBomb(playerEntity: playerEntity, context: context)
+        if let playerHealth = playerEntity.component(ofType: HealthComponent.self) {
+            playerHealth.invulnerabilityTimer = 6.0
+        }
+        
+        BulletUtility.convertBulletsToPoints(entityManager: entityManager, engine: self)
+        eventBus.fire(AttractItemsEvent(itemTypes: [.pointBullet]))
+        
+        let enemies = entityManager.getEntities(with: EnemyComponent.self)
+        for enemy in enemies {
+            damage(enemy, amount: 50)
+        }
+        
+        eventBus.fire(BombActivatedEvent(playerEntity: playerEntity))
+        loseBomb()
+    }
+    
+    func spawnEnemyBullet(_ command: BulletSpawnCommand) {
+        commandQueue.enqueue(.spawnBullet(command, ownedByPlayer: false))
+    }
+    
+    func spawnEnemyLaser(_ command: LaserSpawnCommand) {
+        commandQueue.enqueue(.spawnLaser(command, ownedByPlayer: false))
+    }
+    
+    func fireItemCollectionEvent(itemType: ItemType, value: Int, position: CGPoint) {
+        eventBus.fire(PowerUpCollectedEvent(itemType: itemType, value: value, position: position))
     }
 }

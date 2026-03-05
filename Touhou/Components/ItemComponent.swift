@@ -33,15 +33,15 @@ final class ItemComponent: GKComponent {
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        fatalError("init(coder:) has not really been implemented")
     }
     
     override func update(deltaTime: TimeInterval) {
         guard let entity = entity,
               let transform = entity.component(ofType: TransformComponent.self) else { return }
         
-        if isAttractedToPlayer,
-           let player = GameFacade.shared.entities.player,
+        // If player has moved above attraction line, attract all items
+        if let player = GameFacade.shared.entityManager.getPlayerEntity(),
            let playerTransform = player.component(ofType: TransformComponent.self) {
             let target = playerTransform.position
             let speed: CGFloat = 480
@@ -65,12 +65,12 @@ final class ItemComponent: GKComponent {
         let playArea = GameFacade.playArea
         let despawnBuffer: CGFloat = -50  // Buffer beyond bottom edge
         if transform.position.y < despawnBuffer || transform.position.y > playArea.maxY {
-            GameFacade.shared.entities.destroy(entity)
+            GameFacade.shared.destroy(entity)
             return
         }
         
         // Check collection with player
-        guard let player = GameFacade.shared.entities.player,
+        guard let player = GameFacade.shared.entityManager.getPlayerEntity(),
               let playerTransform = player.component(ofType: TransformComponent.self),
               let playerComp = player.component(ofType: PlayerComponent.self) else { return }
         
@@ -89,9 +89,11 @@ final class ItemComponent: GKComponent {
                 grazeInStage: playerComp.grazeInStage
             )
             
-            // Fire collection event and destroy item
-            GameFacade.shared.combat.fireItemCollectionEvent(itemType: itemType, value: calculatedValue, position: transform.position)
-            GameFacade.shared.entities.destroy(entity)
+            // Fire collection event for score
+            GameFacade.shared.fireEvent(PowerUpCollectedEvent(itemType: itemType, value: calculatedValue, position: transform.position))
+            
+            // Mark for destruction instead of immediately destroying to let systems process it
+            GameFacade.shared.destroy(entity)
         }
     }
     

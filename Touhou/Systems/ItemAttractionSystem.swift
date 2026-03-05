@@ -10,18 +10,16 @@ import GameplayKit
 import CoreGraphics
 
 final class ItemAttractionSystem: GameSystem {
-    private var entityManager: EntityManaging!
-    private var eventBus: EventDispatching!
+    private weak var engine: GameEngine!
     
-    func initialize(context: GameRuntimeContext) {
-        self.entityManager = context.entityManager
-        self.eventBus = context.eventBus
+    func initialize(engine: GameEngine) {
+        self.engine = engine
     }
     
-    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
+    func update(deltaTime: TimeInterval) {
     }
     
-    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
+    func handleEvent(_ event: GameEvent) {
         switch event {
         case let died as EnemyDiedEvent:
             if died.entity.component(ofType: BossComponent.self) != nil {
@@ -34,13 +32,8 @@ final class ItemAttractionSystem: GameSystem {
         }
     }
     
-    func handleEvent(_ event: GameEvent) {
-        // Fallback for non-GameSystem listeners (shouldn't be called)
-        fatalError("ItemAttractionSystem.handleEvent without context should not be called")
-    }
-    
     private func attractItems(ofTypes types: [ItemType]) {
-        for item in entityManager.getAllComponents(ItemComponent.self) {
+        for item in engine.entityManager.getAllComponents(ItemComponent.self) {
             if types.contains(item.itemType) {
                 item.isAttractedToPlayer = true
             }

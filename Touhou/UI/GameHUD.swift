@@ -361,7 +361,7 @@ class GameHUD {
     
     func updateBossUI(bossLayer: SKNode) {
         guard let engine = engine else { return }
-        let bosses = engine.entities.getEntities(with: BossComponent.self)
+        let bosses = engine.entityManager.getEntities(with: BossComponent.self)
         
         // No bosses? Hide all boss UI
         guard let boss = bosses.first,

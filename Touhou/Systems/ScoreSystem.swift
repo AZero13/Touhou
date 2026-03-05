@@ -9,40 +9,38 @@ import Foundation
 import GameplayKit
 
 final class ScoreSystem: GameSystem {
-    private var entityManager: EntityManaging!
-    private var eventBus: EventDispatching!
+    private weak var engine: GameEngine!
     private var highScore: Int = 0
     private let highScoreStore = UserDefaultsHighScoreStore()
     
-    func initialize(context: GameRuntimeContext) {
-        self.entityManager = context.entityManager
-        self.eventBus = context.eventBus
-        self.highScore = entityManager.getPlayerComponent()?.score ?? 0
+    func initialize(engine: GameEngine) {
+        self.engine = engine
+        self.highScore = engine.entityManager.getPlayerComponent()?.score ?? 0
     }
     
-    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
+    func update(deltaTime: TimeInterval) {
     }
     
-    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
+    func handleEvent(_ event: GameEvent) {
         switch event {
         case let e as EnemyDiedEvent:
-            context.combat.addScore(e.scoreValue)
+            engine.addScore(e.scoreValue)
         case let g as GrazeEvent:
-            if let playerComp = entityManager.getPlayerComponent() {
+            if let playerComp = engine.entityManager.getPlayerComponent() {
                 playerComp.grazeInStage += g.grazeValue
             }
-            context.combat.addScore(g.grazeValue)
+            engine.addScore(g.grazeValue)
         case let p as PowerUpCollectedEvent:
-            handlePowerUpCollection(p, context: context)
+            handlePowerUpCollection(p)
         case let s as ScoreChangedEvent:
             if s.newTotal > highScore {
                 highScore = s.newTotal
-                eventBus.fire(HighScoreChangedEvent(newHighScore: highScore))
+                engine.fireEvent(HighScoreChangedEvent(newHighScore: highScore))
             }
         case let st as StageStartedEvent:
             if st.stageId == 1 {
-                self.highScore = entityManager.getPlayerComponent()?.score ?? 0
-                eventBus.fire(HighScoreChangedEvent(newHighScore: highScore))
+                self.highScore = engine.entityManager.getPlayerComponent()?.score ?? 0
+                engine.fireEvent(HighScoreChangedEvent(newHighScore: highScore))
             }
         case is GameOverEvent:
             persistIfNewBest()
@@ -55,17 +53,12 @@ final class ScoreSystem: GameSystem {
         }
     }
     
-    func handleEvent(_ event: GameEvent) {
-        // Fallback for non-GameSystem listeners (shouldn't be called)
-        fatalError("ScoreSystem.handleEvent without context should not be called")
-    }
-    
-    private func handlePowerUpCollection(_ p: PowerUpCollectedEvent, context: GameRuntimeContext) {
-        guard let playerComp = entityManager.getPlayerComponent() else { return }
+    private func handlePowerUpCollection(_ p: PowerUpCollectedEvent) {
+        guard let playerComp = engine.entityManager.getPlayerComponent() else { return }
         
         switch p.itemType {
         case .point:
-            context.combat.addScore(p.value)
+            engine.addScore(p.value)
         case .power:
             if playerComp.power >= 128 {
                 playerComp.powerItemCountForScore += 1
@@ -78,19 +71,19 @@ final class ScoreSystem: GameSystem {
                     3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 51200
                 ]
                 let actualScore = powerItemScores[playerComp.powerItemCountForScore]
-                context.combat.addScore(actualScore)
+                engine.addScore(actualScore)
             } else {
-                context.combat.gainPower(1)
-                context.combat.addScore(p.value)
+                engine.gainPower(1)
+                engine.addScore(p.value)
             }
         case .pointBullet:
-            context.combat.addScore(p.value)
+            engine.addScore(p.value)
         case .bomb:
             if playerComp.bombs < 8 {
-                context.combat.gainBombs(1)
+                engine.gainBombs(1)
             }
         case .life:
-            context.combat.gainLives(1)
+            engine.gainLives(1)
         }
     }
     

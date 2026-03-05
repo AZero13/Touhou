@@ -28,8 +28,8 @@ final class RenderSystem {
     ///   - worldLayer: Direct reference to world layer (optimized, avoids string lookup)
     ///   - bossLayer: Direct reference to boss layer
     ///   - effectLayer: Direct reference to effect layer
-    func sync(entities: EntityFacade, scene: SKScene, worldLayer: SKNode, bossLayer: SKNode, effectLayer: SKNode) {
-        let allEntities = entities.getAllEntities()
+    func sync(engine: GameEngine, scene: SKScene, worldLayer: SKNode, bossLayer: SKNode, effectLayer: SKNode) {
+        let allEntities = engine.entityManager.getAllEntities()
         
         // Calculate scale factors
         let scaleX = scene.size.width / logicalWidth
@@ -157,8 +157,10 @@ final class RenderSystem {
             let pct = max(0, min(1, CGFloat(currentHealth) / CGFloat(phaseMaxHealth)))
             
             if fill == nil {
-                let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
-                fill = SKShapeNode(rect: rect, cornerRadius: 4)
+                let w = max(0, barWidth * pct)
+                let rect = CGRect(x: origin.x, y: origin.y, width: w, height: barHeight)
+                let safeCorner = min(4, min(w / 2, barHeight / 2))
+                fill = SKShapeNode(rect: rect, cornerRadius: safeCorner)
                 fill?.name = fillName
                 fill?.strokeColor = .clear
                 fill?.fillColor = .systemPink
@@ -167,11 +169,20 @@ final class RenderSystem {
                     bossLayer.addChild(fillToAdd)
                 }
             } else {
-                // Update existing fill bar size based on current health
-                let rect = CGRect(x: origin.x, y: origin.y, width: barWidth * pct, height: barHeight)
-                fill?.path = CGPath(roundedRect: rect, cornerWidth: 4, cornerHeight: 4, transform: nil)
+                // Update existing fill bar size based on current health safely
+                let w = max(0, barWidth * pct)
+                let rect = CGRect(x: origin.x, y: origin.y, width: w, height: barHeight)
+                let safeCorner = min(4, min(w / 2, barHeight / 2))
+                if w > 0 {
+                    fill?.path = unsafe CGPath(roundedRect: rect, cornerWidth: safeCorner, cornerHeight: safeCorner, transform: nil)
+                    fill?.isHidden = false
+                } else {
+                    fill?.isHidden = true
+                }
             }
-            fill?.isHidden = false
+            if pct > 0 {
+                fill?.isHidden = false
+            }
         } else {
             // Hide boss layer when no boss
             bossLayer.isHidden = true

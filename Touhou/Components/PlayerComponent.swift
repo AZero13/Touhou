@@ -202,7 +202,7 @@ final class PlayerComponent: GKComponent {
         game: GameFacade
     ) {
         let bulletSpeed = speed ?? (bulletType == .homingAmulet ? Self.homingSpeed : Self.bulletSpeed)
-        game.entities.spawnBullet(
+        game.spawnBullet(
             position: position,
             velocity: velocity,
             bulletType: bulletType,

@@ -19,7 +19,7 @@ protocol EventDispatching: AnyObject {
     func register(listener: EventListener)
     func unregister(_ listener: EventListener)
     func fire(_ event: GameEvent)
-    func processEvents(context: GameRuntimeContext?)
+    func processEvents()
 }
 
 class EventBus: EventDispatching {
@@ -38,7 +38,7 @@ class EventBus: EventDispatching {
         eventQueue.append(event)
     }
     
-    func processEvents(context: GameRuntimeContext? = nil) {
+    func processEvents() {
         guard !eventQueue.isEmpty else { return }
         
         let eventsToProcess = eventQueue
@@ -48,13 +48,7 @@ class EventBus: EventDispatching {
         for event in eventsToProcess {
             if let listeners = subscribers["all_events"] {
                 for weakListener in listeners {
-                    if let listener = weakListener.listener {
-                        if let system = listener as? GameSystem, let ctx = context {
-                            system.handleEvent(event, context: ctx)
-                        } else {
-                            listener.handleEvent(event)
-                        }
-                    }
+                    weakListener.listener?.handleEvent(event)
                 }
             }
         }

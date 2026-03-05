@@ -9,8 +9,7 @@ import GameplayKit
 
 /// PlayerLifecycleSystem - handles player spawning and lifecycle management
 final class PlayerLifecycleSystem: GameSystem {
-    private var entityManager: EntityManaging!
-    private var eventBus: EventDispatching!
+    private weak var engine: GameEngine!
     private var playerEntity: GKEntity?
     
     private enum Tuning {
@@ -19,18 +18,17 @@ final class PlayerLifecycleSystem: GameSystem {
         static let playerHitbox: CGFloat = 2.5
     }
     
-    func initialize(context: GameRuntimeContext) {
-        self.entityManager = context.entityManager
-        self.eventBus = context.eventBus
+    func initialize(engine: GameEngine) {
+        self.engine = engine
     }
     
-    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
+    func update(deltaTime: TimeInterval) {
         // Sync playerEntity reference with EntityManaging
         // This keeps the local reference in sync with EntityManaging's state
         syncPlayerEntity()
     }
     
-    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
+    func handleEvent(_ event: GameEvent) {
         switch event {
         case let e as PlayerRespawnedEvent:
             // Player respawned (e.g., after losing a life) - reset position
@@ -76,11 +74,6 @@ final class PlayerLifecycleSystem: GameSystem {
         }
     }
     
-    func handleEvent(_ event: GameEvent) {
-        // Fallback for non-GameSystem listeners (shouldn't be called)
-        fatalError("PlayerLifecycleSystem.handleEvent without context should not be called")
-    }
-    
     // MARK: - Private Methods
     
     /// Reset player stats to initial values (for new run - stage 1 only)
@@ -96,10 +89,10 @@ final class PlayerLifecycleSystem: GameSystem {
         player.score = 0
         player.power = 0
         player.powerItemCountForScore = 0
-        eventBus.fire(LivesChangedEvent(newTotal: player.lives))
-        eventBus.fire(BombsChangedEvent(newTotal: player.bombs))
-        eventBus.fire(ScoreChangedEvent(newTotal: player.score))
-        eventBus.fire(PowerLevelChangedEvent(newTotal: player.power))
+        engine.fireEvent(LivesChangedEvent(newTotal: player.lives))
+        engine.fireEvent(BombsChangedEvent(newTotal: player.bombs))
+        engine.fireEvent(ScoreChangedEvent(newTotal: player.score))
+        engine.fireEvent(PowerLevelChangedEvent(newTotal: player.power))
     }
     
     /// Sync playerEntity reference with EntityManager
@@ -108,7 +101,7 @@ final class PlayerLifecycleSystem: GameSystem {
     /// - Returns true if player exists, false if missing
     @discardableResult
     private func syncPlayerEntity() -> Bool {
-        if let existingPlayer = entityManager.getPlayerEntity() {
+        if let existingPlayer = engine.entityManager.getPlayerEntity() {
             // Player exists - update reference if it's different
             if playerEntity !== existingPlayer {
                 playerEntity = existingPlayer
@@ -124,13 +117,13 @@ final class PlayerLifecycleSystem: GameSystem {
     /// Spawn player with default stats (for new runs or stage 1)
     private func spawnPlayer() {
         // Check if player already exists in EntityManager (shouldn't happen)
-        if let existingPlayer = entityManager.getPlayerEntity() {
+        if let existingPlayer = engine.entityManager.getPlayerEntity() {
             print("Warning: Player already exists in EntityManager, using existing player")
             playerEntity = existingPlayer
             return
         }
         
-        let entity = entityManager.createEntity()
+        let entity = engine.entityManager.createEntity()
         
         let playerComponent = PlayerComponent()
         entity.addComponent(playerComponent)
@@ -140,7 +133,7 @@ final class PlayerLifecycleSystem: GameSystem {
         // Add HealthComponent to track invulnerability
         entity.addComponent(HealthComponent(health: 1, maxHealth: 1, invulnerabilityTimer: 2.0))
         playerEntity = entity
-        GameFacade.shared.registerEntity(entity)
+        engine.registerEntity(entity)
     }
     
     private func resetPlayerPosition(entity: GKEntity) {

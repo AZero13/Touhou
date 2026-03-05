@@ -8,24 +8,10 @@
 import Foundation
 import GameplayKit
 
-/// Runtime context passed to systems each update
-/// Contains all shared game state and services systems need
-struct GameRuntimeContext {
-    let entityManager: EntityManaging
-    let eventBus: EventDispatching
-    let entities: EntityFacade
-    let combat: CombatFacade
-    let isTimeFrozen: Bool
-    let currentStage: Int
-    let unregisterEntity: (GKEntity) -> Void
-}
-
-/// Protocol for all game systems
+/// Protocol for all game systems.
+/// Systems hold a reference to the engine from initialize() and access everything through it.
 protocol GameSystem: EventListener {
-    func initialize(context: GameRuntimeContext)
-    func update(deltaTime: TimeInterval, context: GameRuntimeContext)
-    func handleEvent(_ event: GameEvent, context: GameRuntimeContext)
-    
-    // Default implementation for EventListener compatibility
+    func initialize(engine: GameEngine)
+    func update(deltaTime: TimeInterval)
     func handleEvent(_ event: GameEvent)
 }

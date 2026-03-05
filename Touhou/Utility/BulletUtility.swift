@@ -53,17 +53,17 @@ enum BulletUtility {
     }
     
     /// Convert all enemy bullets to point items (TH06 boss death/phase transition style)
-    static func convertBulletsToPoints(entityManager: EntityManaging, context: GameRuntimeContext) {
-        let enemyBullets = getBullets(entityManager: entityManager, selector: .enemy)
+    static func convertBulletsToPoints(engine: GameEngine) {
+        let enemyBullets = getBullets(entityManager: engine.entityManager, selector: .enemy)
         
         for bullet in enemyBullets {
             guard let transform = bullet.component(ofType: TransformComponent.self) else { continue }
             
             // Spawn a pointBullet item at bullet position
-            context.entities.spawnItem(type: .pointBullet, at: transform.position, velocity: .zero)
+            engine.spawnItem(type: .pointBullet, at: transform.position, velocity: .zero)
             
             // Destroy the bullet
-            entityManager.markForDestruction(bullet)
+            engine.destroy(bullet)
         }
     }
 }

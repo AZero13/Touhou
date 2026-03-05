@@ -134,7 +134,7 @@ final class LaserComponent: GKComponent {
         
         elapsed += deltaTime
         if elapsed >= duration {
-            GameFacade.shared.entities.destroy(entity)
+            GameFacade.shared.destroy(entity)
         }
     }
     

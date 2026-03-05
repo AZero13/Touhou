@@ -21,18 +21,16 @@ struct BulletModifierChange {
 /// System that applies bullet modifiers over time
 /// Used for patterns like TH06 Sub0 that rotate bullets at specific times
 final class BulletModifierSystem: GameSystem {
-    private var entityManager: EntityManaging!
-    private var eventBus: EventDispatching!
+    private weak var engine: GameEngine!
     private var scheduledChanges: [BulletModifierChange] = []
     private var timer: TimeInterval = 0
     private var isActive: Bool = false
     
-    func initialize(context: GameRuntimeContext) {
-        self.entityManager = context.entityManager
-        self.eventBus = context.eventBus
+    func initialize(engine: GameEngine) {
+        self.engine = engine
     }
     
-    func update(deltaTime: TimeInterval, context: GameRuntimeContext) {
+    func update(deltaTime: TimeInterval) {
         guard isActive else { return }
         
         timer += deltaTime
@@ -42,7 +40,7 @@ final class BulletModifierSystem: GameSystem {
         for change in scheduledChanges {
             if timer >= change.delay {
                 // Apply the modifier to matching bullets
-                let bullets = entityManager.getEntities(with: BulletComponent.self)
+                let bullets = engine.entityManager.getEntities(with: BulletComponent.self)
                 for entity in bullets {
                     guard let bullet = entity.component(ofType: BulletComponent.self) else { continue }
                     if !change.selector.matches(bullet: bullet) { continue }
@@ -66,18 +64,13 @@ final class BulletModifierSystem: GameSystem {
         }
     }
     
-    func handleEvent(_ event: GameEvent, context: GameRuntimeContext) {
+    func handleEvent(_ event: GameEvent) {
         // Reset on stage start
         if event is StageStartedEvent {
             scheduledChanges.removeAll()
             timer = 0
             isActive = false
         }
-    }
-    
-    func handleEvent(_ event: GameEvent) {
-        // Fallback for non-GameSystem listeners (shouldn't be called)
-        fatalError("BulletModifierSystem.handleEvent without context should not be called")
     }
     
     // MARK: - Public API
